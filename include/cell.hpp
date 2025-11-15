@@ -13,6 +13,7 @@ public:
     void draw(sf::RenderWindow& window) const;
 private:
     b2BodyId bodyId;
+    b2ShapeId shapeId;
 };
 
 #endif
