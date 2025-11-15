@@ -18,6 +18,7 @@ int main() {
                 window.close();
         }
 
+        game.handleInput();
         game.render();
     }
 

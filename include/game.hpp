@@ -8,6 +8,7 @@ public:
     Game(sf::RenderWindow& window) :
         window(window) {};
 
+    void handleInput();
     void render() const;
 private:
     sf::RenderWindow& window;
