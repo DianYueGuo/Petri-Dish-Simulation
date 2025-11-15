@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-Game::Game(sf::RenderWindow& window) : window(window) {
+Game::Game() {
     b2WorldDef worldDef = b2DefaultWorldDef();
     worldDef.gravity = (b2Vec2){0.0f, 0.0f};
     worldId = b2CreateWorld(&worldDef);
@@ -30,7 +30,7 @@ void Game::update() {
     b2World_Step(worldId, timeStep, subStepCount);
 }
 
-void Game::render() const {
+void Game::render(sf::RenderWindow& window) const {
     window.clear(sf::Color::Black);
 
     cell.draw(window);

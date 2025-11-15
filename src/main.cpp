@@ -8,7 +8,7 @@
 int main() {
     sf::RenderWindow window(sf::VideoMode({800, 600}), "My window");
 
-    Game game(window);
+    Game game;
 
     while (window.isOpen())
     {
@@ -20,7 +20,7 @@ int main() {
 
         game.handleInput();
         game.update();
-        game.render();
+        game.render(window);
     }
 
     return 0;

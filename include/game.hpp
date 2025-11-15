@@ -8,14 +8,12 @@
 
 class Game {
 public:
-    Game(sf::RenderWindow& window);
+    Game();
 
     void handleInput();
     void update();
-    void render() const;
+    void render(sf::RenderWindow& window) const;
 private:
-    sf::RenderWindow& window;
-
     b2WorldId worldId;
 
     Cell cell;
