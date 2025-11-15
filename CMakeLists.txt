@@ -24,6 +24,7 @@ add_executable(
     app
     src/main.cpp
     src/game.cpp
+    src/cell.cpp
 )
 target_link_libraries(app PRIVATE SFML::Graphics SFML::Audio SFML::Network)
 target_link_libraries(app PRIVATE box2d)
