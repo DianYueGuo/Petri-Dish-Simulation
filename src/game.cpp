@@ -9,6 +9,10 @@ Game::Game() {
     worldId = b2CreateWorld(&worldDef);
 }
 
+Game::~Game() {
+    b2DestroyWorld(worldId);
+}
+
 void Game::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
         std::cout << "Space key pressed" << std::endl;
