@@ -2,9 +2,13 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "game.hpp"
+
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({800, 600}), "My window");
+
+    Game game(window);
 
     while (window.isOpen())
     {
@@ -14,13 +18,7 @@ int main() {
                 window.close();
         }
 
-        window.clear(sf::Color::Black);
-
-        sf::CircleShape shape(50.f);
-        shape.setFillColor(sf::Color(100, 250, 50));
-        window.draw(shape);
-
-        window.display();
+        game.render();
     }
 
     return 0;

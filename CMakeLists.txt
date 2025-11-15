@@ -18,9 +18,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(box2d)
 
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
 add_executable(
     app
     src/main.cpp
+    src/game.cpp
 )
 target_link_libraries(app PRIVATE SFML::Graphics SFML::Audio SFML::Network)
 target_link_libraries(app PRIVATE box2d)
