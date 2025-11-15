@@ -3,6 +3,12 @@
 #include <iostream>
 
 
+Game::Game(sf::RenderWindow& window) : window(window) {
+    b2WorldDef worldDef = b2DefaultWorldDef();
+    worldDef.gravity = (b2Vec2){0.0f, 0.0f};
+    worldId = b2CreateWorld(&worldDef);
+}
+
 void Game::handleInput() {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
         std::cout << "Space key pressed" << std::endl;

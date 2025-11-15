@@ -2,16 +2,18 @@
 #define GAME_HPP
 
 #include <SFML/Graphics.hpp>
+#include <box2d/box2d.h>
 
 class Game {
 public:
-    Game(sf::RenderWindow& window) :
-        window(window) {};
+    Game(sf::RenderWindow& window);
 
     void handleInput();
     void render() const;
 private:
     sf::RenderWindow& window;
+
+    b2WorldId worldId;
 };
 
 #endif
