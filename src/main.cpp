@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <vector>
+
 #include <SFML/Graphics.hpp>
 #include <imgui.h>
 #include <imgui-SFML.h>
@@ -27,11 +29,11 @@ public:
         b2CreateCircleShape(bodyId, &CircleShapeDef, &circle);
     }
 
-    b2Vec2 getPosition() {
+    b2Vec2 getPosition() const {
         return b2Body_GetPosition(bodyId);
     }
 
-    float getRadius() {
+    float getRadius() const {
         b2ShapeId shapeId;
         b2Body_GetShapes(bodyId, &shapeId, 1);
         b2Circle circle = b2Shape_GetCircle(shapeId);
@@ -46,7 +48,7 @@ int main() {
     worldDef.gravity = (b2Vec2){0.0f, 0.0f};
     b2WorldId worldId = b2CreateWorld(&worldDef);
 
-    CirclePhysics circle_physics(worldId, 10.0f, 10.0f, 10.0f);
+    std::vector<CirclePhysics> circle_physics;
 
     float timeStep = 1.0f / 60.0f;
     int subStepCount = 4;
@@ -64,9 +66,6 @@ int main() {
     {
         b2World_Step(worldId, timeStep, subStepCount);
 
-        shape.setPosition({circle_physics.getPosition().x, circle_physics.getPosition().y});
-        shape.setRadius(circle_physics.getRadius());
-
         while (const auto event = window.pollEvent())
         {
             ImGui::SFML::ProcessEvent(window, *event);
@@ -77,14 +76,20 @@ int main() {
             }
 
             if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
-                if ( ImGui::GetIO().WantCaptureMouse ){
-		            std::cout << "ImGui captured the mouse click" << std::endl;
-	            }
-
-                if (mouseButtonPressed->button == sf::Mouse::Button::Left) {
-                    std::cout << "the left button was pressed" << std::endl;
-                    std::cout << "mouse x: " << mouseButtonPressed->position.x << std::endl;
-                    std::cout << "mouse y: " << mouseButtonPressed->position.y << std::endl;
+                if (
+                    ImGui::GetIO().WantCaptureMouse == false &&
+                    mouseButtonPressed->button == sf::Mouse::Button::Left
+                ) {
+                    circle_physics.push_back(
+                        CirclePhysics(
+                            worldId,
+                            static_cast<float>(mouseButtonPressed->position.x),
+                            static_cast<float>(mouseButtonPressed->position.y),
+                            20.0f,
+                            1.0f,
+                            0.3f
+                        )
+                    );
                 }
             }
         }
@@ -98,7 +103,13 @@ int main() {
         ImGui::End();
 
         window.clear();
-        window.draw(shape);
+
+        for (const auto& circle_physics : circle_physics) {
+            shape.setPosition({circle_physics.getPosition().x, circle_physics.getPosition().y});
+            shape.setRadius(circle_physics.getRadius());
+            window.draw(shape);
+        }
+
         ImGui::SFML::Render(window);
         window.display();
     }
