@@ -7,7 +7,7 @@
 
 class CirclePhysics {
 public:
-    CirclePhysics(b2WorldId &worldId, float position_x = 0.0f, float position_y = 0.0f, float radius = 1.0f) {
+    CirclePhysics(b2WorldId &worldId, float position_x = 0.0f, float position_y = 0.0f, float radius = 1.0f, float density = 1.0f, float friction = 0.0f) {
         b2BodyDef circleBodyDef = b2DefaultBodyDef();
         circleBodyDef.type = b2_dynamicBody;
         circleBodyDef.position = (b2Vec2){position_x, position_y};
@@ -15,8 +15,8 @@ public:
         bodyId = b2CreateBody(worldId, &circleBodyDef);
 
         b2ShapeDef CircleShapeDef = b2DefaultShapeDef();
-        CircleShapeDef.density = 1.0f;
-        CircleShapeDef.material.friction = 0.3f;
+        CircleShapeDef.density = density;
+        CircleShapeDef.material.friction = friction;
 
         b2Circle circle;
         circle.center = (b2Vec2){0.0f, 0.0f};
