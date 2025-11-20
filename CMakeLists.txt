@@ -14,7 +14,7 @@ FetchContent_MakeAvailable(SFML)
 FetchContent_Populate(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG v1.92.4
+    GIT_TAG v1.91.1
 )
 file(
     GLOB
@@ -27,6 +27,15 @@ add_library(
     STATIC
     ${IMGUI_SOURCES}
 )
+
+FetchContent_Declare(
+    imgui-sfml
+    GIT_REPOSITORY https://github.com/SFML/imgui-sfml.git
+    GIT_TAG v3.0
+)
+set(IMGUI_SFML_FIND_SFML OFF)
+set(IMGUI_DIR ${imgui_SOURCE_DIR})
+FetchContent_MakeAvailable(imgui-sfml)
 
 FetchContent_Declare(
     box2d
@@ -45,4 +54,5 @@ add_executable(
 )
 target_link_libraries(app PRIVATE SFML::Graphics SFML::Audio SFML::Network)
 target_link_libraries(app PRIVATE imgui)
+target_link_libraries(app PRIVATE ImGui-SFML::ImGui-SFML)
 target_link_libraries(app PRIVATE box2d)
