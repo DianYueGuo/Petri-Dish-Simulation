@@ -2,8 +2,29 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 
+#include <box2d/box2d.h>
+
 
 int main() {
+    b2WorldDef worldDef = b2DefaultWorldDef();
+    worldDef.gravity = (b2Vec2){0.0f, 0.0f};
+    b2WorldId worldId = b2CreateWorld(&worldDef);
+
+    b2BodyDef circleBodyDef = b2DefaultBodyDef();
+    circleBodyDef.type = b2_dynamicBody;
+    circleBodyDef.position = (b2Vec2){0.0f, -10.0f};
+    b2BodyId circleId = b2CreateBody(worldId, &circleBodyDef);
+    b2ShapeDef CircleShapeDef = b2DefaultShapeDef();
+    CircleShapeDef.density = 1.0f;
+    CircleShapeDef.material.friction = 0.3f;
+    b2Circle circle;
+    circle.center = (b2Vec2){2.0f, 3.0f};
+    circle.radius = 0.5f;
+    b2CreateCircleShape(circleId, &CircleShapeDef, &circle);
+
+    float timeStep = 1.0f / 60.0f;
+    int subStepCount = 4;
+
     sf::RenderWindow window(sf::VideoMode({640, 480}), "ImGui + SFML = <3");
     window.setFramerateLimit(60);
     if (!ImGui::SFML::Init(window))
@@ -15,6 +36,8 @@ int main() {
     sf::Clock deltaClock;
     while (window.isOpen())
     {
+        b2World_Step(worldId, timeStep, subStepCount);
+
         while (const auto event = window.pollEvent())
         {
             ImGui::SFML::ProcessEvent(window, *event);
@@ -40,6 +63,8 @@ int main() {
     }
 
     ImGui::SFML::Shutdown();
+
+    b2DestroyWorld(worldId);
 
     return 0;
 }
