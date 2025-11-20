@@ -83,8 +83,8 @@ int main() {
                     circle_physics.push_back(
                         CirclePhysics(
                             worldId,
-                            static_cast<float>(mouseButtonPressed->position.x),
-                            static_cast<float>(mouseButtonPressed->position.y),
+                            mouseButtonPressed->position.x,
+                            mouseButtonPressed->position.y,
                             20.0f,
                             1.0f,
                             0.3f
