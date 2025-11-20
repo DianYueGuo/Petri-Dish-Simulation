@@ -75,11 +75,11 @@ int main() {
                 window.close();
             }
 
+            if (ImGui::GetIO().WantCaptureMouse)
+                continue;
+
             if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
-                if (
-                    ImGui::GetIO().WantCaptureMouse == false &&
-                    mouseButtonPressed->button == sf::Mouse::Button::Left
-                ) {
+                if (mouseButtonPressed->button == sf::Mouse::Button::Left) {
                     circle_physics.push_back(
                         CirclePhysics(
                             worldId,
