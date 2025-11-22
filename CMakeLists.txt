@@ -51,6 +51,7 @@ add_executable(
     src/main.cpp
     src/game.cpp
     src/cell.cpp
+    src/circle_physics.cpp
 )
 target_link_libraries(app PRIVATE SFML::Graphics SFML::Audio SFML::Network)
 target_link_libraries(app PRIVATE imgui)
