@@ -72,6 +72,7 @@ int main() {
         window.clear();
 
         for (const auto& circle_physics : circle_physics) {
+            shape.setOrigin({circle_physics.getRadius(), circle_physics.getRadius()});
             shape.setPosition({circle_physics.getPosition().x, circle_physics.getPosition().y});
             shape.setRadius(circle_physics.getRadius());
             window.draw(shape);
