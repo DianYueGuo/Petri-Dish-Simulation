@@ -48,15 +48,14 @@ int main() {
 
             if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if (mouseButtonPressed->button == sf::Mouse::Button::Left) {
-                    circle_physics.push_back(
-                        CirclePhysics(
+                    circle_physics.emplace_back(
                         worldId,
                         mouseButtonPressed->position.x,
                         mouseButtonPressed->position.y,
                         20.0f,
                         1.0f,
                         0.3f
-                    ));
+                    );
                 }
             }
         }
