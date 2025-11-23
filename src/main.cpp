@@ -26,7 +26,7 @@ int main() {
                         worldId,
                         100.0f,
                         100.0f,
-                        20.0f,
+                        10.0f,
                         1.0f,
                         0.3f
                     );
@@ -62,7 +62,7 @@ int main() {
                         worldId,
                         mouseButtonPressed->position.x,
                         mouseButtonPressed->position.y,
-                        20.0f * (0.5f + static_cast<float>(rand()) / RAND_MAX),
+                        10.0f * (0.5f + static_cast<float>(rand()) / RAND_MAX),
                         1.0f,
                         0.3f
                     );
