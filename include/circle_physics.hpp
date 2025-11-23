@@ -26,6 +26,8 @@ public:
     void apply_left_turn_torque() const;
     void apply_right_turn_torque() const;
     void stop_applying_torque() const;
+
+    float getAngle() const;
 private:
     b2BodyId bodyId;
 };

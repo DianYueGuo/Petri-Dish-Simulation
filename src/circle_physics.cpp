@@ -77,3 +77,7 @@ void CirclePhysics::apply_right_turn_torque() const {
 void CirclePhysics::stop_applying_torque() const {
     b2Body_ApplyTorque(bodyId, 0.0f, true);
 };
+
+float CirclePhysics::getAngle() const {
+    return b2Rot_GetAngle(b2Body_GetRotation(bodyId));
+}

@@ -113,6 +113,15 @@ int main() {
             shape.setPosition({circle_physics.getPosition().x, circle_physics.getPosition().y});
             shape.setRadius(circle_physics.getRadius());
             window.draw(shape);
+
+            sf::RectangleShape line({circle_physics.getRadius(), circle_physics.getRadius() / 4.0f});
+            line.setFillColor(sf::Color::White);
+            line.rotate(sf::radians(circle_physics.getAngle()));
+
+            line.setOrigin({0, circle_physics.getRadius() / 4.0f / 2.0f});
+            line.setPosition({circle_physics.getPosition().x, circle_physics.getPosition().y});
+
+            window.draw(line);
         }
 
         ImGui::SFML::Render(window);
