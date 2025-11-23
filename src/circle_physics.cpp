@@ -1,5 +1,15 @@
 #include "circle_physics.hpp"
 
+enum CollisionBits
+{
+    GROUND = 0x00000001,
+    TEAM1 = 0x00000002,
+    TEAM2 = 0x00000004,
+    TEAM3 = 0x00000008,
+
+    ALL_BITS = ( ~0u )
+};
+
 
 CirclePhysics::CirclePhysics(b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
     bodyId{} {
@@ -15,6 +25,8 @@ CirclePhysics::CirclePhysics(b2WorldId &worldId, float position_x, float positio
     b2ShapeDef CircleShapeDef = b2DefaultShapeDef();
     CircleShapeDef.density = density;
     CircleShapeDef.material.friction = friction;
+
+    CircleShapeDef.isSensor = true;
 
     b2Circle circle;
     circle.center = (b2Vec2){0.0f, 0.0f};
