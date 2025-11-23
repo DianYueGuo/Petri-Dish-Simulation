@@ -35,9 +35,6 @@ int main() {
     if (!ImGui::SFML::Init(window))
         return -1;
 
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-
     sf::Clock deltaClock;
     while (window.isOpen())
     {
@@ -109,6 +106,9 @@ int main() {
         window.clear();
 
         for (const auto& circle_physics : circle_physics) {
+            sf::CircleShape shape(100.f);
+            shape.setFillColor(sf::Color::Green);
+
             shape.setOrigin({circle_physics.getRadius(), circle_physics.getRadius()});
             shape.setPosition({circle_physics.getPosition().x, circle_physics.getPosition().y});
             shape.setRadius(circle_physics.getRadius());
