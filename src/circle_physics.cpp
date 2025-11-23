@@ -7,6 +7,9 @@ CirclePhysics::CirclePhysics(b2WorldId &worldId, float position_x, float positio
     circleBodyDef.type = b2_dynamicBody;
     circleBodyDef.position = (b2Vec2){position_x, position_y};
 
+    circleBodyDef.linearDamping = 0.3f;
+    circleBodyDef.angularDamping = 1.0f;
+
     bodyId = b2CreateBody(worldId, &circleBodyDef);
 
     b2ShapeDef CircleShapeDef = b2DefaultShapeDef();
