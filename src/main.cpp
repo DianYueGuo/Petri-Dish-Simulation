@@ -63,16 +63,18 @@ int main() {
     worldDef.gravity = (b2Vec2){0.0f, 0.0f};
     b2WorldId worldId = b2CreateWorld(&worldDef);
 
-    std::vector<CirclePhysics> circle_physics;
+    std::vector<std::unique_ptr<CirclePhysics>> circle_physics;
 
-    circle_physics.emplace_back(
+    circle_physics.push_back(
+        std::make_unique<CirclePhysics>(
                         worldId,
                         100.0f,
                         100.0f,
                         10.0f,
                         1.0f,
                         0.3f
-                    );
+        )
+    );
 
     float timeStep = 1.0f / 60.0f;
     int subStepCount = 4;
@@ -103,44 +105,46 @@ int main() {
 
             if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if (mouseButtonPressed->button == sf::Mouse::Button::Left) {
-                    circle_physics.emplace_back(
+                    circle_physics.push_back(
+                    std::make_unique<CirclePhysics>(
                         worldId,
                         mouseButtonPressed->position.x,
                         mouseButtonPressed->position.y,
                         10.0f * (0.5f + static_cast<float>(rand()) / RAND_MAX),
                         1.0f,
                         0.3f
+                    )
                     );
                 }
             }
 
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Space)
-                    circle_physics.at(0).apply_forward_force();
+                    circle_physics.at(0)->apply_forward_force();
             }
             if (const auto* keyPressed = event->getIf<sf::Event::KeyReleased>()) {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Space)
-                    circle_physics.at(0).stop_applying_force();
+                    circle_physics.at(0)->stop_applying_force();
             }
 
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Left)
-                    circle_physics.at(0).apply_left_turn_torque();
+                    circle_physics.at(0)->apply_left_turn_torque();
             }
 
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Right)
-                    circle_physics.at(0).apply_right_turn_torque();
+                    circle_physics.at(0)->apply_right_turn_torque();
             }
 
             if (const auto* keyPressed = event->getIf<sf::Event::KeyReleased>()) {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Left)
-                    circle_physics.at(0).stop_applying_torque();
+                    circle_physics.at(0)->stop_applying_torque();
             }
 
             if (const auto* keyPressed = event->getIf<sf::Event::KeyReleased>()) {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Right)
-                    circle_physics.at(0).stop_applying_torque();
+                    circle_physics.at(0)->stop_applying_torque();
             }
         }
 
@@ -155,7 +159,7 @@ int main() {
         window.clear();
 
         for (const auto& circle_physics : circle_physics) {
-            draw_circle(window, circle_physics);
+            draw_circle(window, *circle_physics);
         }
 
         ImGui::SFML::Render(window);
