@@ -9,7 +9,6 @@
 #include <box2d/box2d.h>
 
 #include "game.hpp"
-#include "circle_physics.hpp"
 
 #include <time.h>
 
