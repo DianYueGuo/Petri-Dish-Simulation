@@ -49,6 +49,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 add_executable(
     app
     src/main.cpp
+    src/game.cpp
     src/circle_physics.cpp
     src/drawable_circle.cpp
     src/eatable_circle.cpp
