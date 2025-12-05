@@ -111,6 +111,15 @@ void Game::process_game_logic() {
 }
 
 void Game::draw(sf::RenderWindow& window) const {
+    // Draw petri dish boundary
+    sf::CircleShape boundary(petri_radius * pixles_per_meter);
+    boundary.setOrigin({petri_radius * pixles_per_meter, petri_radius * pixles_per_meter});
+    boundary.setPosition({0.0f, 0.0f});
+    boundary.setOutlineColor(sf::Color::White);
+    boundary.setOutlineThickness(2.0f);
+    boundary.setFillColor(sf::Color::Transparent);
+    window.draw(boundary);
+
     for (const auto& circle : circles) {
         circle->draw(window, pixles_per_meter);
     }
