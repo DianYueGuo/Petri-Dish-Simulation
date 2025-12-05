@@ -116,7 +116,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         static float poison_death_probability = 1.0f;
         ImGui::SliderFloat("Poison Death Probability", &poison_death_probability, 0.0f, 1.0f, "%.2f");
         game.set_poison_death_probability(poison_death_probability);
-        static float poison_death_probability_normal = 0.0f;
+        static float poison_death_probability_normal = 0.1f;
         ImGui::SliderFloat("Normal Poison Death Probability", &poison_death_probability_normal, 0.0f, 1.0f, "%.2f");
         game.set_poison_death_probability_normal(poison_death_probability_normal);
     }
