@@ -51,7 +51,7 @@ int main() {
         ImGui::Button("Look at this pretty button");
 
         static float pixel_per_meter = 15.0f;
-        ImGui::SliderFloat("Pixel Per Meter", &pixel_per_meter, 0.1f, 100.0f);
+        ImGui::SliderFloat("Pixel Per Meter", &pixel_per_meter, 0.1f, 100.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
         game.set_pixles_per_meter(pixel_per_meter);
 
         static float time_scale = 1.0f;
