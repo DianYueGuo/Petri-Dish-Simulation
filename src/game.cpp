@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <algorithm>
 #include <limits>
+#include <numeric>
+#include <random>
 
 #include "game.hpp"
 #include "eater_circle.hpp"
@@ -378,5 +380,30 @@ void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique
         out.push_back(create_eatable_at(piece_pos, false));
 
         remaining_area -= use_area;
+    }
+}
+
+void Game::remove_random_percentage(float percentage) {
+    if (circles.empty() || percentage <= 0.0f) {
+        return;
+    }
+
+    float clamped = std::clamp(percentage, 0.0f, 100.0f);
+    std::size_t target = static_cast<std::size_t>(std::round(circles.size() * (clamped / 100.0f)));
+    if (target == 0) {
+        return;
+    }
+
+    std::vector<std::size_t> indices(circles.size());
+    std::iota(indices.begin(), indices.end(), 0);
+
+    static std::mt19937 rng{std::random_device{}()};
+    std::shuffle(indices.begin(), indices.end(), rng);
+
+    indices.resize(target);
+    std::sort(indices.begin(), indices.end(), std::greater<std::size_t>());
+
+    for (std::size_t idx : indices) {
+        circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
     }
 }

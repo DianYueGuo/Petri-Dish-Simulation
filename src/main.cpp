@@ -135,6 +135,13 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
 
     render_cursor_controls(game);
 
+    static float delete_percentage = 10.0f;
+    ImGui::Separator();
+    ImGui::SliderFloat("Delete % (random)", &delete_percentage, 0.0f, 100.0f, "%.1f");
+    if (ImGui::Button("Delete Random Circles")) {
+        game.remove_random_percentage(delete_percentage);
+    }
+
     ImGui::End();
 }
 

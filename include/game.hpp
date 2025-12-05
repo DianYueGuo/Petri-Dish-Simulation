@@ -48,6 +48,7 @@ public:
     void set_sprinkle_rate_toxic(float r) { sprinkle_rate_toxic = r; }
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
+    void remove_random_percentage(float percentage);
     std::size_t get_circle_count() const { return circles.size(); }
 private:
     void spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out);
