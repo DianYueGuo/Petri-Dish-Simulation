@@ -3,9 +3,13 @@
 #include <algorithm>
 #include <cmath>
 
+#include <cstdlib>
+
 
 EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
-    EatableCircle(worldId, position_x, position_y, radius, density, friction) {
+    EatableCircle(worldId, position_x, position_y, radius, density, friction),
+    brain(0, 3) {
+    initialize_brain();
 }
 
 float calculate_overlap_area(float r1, float r2, float distance) {
@@ -62,6 +66,20 @@ void EaterCircle::move_randomly(const b2WorldId &worldId, Game &game) {
         this->apply_right_turn_impulse();
 }
 
+void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game) {
+    brain.update();
+
+    if (brain.read_output(0) >= 1.0f) {
+        this->boost_forward(worldId, game);
+    }
+    if (brain.read_output(1) >= 1.0f) {
+        this->apply_left_turn_impulse();
+    }
+    if (brain.read_output(2) >= 1.0f) {
+        this->apply_right_turn_impulse();
+    }
+}
+
 void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
     float current_area = 3.14159f * this->getRadius() * this->getRadius();
     float boost_cost = 0.3f;
@@ -86,5 +104,13 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
             boost_circle_ptr->setAngle(angle + 3.14159f, worldId);
             boost_circle_ptr->apply_forward_impulse();
         }
+    }
+}
+
+void EaterCircle::initialize_brain() {
+    // Mutate repeatedly to seed a non-trivial brain topology.
+    constexpr int mutation_rounds = 5;
+    for (int i = 0; i < mutation_rounds; ++i) {
+        brain.mutate(0.7f, 0.2f, 0.6f);
     }
 }

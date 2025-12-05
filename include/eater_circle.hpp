@@ -2,6 +2,7 @@
 #define EATER_CIRCLE_HPP
 
 #include "eatable_circle.hpp"
+#include "eater_brain.hpp"
 
 #include "game.hpp"
 
@@ -15,8 +16,14 @@ public:
     void process_eating(const b2WorldId &worldId);
 
     void move_randomly(const b2WorldId &worldId, Game &game);
+    void move_intelligently(const b2WorldId &worldId, Game &game);
 
     void boost_forward(const b2WorldId &worldId, Game& game);
+
+private:
+    void initialize_brain();
+
+    EaterBrain brain;
 };
 
 #endif
