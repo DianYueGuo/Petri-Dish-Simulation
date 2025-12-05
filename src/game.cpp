@@ -94,10 +94,8 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
                         circles.push_back(create_eater_at({pos.x, pos.y}));
                         break;
                     case AddType::Eatable:
-                        circles.push_back(create_eatable_at({pos.x, pos.y}, false));
-                        break;
                     case AddType::ToxicEatable:
-                        circles.push_back(create_eatable_at({pos.x, pos.y}, true));
+                        circles.push_back(create_eatable_at({pos.x, pos.y}, add_type == AddType::ToxicEatable));
                         break;
                 }
             };
@@ -159,38 +157,15 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
             add_drag_distance += std::sqrt(dx_move * dx_move + dy_move * dy_move);
             last_drag_world_pos = worldPos;
 
-            const float min_spacing = std::sqrt(add_eatable_area / 3.14159f) * 2.0f;
+            const float min_spacing = radius_from_area(add_eatable_area) * 2.0f;
 
             if (add_drag_distance >= min_spacing) {
                 switch (add_type) {
                     case AddType::Eater:
                         break;
                     case AddType::Eatable:
-                        circles.push_back(
-                            std::make_unique<EatableCircle>(
-                                worldId,
-                                worldPos.x,
-                                worldPos.y,
-                                std::sqrt(add_eatable_area / 3.14159f),
-                                1.0f,
-                                0.3f,
-                                false
-                            )
-                        );
-                        last_add_world_pos = worldPos;
-                        break;
                     case AddType::ToxicEatable:
-                        circles.push_back(
-                            std::make_unique<EatableCircle>(
-                                worldId,
-                                worldPos.x,
-                                worldPos.y,
-                                std::sqrt(add_eatable_area / 3.14159f),
-                                1.0f,
-                                0.3f,
-                                true
-                            )
-                        );
+                        circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, add_type == AddType::ToxicEatable));
                         last_add_world_pos = worldPos;
                         break;
                 }
