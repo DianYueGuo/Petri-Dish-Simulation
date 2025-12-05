@@ -38,6 +38,7 @@ public:
     void set_add_type(AddType type) { add_type = type; }
     void set_add_eatable_area(float area) { add_eatable_area = area; }
     void set_poison_death_probability(float p) { poison_death_probability = p; }
+    void set_poison_death_probability_normal(float p) { poison_death_probability_normal = p; }
     void set_boost_area(float area) { boost_area = area; }
     float get_boost_area() const { return boost_area; }
     CursorMode get_cursor_mode() const { return cursor_mode; }
@@ -61,6 +62,7 @@ private:
     float add_eatable_area = 1.0f;
     float boost_area = 0.3f;
     float poison_death_probability = 1.0f;
+    float poison_death_probability_normal = 0.0f;
     bool dragging = false;
     bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};

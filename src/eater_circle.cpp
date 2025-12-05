@@ -32,7 +32,7 @@ float calculate_overlap_area(float r1, float r2, float distance) {
     return part1 + part2 - part3;
 }
 
-void EaterCircle::process_eating(const b2WorldId &worldId, float poison_death_probability) {
+void EaterCircle::process_eating(const b2WorldId &worldId, float poison_death_probability_toxic, float poison_death_probability_normal) {
     poisoned = false;
     for (auto* touching_circle : touching_circles) {
         if (touching_circle->getRadius() < this->getRadius()) {
@@ -44,13 +44,16 @@ void EaterCircle::process_eating(const b2WorldId &worldId, float poison_death_pr
 
             if (overlap_area >= overlap_threshold) {
                 if (auto* eatable = dynamic_cast<EatableCircle*>(touching_circle)) {
+                    float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
                     if (eatable->is_toxic()) {
-                        float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-                        if (roll < poison_death_probability) {
+                        if (roll < poison_death_probability_toxic) {
                             poisoned = true;
                         }
                         eatable->be_eaten();
                     } else {
+                        if (roll < poison_death_probability_normal) {
+                            poisoned = true;
+                        }
                         eatable->be_eaten();
                     }
                 }

@@ -14,7 +14,7 @@ public:
     void set_minimum_area(float area) { minimum_area = area; }
     float get_minimum_area() const { return minimum_area; }
 
-    void process_eating(const b2WorldId &worldId, float poison_death_probability);
+    void process_eating(const b2WorldId &worldId, float poison_death_probability_toxic, float poison_death_probability_normal);
 
     void move_randomly(const b2WorldId &worldId, Game &game);
     void move_intelligently(const b2WorldId &worldId, Game &game);
