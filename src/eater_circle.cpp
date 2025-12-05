@@ -1,7 +1,10 @@
 #include "eater_circle.hpp"
 
+#include <algorithm>
+#include <cmath>
 
-EaterCircle::EaterCircle(b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
+
+EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
     EatableCircle(worldId, position_x, position_y, radius, density, friction) {
 }
 
@@ -13,8 +16,11 @@ float calculate_overlap_area(float r1, float r2, float distance) {
     float r_sq2 = r2 * r2;
     float d_sq = distance * distance;
 
-    float part1 = r_sq1 * acos((d_sq + r_sq1 - r_sq2) / (2.0f * distance * r1));
-    float part2 = r_sq2 * acos((d_sq + r_sq2 - r_sq1) / (2.0f * distance * r2));
+    float clamp1 = std::clamp((d_sq + r_sq1 - r_sq2) / (2.0f * distance * r1), -1.0f, 1.0f);
+    float clamp2 = std::clamp((d_sq + r_sq2 - r_sq1) / (2.0f * distance * r2), -1.0f, 1.0f);
+
+    float part1 = r_sq1 * acos(clamp1);
+    float part2 = r_sq2 * acos(clamp2);
     float part3 = 0.5f * sqrt((r1 + r2 - distance) * (r1 - r2 + distance) * (-r1 + r2 + distance) * (r1 + r2 + distance));
 
     return part1 + part2 - part3;
@@ -34,7 +40,9 @@ void EaterCircle::process_eating(const b2WorldId &worldId) {
                 float new_radius = sqrt(new_area / 3.14159f);
                 this->setRadius(new_radius, worldId);
 
-                static_cast<EatableCircle*>(touching_circle)->be_eaten();
+                if (auto* eatable = dynamic_cast<EatableCircle*>(touching_circle)) {
+                    eatable->be_eaten();
+                }
             }
         }
     }

@@ -2,24 +2,30 @@
 
 
 CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
-    bodyId{} {
+    bodyId{},
+    density(density),
+    friction(friction),
+    isSensor(true),
+    enableSensorEvents(true),
+    linearDamping(0.3f),
+    angularDamping(1.0f) {
     b2BodyDef circleBodyDef = b2DefaultBodyDef();
     circleBodyDef.type = b2_dynamicBody;
     circleBodyDef.position = (b2Vec2){position_x, position_y};
 
-    circleBodyDef.linearDamping = 0.3f;
-    circleBodyDef.angularDamping = 1.0f;
+    circleBodyDef.linearDamping = linearDamping;
+    circleBodyDef.angularDamping = angularDamping;
 
     bodyId = b2CreateBody(worldId, &circleBodyDef);
 
     b2ShapeDef CircleShapeDef = b2DefaultShapeDef();
-    CircleShapeDef.density = density;
-    CircleShapeDef.material.friction = friction;
+    CircleShapeDef.density = this->density;
+    CircleShapeDef.material.friction = this->friction;
 
     CircleShapeDef.userData = this;
 
-    CircleShapeDef.isSensor = true;
-    CircleShapeDef.enableSensorEvents = true;
+    CircleShapeDef.isSensor = isSensor;
+    CircleShapeDef.enableSensorEvents = enableSensorEvents;
 
     b2Circle circle;
     circle.center = (b2Vec2){0.0f, 0.0f};
@@ -40,6 +46,12 @@ CirclePhysics::~CirclePhysics() {
 
 CirclePhysics::CirclePhysics(CirclePhysics&& other_circle_physics) noexcept :
     bodyId(other_circle_physics.bodyId),
+    density(other_circle_physics.density),
+    friction(other_circle_physics.friction),
+    isSensor(other_circle_physics.isSensor),
+    enableSensorEvents(other_circle_physics.enableSensorEvents),
+    linearDamping(other_circle_physics.linearDamping),
+    angularDamping(other_circle_physics.angularDamping),
     touching_circles(std::move(other_circle_physics.touching_circles)) {
 
     b2ShapeId shapeId;
@@ -61,6 +73,12 @@ CirclePhysics& CirclePhysics::operator=(CirclePhysics&& other_circle_physics) no
 
     if (b2Body_IsValid(bodyId)) b2DestroyBody(bodyId);
     bodyId = other_circle_physics.bodyId;
+    density = other_circle_physics.density;
+    friction = other_circle_physics.friction;
+    isSensor = other_circle_physics.isSensor;
+    enableSensorEvents = other_circle_physics.enableSensorEvents;
+    linearDamping = other_circle_physics.linearDamping;
+    angularDamping = other_circle_physics.angularDamping;
 
     b2ShapeId shapeId;
     b2Body_GetShapes(bodyId, &shapeId, 1);
@@ -158,17 +176,17 @@ void CirclePhysics::setRadius(float new_radius, const b2WorldId &worldId) {
     bodyDef.rotation = rotation;
     bodyDef.linearVelocity = linearVelocity;
     bodyDef.angularVelocity = angularVelocity;
-    bodyDef.linearDamping = 0.3f;
-    bodyDef.angularDamping = 1.0f;
+    bodyDef.linearDamping = linearDamping;
+    bodyDef.angularDamping = angularDamping;
 
     bodyId = b2CreateBody(worldId, &bodyDef);
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
-    shapeDef.density = 1.0f;
-    shapeDef.material.friction = 0.5f;
+    shapeDef.density = density;
+    shapeDef.material.friction = friction;
     shapeDef.userData = this;
-    shapeDef.isSensor = true;
-    shapeDef.enableSensorEvents = true;
+    shapeDef.isSensor = isSensor;
+    shapeDef.enableSensorEvents = enableSensorEvents;
 
     b2Circle circle;
     circle.center = (b2Vec2){0.0f, 0.0f};
@@ -196,17 +214,17 @@ void CirclePhysics::setAngle(float new_angle, const b2WorldId &worldId) {
     bodyDef.rotation = b2MakeRot(new_angle);
     bodyDef.linearVelocity = linearVelocity;
     bodyDef.angularVelocity = angularVelocity;
-    bodyDef.linearDamping = 0.3f;
-    bodyDef.angularDamping = 1.0f;
+    bodyDef.linearDamping = linearDamping;
+    bodyDef.angularDamping = angularDamping;
 
     bodyId = b2CreateBody(worldId, &bodyDef);
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
-    shapeDef.density = 1.0f;
-    shapeDef.material.friction = 0.5f;
+    shapeDef.density = density;
+    shapeDef.material.friction = friction;
     shapeDef.userData = this;
-    shapeDef.isSensor = true;
-    shapeDef.enableSensorEvents = true;
+    shapeDef.isSensor = isSensor;
+    shapeDef.enableSensorEvents = enableSensorEvents;
 
     b2Circle circle;
     circle.center = (b2Vec2){0.0f, 0.0f};

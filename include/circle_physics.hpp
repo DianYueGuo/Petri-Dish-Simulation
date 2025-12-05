@@ -42,6 +42,12 @@ public:
     void setAngle(float new_angle, const b2WorldId &worldId);
 private:
     b2BodyId bodyId;
+    float density;
+    float friction;
+    bool isSensor;
+    bool enableSensorEvents;
+    float linearDamping;
+    float angularDamping;
 protected:
     std::unordered_set<CirclePhysics*> touching_circles;
 };
