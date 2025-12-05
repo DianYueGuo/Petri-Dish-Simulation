@@ -88,6 +88,11 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         ImGui::SliderFloat("Petri Radius", &petri_radius, 1.0f, 200.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
         game.set_petri_radius(petri_radius);
 
+        bool auto_remove_outside = game.get_auto_remove_outside();
+        if (ImGui::Checkbox("Auto-delete Outside Petri Dish", &auto_remove_outside)) {
+            game.set_auto_remove_outside(auto_remove_outside);
+        }
+
         if (ImGui::Button("Reset View")) {
             view = window.getView();
             view.setSize({static_cast<float>(window.getSize().x), static_cast<float>(window.getSize().y)});

@@ -65,6 +65,9 @@ void Game::process_game_logic() {
     update_eaters(worldId);
     run_brain_updates(worldId, timeStep);
     cull_consumed();
+    if (auto_remove_outside) {
+        remove_outside_petri();
+    }
 }
 
 void Game::draw(sf::RenderWindow& window) const {
@@ -384,6 +387,23 @@ void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique
 
         remaining_area -= use_area;
     }
+}
+
+void Game::remove_outside_petri() {
+    if (circles.empty()) {
+        return;
+    }
+
+    circles.erase(
+        std::remove_if(
+            circles.begin(),
+            circles.end(),
+            [&](const std::unique_ptr<EatableCircle>& circle) {
+                b2Vec2 pos = circle->getPosition();
+                float distance = std::sqrt(pos.x * pos.x + pos.y * pos.y);
+                return distance + circle->getRadius() > petri_radius;
+            }),
+        circles.end());
 }
 
 void Game::remove_random_percentage(float percentage) {

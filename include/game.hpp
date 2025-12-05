@@ -51,6 +51,9 @@ public:
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
     void remove_random_percentage(float percentage);
+    void remove_outside_petri();
+    void set_auto_remove_outside(bool enabled) { auto_remove_outside = enabled; }
+    bool get_auto_remove_outside() const { return auto_remove_outside; }
     std::size_t get_circle_count() const { return circles.size(); }
 private:
     void spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out);
@@ -89,6 +92,7 @@ private:
     float average_eater_area = 1.8f;
     float sprinkle_rate_eatable = 0.0f;
     float sprinkle_rate_toxic = 0.0f;
+    bool auto_remove_outside = false;
     bool dragging = false;
     bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};
