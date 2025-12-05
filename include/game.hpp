@@ -84,9 +84,9 @@ private:
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
-    float pixles_per_meter = 100.0f;
+    float pixles_per_meter = 15.0f;
     float time_scale = 1.0f;
-    float brain_updates_per_sim_second = 60.0f;
+    float brain_updates_per_sim_second = 10.0f;
     float brain_time_accumulator = 0.0f;
     float minimum_area = 1.0f;
     CursorMode cursor_mode = CursorMode::Add;
@@ -98,7 +98,7 @@ private:
     float add_eatable_area = 1.0f;
     float boost_area = 0.3f;
     float poison_death_probability = 1.0f;
-    float poison_death_probability_normal = 0.0f;
+    float poison_death_probability_normal = 0.1f;
     float petri_radius = 20.0f;
     float sprinkle_rate_eater = 0.0f;
     float average_eater_area = 1.8f;
