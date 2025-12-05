@@ -42,15 +42,15 @@ void EaterCircle::process_eating(const b2WorldId &worldId) {
 
 void EaterCircle::move_randomly(const b2WorldId &worldId) {
     float probability = static_cast<float>(rand()) / RAND_MAX;
-    if (probability > 0.8f)
+    if (probability > 0.9f)
         this->boost_forward(worldId);
 
     probability = static_cast<float>(rand()) / RAND_MAX;
-    if (probability > 0.8f)
+    if (probability > 0.9f)
         this->apply_left_turn_impulse();
 
     probability = static_cast<float>(rand()) / RAND_MAX;
-    if (probability > 0.8f)
+    if (probability > 0.9f)
         this->apply_right_turn_impulse();
 }
 
