@@ -13,6 +13,7 @@ public:
 
     void draw(sf::RenderWindow& window, float pixle_per_meter) const;
     void set_color_rgb(float r, float g, float b);
+    std::array<float, 3> get_color_rgb() const { return color_rgb; }
 protected:
     std::array<float, 3> color_rgb{};
 };

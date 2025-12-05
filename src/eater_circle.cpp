@@ -105,6 +105,8 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
 
         auto boost_circle = std::make_unique<EatableCircle>(worldId, back_position.x, back_position.y, boost_radius, 1.0f, 0.3f);
         EatableCircle* boost_circle_ptr = boost_circle.get();
+        const auto color = get_color_rgb();
+        boost_circle_ptr->set_color_rgb(color[0], color[1], color[2]);
         game.add_circle(std::move(boost_circle));
         if (boost_circle_ptr) {
             boost_circle_ptr->setAngle(angle + 3.14159f, worldId);
