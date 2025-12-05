@@ -83,6 +83,12 @@ int main() {
         }
         game.set_cursor_mode(static_cast<Game::CursorMode>(cursor_mode));
 
+        if (cursor_mode == static_cast<int>(Game::CursorMode::Add)) {
+            static bool add_toxic = false;
+            ImGui::Checkbox("Add Toxic", &add_toxic);
+            game.set_add_toxic(add_toxic);
+        }
+
         ImGui::End();
 
         window.clear();

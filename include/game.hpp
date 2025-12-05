@@ -30,6 +30,7 @@ public:
     void set_minimum_area(float area) { minimum_area = area; }
     float get_minimum_area() const { return minimum_area; }
     void set_cursor_mode(CursorMode mode) { cursor_mode = mode; }
+    void set_add_toxic(bool value) { add_toxic = value; }
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
 private:
@@ -41,6 +42,7 @@ private:
     float brain_time_accumulator = 0.0f;
     float minimum_area = 1.0f;
     CursorMode cursor_mode = CursorMode::Add;
+    bool add_toxic = false;
     bool dragging = false;
     bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};

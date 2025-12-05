@@ -97,16 +97,30 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
 
             switch (cursor_mode) {
                 case CursorMode::Add: {
-                    circles.push_back(
-                        std::make_unique<EaterCircle>(
-                            worldId,
-                            worldPos.x,
-                            worldPos.y,
-                            1.0f * (0.5f + static_cast<float>(rand()) / RAND_MAX),
-                            1.0f,
-                            0.3f
-                        )
-                    );
+                    if (add_toxic) {
+                        circles.push_back(
+                            std::make_unique<EatableCircle>(
+                                worldId,
+                                worldPos.x,
+                                worldPos.y,
+                                1.0f * (0.5f + static_cast<float>(rand()) / RAND_MAX),
+                                1.0f,
+                                0.3f,
+                                true
+                            )
+                        );
+                    } else {
+                        circles.push_back(
+                            std::make_unique<EaterCircle>(
+                                worldId,
+                                worldPos.x,
+                                worldPos.y,
+                                1.0f * (0.5f + static_cast<float>(rand()) / RAND_MAX),
+                                1.0f,
+                                0.3f
+                            )
+                        );
+                    }
                     break;
                 }
                 case CursorMode::Drag: {
