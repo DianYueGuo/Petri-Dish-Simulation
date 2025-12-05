@@ -14,6 +14,20 @@ EaterBrain::EaterBrain(size_t input_count, size_t output_count)
     }
 }
 
+EaterBrain::EaterBrain(const EaterBrain& other)
+    : input_count(other.input_count), output_count(other.output_count) {
+    clone_from(other);
+}
+
+EaterBrain& EaterBrain::operator=(const EaterBrain& other) {
+    if (this != &other) {
+        input_count = other.input_count;
+        output_count = other.output_count;
+        clone_from(other);
+    }
+    return *this;
+}
+
 void EaterBrain::set_input(size_t input_index, float value) {
     if (input_index >= input_count) {
         throw std::out_of_range("input_index out of range");
@@ -96,6 +110,37 @@ void EaterBrain::mutate(float add_node_probability, float remove_node_probabilit
 
 bool EaterBrain::has_hidden_nodes() const {
     return nodes.size() > input_count + output_count;
+}
+
+void EaterBrain::clone_from(const EaterBrain& other) {
+    nodes.clear();
+    nodes.reserve(other.nodes.size());
+
+    for (const auto& other_node_ptr : other.nodes) {
+        auto new_node = std::make_unique<Node>();
+        new_node->type = other_node_ptr->type;
+        new_node->input_register = other_node_ptr->input_register;
+        new_node->output_register = other_node_ptr->output_register;
+        nodes.push_back(std::move(new_node));
+    }
+
+    std::unordered_map<const Node*, size_t> index_map;
+    for (size_t i = 0; i < other.nodes.size(); ++i) {
+        index_map[other.nodes[i].get()] = i;
+    }
+
+    for (size_t i = 0; i < other.nodes.size(); ++i) {
+        const auto& other_inputs = other.nodes[i]->input_nodes;
+        auto& new_inputs = nodes[i]->input_nodes;
+        new_inputs.clear();
+        new_inputs.reserve(other_inputs.size());
+        for (const Node* other_input : other_inputs) {
+            auto it = index_map.find(other_input);
+            if (it != index_map.end()) {
+                new_inputs.push_back(nodes[it->second].get());
+            }
+        }
+    }
 }
 
 void EaterBrain::add_hidden_node(NodeType type) {

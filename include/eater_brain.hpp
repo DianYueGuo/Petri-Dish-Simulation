@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <memory>
+#include <unordered_map>
 
 // EaterBrain is a simple node graph.
 // Nodes store input and output registers.
@@ -26,6 +27,11 @@ public:
     };
 
     EaterBrain(size_t input_count, size_t output_count);
+    EaterBrain(const EaterBrain& other);
+    EaterBrain& operator=(const EaterBrain& other);
+    EaterBrain(EaterBrain&&) = default;
+    EaterBrain& operator=(EaterBrain&&) = default;
+    ~EaterBrain() = default;
 
     size_t get_input_count() const { return input_count; }
     size_t get_output_count() const { return output_count; }
@@ -60,6 +66,7 @@ private:
     void add_random_connection();
     void remove_random_connection();
     size_t random_node_index() const;
+    void clone_from(const EaterBrain& other);
 };
 
 #endif
