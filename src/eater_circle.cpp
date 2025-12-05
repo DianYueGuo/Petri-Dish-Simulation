@@ -8,7 +8,7 @@
 
 EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
     EatableCircle(worldId, position_x, position_y, radius, density, friction),
-    brain(0, 3) {
+    brain(0, 4) {
     initialize_brain();
 }
 
@@ -78,6 +78,9 @@ void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game) {
     if (brain.read_output(2) >= 1.0f) {
         this->apply_right_turn_impulse();
     }
+    if (brain.read_output(3) >= 1.0f) {
+        this->divide(worldId, game);
+    }
 }
 
 void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
@@ -113,4 +116,48 @@ void EaterCircle::initialize_brain() {
     for (int i = 0; i < mutation_rounds; ++i) {
         brain.mutate(0.8f, 0.0f, 1.0f, 0.0f);
     }
+}
+
+void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
+    const float current_area = 3.14159f * this->getRadius() * this->getRadius();
+    const float divided_area = current_area / 2.0f;
+
+    if (divided_area <= 1.0f) {
+        return;
+    }
+
+    const float new_radius = std::sqrt(divided_area / 3.14159f);
+
+    EaterBrain parent_brain_copy = brain;
+
+    const b2Vec2 original_pos = this->getPosition();
+
+    this->setRadius(new_radius, worldId);
+
+    float angle = this->getAngle();
+    b2Vec2 direction = {std::cos(angle), std::sin(angle)};
+    b2Vec2 forward_offset = {direction.x * new_radius, direction.y * new_radius};
+
+    b2Vec2 parent_position = {original_pos.x + forward_offset.x, original_pos.y + forward_offset.y};
+    b2Vec2 child_position = {original_pos.x - forward_offset.x, original_pos.y - forward_offset.y};
+
+    this->setPosition(parent_position, worldId);
+
+    auto new_circle = std::make_unique<EaterCircle>(worldId, child_position.x, child_position.y, new_radius, 1.0f, 0.3f);
+    EaterCircle* new_circle_ptr = new_circle.get();
+    if (new_circle_ptr) {
+        new_circle_ptr->brain = parent_brain_copy;
+        new_circle_ptr->setAngle(angle + 3.14159f, worldId);
+        new_circle_ptr->apply_forward_impulse();
+    }
+
+    constexpr int mutation_rounds = 3;
+    for (int i = 0; i < mutation_rounds; ++i) {
+        brain.mutate(0.6f, 0.2f, 0.5f, 0.5f);
+        if (new_circle_ptr) {
+            new_circle_ptr->brain.mutate(0.6f, 0.2f, 0.5f, 0.5f);
+        }
+    }
+
+    game.add_circle(std::move(new_circle));
 }

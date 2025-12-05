@@ -39,6 +39,7 @@ public:
     void remove_touching_circle(CirclePhysics* circle_physics);
 
     void setRadius(float new_radius, const b2WorldId &worldId);
+    void setPosition(const b2Vec2& new_position, const b2WorldId &worldId);
     void setAngle(float new_angle, const b2WorldId &worldId);
 private:
     b2BodyId bodyId;

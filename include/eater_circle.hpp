@@ -19,6 +19,7 @@ public:
     void move_intelligently(const b2WorldId &worldId, Game &game);
 
     void boost_forward(const b2WorldId &worldId, Game& game);
+    void divide(const b2WorldId &worldId, Game& game);
 
 private:
     void initialize_brain();
