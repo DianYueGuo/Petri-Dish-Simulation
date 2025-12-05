@@ -8,8 +8,9 @@
 
 EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle) :
     EatableCircle(worldId, position_x, position_y, radius, density, false, angle),
-    brain(0, 7) {
+    brain(3, 7) {
     initialize_brain();
+    update_brain_inputs_from_touching();
     brain.update();
     update_color_from_brain();
 }
@@ -84,6 +85,7 @@ void EaterCircle::move_randomly(const b2WorldId &worldId, Game &game) {
 }
 
 void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game) {
+    update_brain_inputs_from_touching();
     brain.update();
     update_color_from_brain();
 
@@ -196,4 +198,39 @@ void EaterCircle::update_color_from_brain() {
     float g = std::clamp(brain.read_output_input_register(5), 0.0f, 1.0f);
     float b = std::clamp(brain.read_output_input_register(6), 0.0f, 1.0f);
     set_color_rgb(r, g, b);
+}
+
+std::array<float, 3> EaterCircle::average_touching_color() const {
+    std::array<float, 3> summed_color = {0.0f, 0.0f, 0.0f};
+    if (touching_circles.empty()) {
+        return summed_color;
+    }
+
+    int count = 0;
+    for (auto* circle : touching_circles) {
+        if (auto* drawable = dynamic_cast<DrawableCircle*>(circle)) {
+            const auto color = drawable->get_color_rgb();
+            summed_color[0] += color[0];
+            summed_color[1] += color[1];
+            summed_color[2] += color[2];
+            ++count;
+        }
+    }
+
+    if (count == 0) {
+        return {0.0f, 0.0f, 0.0f};
+    }
+
+    float inv_count = 1.0f / static_cast<float>(count);
+    summed_color[0] *= inv_count;
+    summed_color[1] *= inv_count;
+    summed_color[2] *= inv_count;
+    return summed_color;
+}
+
+void EaterCircle::update_brain_inputs_from_touching() {
+    const auto average_color = average_touching_color();
+    brain.set_input(0, average_color[0]);
+    brain.set_input(1, average_color[1]);
+    brain.set_input(2, average_color[2]);
 }
