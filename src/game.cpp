@@ -111,21 +111,28 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
                 }
                 case CursorMode::Drag: {
                     dragging = true;
+                    right_dragging = false;
                     last_drag_pixels = mouseButtonPressed->position;
                     break;
                 }
             }
+        } else if (mouseButtonPressed->button == sf::Mouse::Button::Right) {
+            dragging = true;
+            right_dragging = true;
+            last_drag_pixels = mouseButtonPressed->position;
         }
     }
 
     if (const auto* mouseButtonReleased = event->getIf<sf::Event::MouseButtonReleased>()) {
-        if (mouseButtonReleased->button == sf::Mouse::Button::Left && cursor_mode == CursorMode::Drag) {
+        if ((mouseButtonReleased->button == sf::Mouse::Button::Left && cursor_mode == CursorMode::Drag) ||
+            mouseButtonReleased->button == sf::Mouse::Button::Right) {
             dragging = false;
+            right_dragging = false;
         }
     }
 
     if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
-        if (dragging && cursor_mode == CursorMode::Drag) {
+        if (dragging && (cursor_mode == CursorMode::Drag || right_dragging)) {
             sf::View view = window.getView();
             sf::Vector2f pixels_to_world = {
                 view.getSize().x / static_cast<float>(window.getSize().x),

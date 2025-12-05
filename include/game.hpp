@@ -42,6 +42,7 @@ private:
     float minimum_area = 1.0f;
     CursorMode cursor_mode = CursorMode::Add;
     bool dragging = false;
+    bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};
 };
 
