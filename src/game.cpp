@@ -299,12 +299,20 @@ std::unique_ptr<EaterCircle> Game::create_eater_at(const b2Vec2& pos) const {
     float varied_area = base_area * (0.5f + random_unit()); // random scale around the average
     float radius = radius_from_area(varied_area);
     float angle = random_unit() * 2.0f * PI;
-    return std::make_unique<EaterCircle>(worldId, pos.x, pos.y, radius, 1.0f, 0.3f, angle);
+    auto circle = std::make_unique<EaterCircle>(worldId, pos.x, pos.y, radius, circle_density, circle_friction, angle);
+    circle->set_impulse_magnitudes(linear_impulse_magnitude, angular_impulse_magnitude);
+    circle->set_linear_damping(linear_damping, worldId);
+    circle->set_angular_damping(angular_damping, worldId);
+    return circle;
 }
 
 std::unique_ptr<EatableCircle> Game::create_eatable_at(const b2Vec2& pos, bool toxic) const {
     float radius = radius_from_area(add_eatable_area);
-    return std::make_unique<EatableCircle>(worldId, pos.x, pos.y, radius, 1.0f, 0.3f, toxic, 0.0f);
+    auto circle = std::make_unique<EatableCircle>(worldId, pos.x, pos.y, radius, circle_density, circle_friction, toxic, 0.0f);
+    circle->set_impulse_magnitudes(linear_impulse_magnitude, angular_impulse_magnitude);
+    circle->set_linear_damping(linear_damping, worldId);
+    circle->set_angular_damping(angular_damping, worldId);
+    return circle;
 }
 
 void Game::sprinkle_entities(float dt) {
@@ -428,5 +436,76 @@ void Game::remove_random_percentage(float percentage) {
 
     for (std::size_t idx : indices) {
         circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
+    }
+}
+
+void Game::set_circle_density(float d) {
+    float clamped = std::max(d, 0.0f);
+    if (std::abs(clamped - circle_density) < 1e-6f) {
+        return;
+    }
+    circle_density = clamped;
+    for (auto& circle : circles) {
+        circle->set_density(circle_density, worldId);
+    }
+}
+
+void Game::set_circle_friction(float f) {
+    float clamped = std::max(f, 0.0f);
+    if (std::abs(clamped - circle_friction) < 1e-6f) {
+        return;
+    }
+    circle_friction = clamped;
+    for (auto& circle : circles) {
+        circle->set_friction(circle_friction, worldId);
+    }
+}
+
+void Game::set_linear_impulse_magnitude(float m) {
+    float clamped = std::max(m, 0.0f);
+    if (std::abs(clamped - linear_impulse_magnitude) < 1e-6f) {
+        return;
+    }
+    linear_impulse_magnitude = clamped;
+    apply_impulse_magnitudes_to_circles();
+}
+
+void Game::set_angular_impulse_magnitude(float m) {
+    float clamped = std::max(m, 0.0f);
+    if (std::abs(clamped - angular_impulse_magnitude) < 1e-6f) {
+        return;
+    }
+    angular_impulse_magnitude = clamped;
+    apply_impulse_magnitudes_to_circles();
+}
+
+void Game::apply_impulse_magnitudes_to_circles() {
+    for (auto& circle : circles) {
+        circle->set_impulse_magnitudes(linear_impulse_magnitude, angular_impulse_magnitude);
+    }
+}
+
+void Game::set_linear_damping(float d) {
+    float clamped = std::max(d, 0.0f);
+    if (std::abs(clamped - linear_damping) < 1e-6f) {
+        return;
+    }
+    linear_damping = clamped;
+    apply_damping_to_circles();
+}
+
+void Game::set_angular_damping(float d) {
+    float clamped = std::max(d, 0.0f);
+    if (std::abs(clamped - angular_damping) < 1e-6f) {
+        return;
+    }
+    angular_damping = clamped;
+    apply_damping_to_circles();
+}
+
+void Game::apply_damping_to_circles() {
+    for (auto& circle : circles) {
+        circle->set_linear_damping(linear_damping, worldId);
+        circle->set_angular_damping(angular_damping, worldId);
     }
 }

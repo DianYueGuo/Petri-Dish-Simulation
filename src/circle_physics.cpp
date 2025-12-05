@@ -1,5 +1,8 @@
 #include "circle_physics.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 
 CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction, float angle) :
     bodyId{},
@@ -8,7 +11,9 @@ CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float p
     isSensor(true),
     enableSensorEvents(true),
     linearDamping(0.3f),
-    angularDamping(1.0f) {
+    angularDamping(1.0f),
+    linearImpulseMagnitude(5.0f),
+    angularImpulseMagnitude(5.0f) {
     BodyState initialState{};
     initialState.position = (b2Vec2){position_x, position_y};
     initialState.rotation = b2MakeRot(angle);
@@ -88,6 +93,8 @@ CirclePhysics::CirclePhysics(CirclePhysics&& other_circle_physics) noexcept :
     enableSensorEvents(other_circle_physics.enableSensorEvents),
     linearDamping(other_circle_physics.linearDamping),
     angularDamping(other_circle_physics.angularDamping),
+    linearImpulseMagnitude(other_circle_physics.linearImpulseMagnitude),
+    angularImpulseMagnitude(other_circle_physics.angularImpulseMagnitude),
     touching_circles(std::move(other_circle_physics.touching_circles)) {
 
     b2ShapeId shapeId;
@@ -115,12 +122,14 @@ CirclePhysics& CirclePhysics::operator=(CirclePhysics&& other_circle_physics) no
     enableSensorEvents = other_circle_physics.enableSensorEvents;
     linearDamping = other_circle_physics.linearDamping;
     angularDamping = other_circle_physics.angularDamping;
+    linearImpulseMagnitude = other_circle_physics.linearImpulseMagnitude;
+    angularImpulseMagnitude = other_circle_physics.angularImpulseMagnitude;
 
     b2ShapeId shapeId;
     b2Body_GetShapes(bodyId, &shapeId, 1);
     b2Shape_SetUserData(shapeId, this);
 
-        other_circle_physics.bodyId = (b2BodyId){};
+    other_circle_physics.bodyId = (b2BodyId){};
 
     touching_circles = std::move(other_circle_physics.touching_circles);
     for (auto* touching_circle : touching_circles) {
@@ -173,17 +182,16 @@ void CirclePhysics::stop_applying_torque() const {
 
 void CirclePhysics::apply_forward_impulse() const {
     b2Rot rotation = b2Body_GetRotation(bodyId);
-    float impulse_magnitude = 5.0f;
-    b2Vec2 impulse = {impulse_magnitude * rotation.c, impulse_magnitude * rotation.s};
+    b2Vec2 impulse = {linearImpulseMagnitude * rotation.c, linearImpulseMagnitude * rotation.s};
     b2Body_ApplyLinearImpulse(bodyId, impulse, b2Body_GetPosition(bodyId), true);
 };
 
 void CirclePhysics::apply_left_turn_impulse() const {
-    b2Body_ApplyAngularImpulse(bodyId, -5.0f, true);
+    b2Body_ApplyAngularImpulse(bodyId, -angularImpulseMagnitude, true);
 };
 
 void CirclePhysics::apply_right_turn_impulse() const {
-    b2Body_ApplyAngularImpulse(bodyId, 5.0f, true);
+    b2Body_ApplyAngularImpulse(bodyId, angularImpulseMagnitude, true);
 };
 
 float CirclePhysics::getAngle() const {
@@ -227,5 +235,42 @@ void CirclePhysics::setAngle(float new_angle, const b2WorldId &worldId) {
 
     BodyState state = captureBodyState();
     state.rotation = b2MakeRot(new_angle);
+    recreateBodyWithState(worldId, state);
+}
+
+void CirclePhysics::set_density(float new_density, const b2WorldId& worldId) {
+    density = std::max(new_density, 0.0f);
+    if (!b2Body_IsValid(bodyId)) return;
+
+    BodyState state = captureBodyState();
+    recreateBodyWithState(worldId, state);
+}
+
+void CirclePhysics::set_friction(float new_friction, const b2WorldId& worldId) {
+    friction = std::max(new_friction, 0.0f);
+    if (!b2Body_IsValid(bodyId)) return;
+
+    BodyState state = captureBodyState();
+    recreateBodyWithState(worldId, state);
+}
+
+void CirclePhysics::set_impulse_magnitudes(float linear, float angular) {
+    linearImpulseMagnitude = std::max(linear, 0.0f);
+    angularImpulseMagnitude = std::max(angular, 0.0f);
+}
+
+void CirclePhysics::set_linear_damping(float damping, const b2WorldId& worldId) {
+    linearDamping = std::max(damping, 0.0f);
+    if (!b2Body_IsValid(bodyId)) return;
+
+    BodyState state = captureBodyState();
+    recreateBodyWithState(worldId, state);
+}
+
+void CirclePhysics::set_angular_damping(float damping, const b2WorldId& worldId) {
+    angularDamping = std::max(damping, 0.0f);
+    if (!b2Body_IsValid(bodyId)) return;
+
+    BodyState state = captureBodyState();
     recreateBodyWithState(worldId, state);
 }

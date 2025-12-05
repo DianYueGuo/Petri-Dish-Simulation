@@ -117,10 +117,13 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
         b2Vec2 back_position = {pos.x - direction.x * (this->getRadius() + boost_radius), 
                     pos.y - direction.y * (this->getRadius() + boost_radius)};
 
-        auto boost_circle = std::make_unique<EatableCircle>(worldId, back_position.x, back_position.y, boost_radius, 1.0f, 0.3f, false, 0.0f);
+        auto boost_circle = std::make_unique<EatableCircle>(worldId, back_position.x, back_position.y, boost_radius, game.get_circle_density(), game.get_circle_friction(), false, 0.0f);
         EatableCircle* boost_circle_ptr = boost_circle.get();
         const auto color = get_color_rgb();
         boost_circle_ptr->set_color_rgb(color[0], color[1], color[2]);
+        boost_circle_ptr->set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
+        boost_circle_ptr->set_linear_damping(game.get_linear_damping(), worldId);
+        boost_circle_ptr->set_angular_damping(game.get_angular_damping(), worldId);
         game.add_circle(std::move(boost_circle));
         if (boost_circle_ptr) {
             boost_circle_ptr->setAngle(angle + 3.14159f, worldId);
@@ -162,10 +165,13 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
 
     this->setPosition(parent_position, worldId);
 
-    auto new_circle = std::make_unique<EaterCircle>(worldId, child_position.x, child_position.y, new_radius, 1.0f, 0.3f, angle + 3.14159f);
+    auto new_circle = std::make_unique<EaterCircle>(worldId, child_position.x, child_position.y, new_radius, game.get_circle_density(), game.get_circle_friction(), angle + 3.14159f);
     EaterCircle* new_circle_ptr = new_circle.get();
     if (new_circle_ptr) {
         new_circle_ptr->brain = parent_brain_copy;
+        new_circle_ptr->set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
+        new_circle_ptr->set_linear_damping(game.get_linear_damping(), worldId);
+        new_circle_ptr->set_angular_damping(game.get_angular_damping(), worldId);
         new_circle_ptr->setAngle(angle + 3.14159f, worldId);
         new_circle_ptr->apply_forward_impulse();
         new_circle_ptr->update_color_from_brain();

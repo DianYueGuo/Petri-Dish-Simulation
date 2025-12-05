@@ -130,6 +130,26 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         game.set_poison_death_probability_normal(poison_death_probability_normal);
     }
 
+    if (ImGui::CollapsingHeader("Circle Physics", ImGuiTreeNodeFlags_DefaultOpen)) {
+        static float circle_density = 1.0f;
+        static float linear_impulse = 5.0f;
+        static float angular_impulse = 5.0f;
+        static float linear_damping = 0.3f;
+        static float angular_damping = 1.0f;
+
+        ImGui::SliderFloat("Density", &circle_density, 0.01f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("Forward Impulse", &linear_impulse, 0.01f, 50.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("Angular Impulse", &angular_impulse, 0.01f, 50.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("Linear Damping", &linear_damping, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("Angular Damping", &angular_damping, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+
+        game.set_circle_density(circle_density);
+        game.set_linear_impulse_magnitude(linear_impulse);
+        game.set_angular_impulse_magnitude(angular_impulse);
+        game.set_linear_damping(linear_damping);
+        game.set_angular_damping(angular_damping);
+    }
+
     if (ImGui::CollapsingHeader("Sprinkle Rates", ImGuiTreeNodeFlags_DefaultOpen)) {
         static float sprinkle_rate_eater = 0.0f;
         static float sprinkle_rate_eatable = 0.0f;

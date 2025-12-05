@@ -40,6 +40,18 @@ public:
     void set_poison_death_probability(float p) { poison_death_probability = p; }
     void set_poison_death_probability_normal(float p) { poison_death_probability_normal = p; }
     void set_boost_area(float area) { boost_area = area; }
+    void set_circle_density(float d);
+    float get_circle_density() const { return circle_density; }
+    void set_circle_friction(float f);
+    float get_circle_friction() const { return circle_friction; }
+    void set_linear_impulse_magnitude(float m);
+    float get_linear_impulse_magnitude() const { return linear_impulse_magnitude; }
+    void set_angular_impulse_magnitude(float m);
+    float get_angular_impulse_magnitude() const { return angular_impulse_magnitude; }
+    void set_linear_damping(float d);
+    float get_linear_damping() const { return linear_damping; }
+    void set_angular_damping(float d);
+    float get_angular_damping() const { return angular_damping; }
     float get_boost_area() const { return boost_area; }
     void set_petri_radius(float r) { petri_radius = r; }
     float get_petri_radius() const { return petri_radius; }
@@ -65,6 +77,8 @@ private:
     void cull_consumed();
     std::unique_ptr<EaterCircle> create_eater_at(const b2Vec2& pos) const;
     std::unique_ptr<EatableCircle> create_eatable_at(const b2Vec2& pos, bool toxic) const;
+    void apply_impulse_magnitudes_to_circles();
+    void apply_damping_to_circles();
     void handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseButtonPressed& e);
     void handle_mouse_release(const sf::Event::MouseButtonReleased& e);
     void handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e);
@@ -96,6 +110,12 @@ private:
     bool dragging = false;
     bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};
+    float circle_density = 1.0f;
+    float circle_friction = 0.3f;
+    float linear_impulse_magnitude = 5.0f;
+    float angular_impulse_magnitude = 5.0f;
+    float linear_damping = 0.3f;
+    float angular_damping = 1.0f;
 };
 
 #endif

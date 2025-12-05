@@ -37,6 +37,12 @@ public:
 
     float getAngle() const;
 
+    void set_density(float new_density, const b2WorldId& worldId);
+    void set_friction(float new_friction, const b2WorldId& worldId);
+    void set_impulse_magnitudes(float linear, float angular);
+    void set_linear_damping(float damping, const b2WorldId& worldId);
+    void set_angular_damping(float damping, const b2WorldId& worldId);
+
     void add_touching_circle(CirclePhysics* circle_physics);
     void remove_touching_circle(CirclePhysics* circle_physics);
 
@@ -65,6 +71,8 @@ private:
     bool enableSensorEvents;
     float linearDamping;
     float angularDamping;
+    float linearImpulseMagnitude;
+    float angularImpulseMagnitude;
 protected:
     std::unordered_set<CirclePhysics*> touching_circles;
 };
