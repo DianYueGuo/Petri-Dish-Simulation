@@ -1,13 +1,23 @@
 #include "drawable_circle.hpp"
 
+#include <cstdlib>
+#include <algorithm>
 
 DrawableCircle::DrawableCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
     CirclePhysics(worldId, position_x, position_y, radius, density, friction) {
+    for (auto& c : color_rgb) {
+        c = std::clamp(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX), 0.0f, 1.0f);
+    }
 }
 
 void DrawableCircle::draw(sf::RenderWindow& window, float pixle_per_meter) const {
     sf::CircleShape shape(getRadius() * pixle_per_meter);
-    shape.setFillColor(sf::Color::Green);
+    sf::Color fill{
+        static_cast<std::uint8_t>(color_rgb[0] * 255.0f),
+        static_cast<std::uint8_t>(color_rgb[1] * 255.0f),
+        static_cast<std::uint8_t>(color_rgb[2] * 255.0f)
+    };
+    shape.setFillColor(fill);
 
     shape.setOrigin({getRadius() * pixle_per_meter, getRadius() * pixle_per_meter});
     shape.setPosition({getPosition().x * pixle_per_meter, getPosition().y * pixle_per_meter});
