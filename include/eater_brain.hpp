@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdlib>
 #include <algorithm>
+#include <memory>
 
 // EaterBrain is a simple node graph.
 // Nodes store input and output registers.
@@ -18,7 +19,7 @@ public:
 
     struct Node {
         NodeType type;
-        std::vector<size_t> input_indices;
+        std::vector<Node*> input_nodes;
         float input_register = 0.0f;
         float output_register = 0.0f;
     };
@@ -43,10 +44,10 @@ public:
     // Mutation entry point. Probabilities are checked independently.
     void mutate(float add_node_probability, float remove_node_probability, float rewire_probability);
 
-    const std::vector<Node>& get_nodes() const { return nodes; }
+    const std::vector<std::unique_ptr<Node>>& get_nodes() const { return nodes; }
 
 private:
-    std::vector<Node> nodes;
+    std::vector<std::unique_ptr<Node>> nodes;
     size_t input_count;
     size_t output_count;
 
