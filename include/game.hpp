@@ -42,8 +42,6 @@ public:
     void set_boost_area(float area) { boost_area = area; }
     void set_circle_density(float d);
     float get_circle_density() const { return circle_density; }
-    void set_circle_friction(float f);
-    float get_circle_friction() const { return circle_friction; }
     void set_linear_impulse_magnitude(float m);
     float get_linear_impulse_magnitude() const { return linear_impulse_magnitude; }
     void set_angular_impulse_magnitude(float m);
@@ -111,7 +109,6 @@ private:
     bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};
     float circle_density = 1.0f;
-    float circle_friction = 0.3f;
     float linear_impulse_magnitude = 5.0f;
     float angular_impulse_magnitude = 5.0f;
     float linear_damping = 0.3f;

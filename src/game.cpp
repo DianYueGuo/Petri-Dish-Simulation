@@ -299,7 +299,7 @@ std::unique_ptr<EaterCircle> Game::create_eater_at(const b2Vec2& pos) const {
     float varied_area = base_area * (0.5f + random_unit()); // random scale around the average
     float radius = radius_from_area(varied_area);
     float angle = random_unit() * 2.0f * PI;
-    auto circle = std::make_unique<EaterCircle>(worldId, pos.x, pos.y, radius, circle_density, circle_friction, angle);
+    auto circle = std::make_unique<EaterCircle>(worldId, pos.x, pos.y, radius, circle_density, angle);
     circle->set_impulse_magnitudes(linear_impulse_magnitude, angular_impulse_magnitude);
     circle->set_linear_damping(linear_damping, worldId);
     circle->set_angular_damping(angular_damping, worldId);
@@ -308,7 +308,7 @@ std::unique_ptr<EaterCircle> Game::create_eater_at(const b2Vec2& pos) const {
 
 std::unique_ptr<EatableCircle> Game::create_eatable_at(const b2Vec2& pos, bool toxic) const {
     float radius = radius_from_area(add_eatable_area);
-    auto circle = std::make_unique<EatableCircle>(worldId, pos.x, pos.y, radius, circle_density, circle_friction, toxic, 0.0f);
+    auto circle = std::make_unique<EatableCircle>(worldId, pos.x, pos.y, radius, circle_density, toxic, 0.0f);
     circle->set_impulse_magnitudes(linear_impulse_magnitude, angular_impulse_magnitude);
     circle->set_linear_damping(linear_damping, worldId);
     circle->set_angular_damping(angular_damping, worldId);
@@ -447,17 +447,6 @@ void Game::set_circle_density(float d) {
     circle_density = clamped;
     for (auto& circle : circles) {
         circle->set_density(circle_density, worldId);
-    }
-}
-
-void Game::set_circle_friction(float f) {
-    float clamped = std::max(f, 0.0f);
-    if (std::abs(clamped - circle_friction) < 1e-6f) {
-        return;
-    }
-    circle_friction = clamped;
-    for (auto& circle : circles) {
-        circle->set_friction(circle_friction, worldId);
     }
 }
 

@@ -8,7 +8,7 @@
 
 class CirclePhysics {
 public:
-    CirclePhysics(const b2WorldId &worldId, float position_x = 0.0f, float position_y = 0.0f, float radius = 1.0f, float density = 1.0f, float friction = 0.0f, float angle = 0.0f);
+    CirclePhysics(const b2WorldId &worldId, float position_x = 0.0f, float position_y = 0.0f, float radius = 1.0f, float density = 1.0f, float angle = 0.0f);
 
     virtual ~CirclePhysics();
 
@@ -38,7 +38,6 @@ public:
     float getAngle() const;
 
     void set_density(float new_density, const b2WorldId& worldId);
-    void set_friction(float new_friction, const b2WorldId& worldId);
     void set_impulse_magnitudes(float linear, float angular);
     void set_linear_damping(float damping, const b2WorldId& worldId);
     void set_angular_damping(float damping, const b2WorldId& worldId);
@@ -66,7 +65,6 @@ private:
 
     b2BodyId bodyId;
     float density;
-    float friction;
     bool isSensor;
     bool enableSensorEvents;
     float linearDamping;

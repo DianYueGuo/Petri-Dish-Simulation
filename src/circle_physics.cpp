@@ -4,10 +4,9 @@
 #include <cmath>
 
 
-CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction, float angle) :
+CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle) :
     bodyId{},
     density(density),
-    friction(friction),
     isSensor(true),
     enableSensorEvents(true),
     linearDamping(0.3f),
@@ -59,7 +58,6 @@ b2BodyDef CirclePhysics::buildBodyDef(const BodyState& state) const {
 b2ShapeDef CirclePhysics::buildCircleShapeDef() const {
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.density = density;
-    shapeDef.material.friction = friction;
     shapeDef.userData = const_cast<CirclePhysics*>(this);
     shapeDef.isSensor = isSensor;
     shapeDef.enableSensorEvents = enableSensorEvents;
@@ -88,7 +86,6 @@ void CirclePhysics::recreateBodyWithState(const b2WorldId& worldId, const BodySt
 CirclePhysics::CirclePhysics(CirclePhysics&& other_circle_physics) noexcept :
     bodyId(other_circle_physics.bodyId),
     density(other_circle_physics.density),
-    friction(other_circle_physics.friction),
     isSensor(other_circle_physics.isSensor),
     enableSensorEvents(other_circle_physics.enableSensorEvents),
     linearDamping(other_circle_physics.linearDamping),
@@ -117,7 +114,6 @@ CirclePhysics& CirclePhysics::operator=(CirclePhysics&& other_circle_physics) no
     if (b2Body_IsValid(bodyId)) b2DestroyBody(bodyId);
     bodyId = other_circle_physics.bodyId;
     density = other_circle_physics.density;
-    friction = other_circle_physics.friction;
     isSensor = other_circle_physics.isSensor;
     enableSensorEvents = other_circle_physics.enableSensorEvents;
     linearDamping = other_circle_physics.linearDamping;
@@ -240,14 +236,6 @@ void CirclePhysics::setAngle(float new_angle, const b2WorldId &worldId) {
 
 void CirclePhysics::set_density(float new_density, const b2WorldId& worldId) {
     density = std::max(new_density, 0.0f);
-    if (!b2Body_IsValid(bodyId)) return;
-
-    BodyState state = captureBodyState();
-    recreateBodyWithState(worldId, state);
-}
-
-void CirclePhysics::set_friction(float new_friction, const b2WorldId& worldId) {
-    friction = std::max(new_friction, 0.0f);
     if (!b2Body_IsValid(bodyId)) return;
 
     BodyState state = captureBodyState();

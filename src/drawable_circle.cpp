@@ -3,8 +3,8 @@
 #include <cstdlib>
 #include <algorithm>
 
-DrawableCircle::DrawableCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction, float angle) :
-    CirclePhysics(worldId, position_x, position_y, radius, density, friction, angle) {
+DrawableCircle::DrawableCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle) :
+    CirclePhysics(worldId, position_x, position_y, radius, density, angle) {
     for (auto& c : color_rgb) {
         c = std::clamp(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX), 0.0f, 1.0f);
     }
