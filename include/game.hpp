@@ -41,7 +41,7 @@ public:
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
 private:
-    void spawn_eatable_cloud(const EaterCircle& eater);
+    void spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out);
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;

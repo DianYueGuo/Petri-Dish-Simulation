@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
 
 #include "game.hpp"
 #include "eater_circle.hpp"
@@ -77,15 +78,20 @@ void Game::process_game_logic() {
         brain_time_accumulator -= brain_period;
     }
 
+    std::vector<std::unique_ptr<EatableCircle>> spawned_cloud;
+
     for (auto it = circles.begin(); it != circles.end(); ) {
-        bool remove = (*it)->is_eaten();
-        if (!remove) {
-            if (auto* eater = dynamic_cast<EaterCircle*>(it->get())) {
-                if (eater->is_poisoned()) {
-                    spawn_eatable_cloud(*eater);
-                    remove = true;
-                }
+        bool remove = false;
+
+        if (auto* eater = dynamic_cast<EaterCircle*>(it->get())) {
+            if (eater->is_poisoned()) {
+                spawn_eatable_cloud(*eater, spawned_cloud);
+                remove = true;
+            } else if (eater->is_eaten()) {
+                remove = true;
             }
+        } else if ((*it)->is_eaten()) {
+            remove = true;
         }
 
         if (remove) {
@@ -93,6 +99,10 @@ void Game::process_game_logic() {
         } else {
             ++it;
         }
+    }
+
+    for (auto& c : spawned_cloud) {
+        circles.push_back(std::move(c));
     }
 }
 
@@ -314,22 +324,21 @@ void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
     circles.push_back(std::move(circle));
 }
 
-void Game::spawn_eatable_cloud(const EaterCircle& eater) {
+void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out) {
     float eater_radius = eater.getRadius();
     float total_area = 3.14159f * eater_radius * eater_radius;
-    if (minimum_area <= 0.0f) {
+    if (minimum_area <= 0.0f || total_area <= 0.0f) {
         return;
     }
 
-    size_t count = static_cast<size_t>(total_area / minimum_area);
-    if (count == 0) {
-        return;
-    }
+    float chunk_area = std::min(minimum_area, total_area);
+    float remaining_area = total_area;
 
-    float piece_radius = std::sqrt(minimum_area / 3.14159f);
-    float max_offset = std::max(0.0f, eater_radius - piece_radius);
+    while (remaining_area > 0.0f) {
+        float use_area = std::min(chunk_area, remaining_area);
+        float piece_radius = std::sqrt(use_area / 3.14159f);
+        float max_offset = std::max(0.0f, eater_radius - piece_radius);
 
-    for (size_t i = 0; i < count; ++i) {
         float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2.0f * 3.14159f;
         float dist = max_offset * std::sqrt(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX));
         b2Vec2 pos = eater.getPosition();
@@ -345,6 +354,8 @@ void Game::spawn_eatable_cloud(const EaterCircle& eater) {
             0.3f,
             false
         );
-        circles.push_back(std::move(piece));
+        out.push_back(std::move(piece));
+
+        remaining_area -= use_area;
     }
 }
