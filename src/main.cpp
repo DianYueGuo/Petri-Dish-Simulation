@@ -54,6 +54,10 @@ int main() {
         ImGui::SliderFloat("Pixel Per Meter", &pixel_per_meter, 0.1f, 100.0f);
         game.set_pixles_per_meter(pixel_per_meter);
 
+        static float time_scale = 1.0f;
+        ImGui::SliderFloat("Time Scale", &time_scale, 0.1f, 3.0f);
+        game.set_time_scale(time_scale);
+
         ImGui::End();
 
         window.clear();

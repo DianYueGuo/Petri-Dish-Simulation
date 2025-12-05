@@ -19,11 +19,13 @@ public:
     void draw(sf::RenderWindow& window) const;
     void process_input_events(sf::RenderWindow& window, const std::optional<sf::Event>& event);
     void set_pixles_per_meter(float ppm) { pixles_per_meter = ppm; }
+    void set_time_scale(float scale) { time_scale = scale; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
 private:
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
     float pixles_per_meter = 100.0f;
+    float time_scale = 1.0f;
 };
 
 #endif

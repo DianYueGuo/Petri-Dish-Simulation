@@ -48,7 +48,7 @@ void process_touch_events(const b2WorldId& worldId) {
 }
 
 void Game::process_game_logic() {
-    float timeStep = 1.0f / 60.0f;
+    float timeStep = (1.0f / 60.0f) * time_scale;
     int subStepCount = 4;
     b2World_Step(worldId, timeStep, subStepCount);
 
