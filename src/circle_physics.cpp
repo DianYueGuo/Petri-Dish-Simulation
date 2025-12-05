@@ -106,6 +106,11 @@ float CirclePhysics::getRadius() const {
     return circle.radius;
 }
 
+float CirclePhysics::getArea() const {
+    float r = getRadius();
+    return 3.14159f * r * r;
+}
+
 void CirclePhysics::apply_forward_force() const {
     b2Rot rotation = b2Body_GetRotation(bodyId);
     float force_magnitude = 50.0f;
@@ -193,6 +198,14 @@ void CirclePhysics::setRadius(float new_radius, const b2WorldId &worldId) {
     circle.radius = new_radius;
 
     b2CreateCircleShape(bodyId, &shapeDef, &circle);
+}
+
+void CirclePhysics::setArea(float area, const b2WorldId &worldId) {
+    if (area <= 0.0f) {
+        return;
+    }
+    float new_radius = std::sqrt(area / 3.14159f);
+    setRadius(new_radius, worldId);
 }
 
 void CirclePhysics::setPosition(const b2Vec2& new_position, const b2WorldId &worldId) {

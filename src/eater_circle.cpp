@@ -36,7 +36,7 @@ void EaterCircle::process_eating(const b2WorldId &worldId, float poison_death_pr
     poisoned = false;
     for (auto* touching_circle : touching_circles) {
         if (touching_circle->getRadius() < this->getRadius()) {
-            float touching_area = 3.14159f * touching_circle->getRadius() * touching_circle->getRadius();
+            float touching_area = touching_circle->getArea();
             float overlap_threshold = touching_area * 0.8f;
 
             float distance = b2Distance(this->getPosition(), touching_circle->getPosition());
@@ -58,9 +58,8 @@ void EaterCircle::process_eating(const b2WorldId &worldId, float poison_death_pr
                     }
                 }
 
-                float new_area = 3.14159f * this->getRadius() * this->getRadius() + touching_area;
-                float new_radius = sqrt(new_area / 3.14159f);
-                this->setRadius(new_radius, worldId);
+                float new_area = this->getArea() + touching_area;
+                this->setArea(new_area, worldId);
             }
         }
     }
@@ -103,13 +102,12 @@ void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game) {
 }
 
 void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
-    float current_area = 3.14159f * this->getRadius() * this->getRadius();
+    float current_area = this->getArea();
     float boost_cost = std::max(game.get_boost_area(), 0.0f);
     float new_area = current_area - boost_cost;
 
     if (new_area > minimum_area) {
-        float new_radius = sqrt(new_area / 3.14159f);
-        this->setRadius(new_radius, worldId);
+        this->setArea(new_area, worldId);
         this->apply_forward_impulse();
 
         float boost_radius = sqrt(boost_cost / 3.14159f);
@@ -140,7 +138,7 @@ void EaterCircle::initialize_brain() {
 }
 
 void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
-    const float current_area = 3.14159f * this->getRadius() * this->getRadius();
+    const float current_area = this->getArea();
     const float divided_area = current_area / 2.0f;
 
     if (divided_area <= minimum_area) {

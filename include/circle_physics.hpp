@@ -22,6 +22,8 @@ public:
     b2Vec2 getPosition() const;
 
     float getRadius() const;
+    float getArea() const;
+    void setArea(float area, const b2WorldId& worldId);
 
     void apply_forward_force() const;
     void stop_applying_force() const;

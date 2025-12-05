@@ -348,7 +348,7 @@ void Game::cull_consumed() {
 
 void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out) {
     float eater_radius = eater.getRadius();
-    float total_area = PI * eater_radius * eater_radius;
+    float total_area = eater.getArea();
     if (minimum_area <= 0.0f || total_area <= 0.0f) {
         return;
     }
@@ -362,7 +362,7 @@ void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique
         float max_offset = std::max(0.0f, eater_radius - piece_radius);
 
         float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2.0f * 3.14159f;
-        float dist = max_offset * std::sqrt(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX));
+        float dist = max_offset * std::sqrt(random_unit());
         b2Vec2 pos = eater.getPosition();
         float x = pos.x + std::cos(angle) * dist;
         float y = pos.y + std::sin(angle) * dist;
