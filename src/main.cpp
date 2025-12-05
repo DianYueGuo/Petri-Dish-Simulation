@@ -58,6 +58,10 @@ int main() {
         ImGui::SliderFloat("Time Scale", &time_scale, 0.1f, 3.0f);
         game.set_time_scale(time_scale);
 
+        static float brain_rate_multiplier = 1.0f;
+        ImGui::SliderFloat("Brain Rate Multiplier", &brain_rate_multiplier, 0.1f, 5.0f);
+        game.set_brain_rate_multiplier(brain_rate_multiplier);
+
         ImGui::End();
 
         window.clear();
