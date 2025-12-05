@@ -68,6 +68,8 @@ public:
     float get_sprinkle_rate_eater() const { return sprinkle_rate_eater; }
     float get_sprinkle_rate_eatable() const { return sprinkle_rate_eatable; }
     float get_sprinkle_rate_toxic() const { return sprinkle_rate_toxic; }
+    void set_eater_cloud_area_percentage(float percentage) { eater_cloud_area_percentage = percentage; }
+    float get_eater_cloud_area_percentage() const { return eater_cloud_area_percentage; }
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
     void remove_random_percentage(float percentage);
@@ -114,6 +116,7 @@ private:
     float average_eater_area = 1.8f;
     float sprinkle_rate_eatable = 0.0f;
     float sprinkle_rate_toxic = 0.0f;
+    float eater_cloud_area_percentage = 70.0f;
     bool auto_remove_outside = true;
     bool dragging = false;
     bool right_dragging = false;

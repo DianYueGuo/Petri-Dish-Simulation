@@ -379,7 +379,7 @@ void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique
     }
 
     float chunk_area = std::min(minimum_area, total_area);
-    float remaining_area = total_area;
+    float remaining_area = total_area * (std::clamp(eater_cloud_area_percentage, 0.0f, 100.0f) / 100.0f);
 
     while (remaining_area > 0.0f) {
         float use_area = std::min(chunk_area, remaining_area);

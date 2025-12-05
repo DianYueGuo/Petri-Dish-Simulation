@@ -18,6 +18,7 @@ struct UiState {
     float boost_area = 0.0f;
     float poison_death_probability = 0.0f;
     float poison_death_probability_normal = 0.0f;
+    float eater_cloud_area_percentage = 0.0f;
     float circle_density = 0.0f;
     float linear_impulse = 0.0f;
     float angular_impulse = 0.0f;
@@ -83,6 +84,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.boost_area = game.get_boost_area();
         state.poison_death_probability = game.get_poison_death_probability();
         state.poison_death_probability_normal = game.get_poison_death_probability_normal();
+        state.eater_cloud_area_percentage = game.get_eater_cloud_area_percentage();
         state.circle_density = game.get_circle_density();
         state.linear_impulse = game.get_linear_impulse_magnitude();
         state.angular_impulse = game.get_angular_impulse_magnitude();
@@ -155,6 +157,10 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.01f, 3.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Area an eater spends to dash forward, leaving a pellet behind.");
             game.set_boost_area(state.boost_area);
+
+            ImGui::SliderFloat("Poison cloud area %", &state.eater_cloud_area_percentage, 0.0f, 100.0f, "%.0f");
+            show_hover_text("Percent of an eater's area that returns as pellets when it dies to poison.");
+            game.set_eater_cloud_area_percentage(state.eater_cloud_area_percentage);
 
             ImGui::SliderFloat("Toxic death chance", &state.poison_death_probability, 0.0f, 1.0f, "%.2f");
             show_hover_text("Chance that eating a toxic pellet kills an eater.");
