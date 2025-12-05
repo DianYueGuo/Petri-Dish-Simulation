@@ -11,11 +11,12 @@ Game::Game() {
     worldDef.gravity = (b2Vec2){0.0f, 0.0f};
     worldId = b2CreateWorld(&worldDef);
 
+    b2Vec2 start = {0.0f, 0.0f};
     circles.push_back(
         std::make_unique<EaterCircle>(
                         worldId,
-                        10.0f,
-                        10.0f,
+                        start.x,
+                        start.y,
                         1.0f,
                         1.0f,
                         0.3f
@@ -59,6 +60,9 @@ void Game::process_game_logic() {
     process_touch_events(worldId);
 
     brain_time_accumulator += timeStep;
+    sprinkle_with_rate(sprinkle_rate_eater, AddType::Eater, timeStep);
+    sprinkle_with_rate(sprinkle_rate_eatable, AddType::Eatable, timeStep);
+    sprinkle_with_rate(sprinkle_rate_toxic, AddType::ToxicEatable, timeStep);
 
     // Use index-based iteration so push_back inside eater logic doesn't invalidate references
     for (size_t i = 0; i < circles.size(); ++i) {
@@ -322,6 +326,75 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
 
 void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
     circles.push_back(std::move(circle));
+}
+
+void Game::sprinkle_with_rate(float rate, AddType type, float dt) {
+    if (rate <= 0.0f || dt <= 0.0f || petri_radius <= 0.0f) {
+        return;
+    }
+
+    float expected = rate * dt;
+    int guaranteed = static_cast<int>(expected);
+    float remainder = expected - static_cast<float>(guaranteed);
+
+    auto spawn_once = [&]() {
+        b2Vec2 pos = random_point_in_petri();
+        switch (type) {
+            case AddType::Eater:
+                circles.push_back(
+                    std::make_unique<EaterCircle>(
+                        worldId,
+                        pos.x,
+                        pos.y,
+                        1.0f * (0.5f + static_cast<float>(rand()) / RAND_MAX),
+                        1.0f,
+                        0.3f
+                    )
+                );
+                break;
+            case AddType::Eatable:
+                circles.push_back(
+                    std::make_unique<EatableCircle>(
+                        worldId,
+                        pos.x,
+                        pos.y,
+                        std::sqrt(add_eatable_area / 3.14159f),
+                        1.0f,
+                        0.3f,
+                        false
+                    )
+                );
+                break;
+            case AddType::ToxicEatable:
+                circles.push_back(
+                    std::make_unique<EatableCircle>(
+                        worldId,
+                        pos.x,
+                        pos.y,
+                        std::sqrt(add_eatable_area / 3.14159f),
+                        1.0f,
+                        0.3f,
+                        true
+                    )
+                );
+                break;
+        }
+    };
+
+    for (int i = 0; i < guaranteed; ++i) {
+        spawn_once();
+    }
+
+    float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    if (roll < remainder) {
+        spawn_once();
+    }
+}
+
+b2Vec2 Game::random_point_in_petri() const {
+    float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2.0f * 3.14159f;
+    float radius = petri_radius * std::sqrt(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX));
+    return b2Vec2{radius * std::cos(angle), radius * std::sin(angle)};
 }
 
 void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out) {

@@ -77,6 +77,20 @@ int main() {
         ImGui::SliderFloat("Boost Area", &boost_area, 0.01f, 3.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
         game.set_boost_area(boost_area);
 
+        static float petri_radius = 20.0f;
+        ImGui::SliderFloat("Petri Radius", &petri_radius, 1.0f, 200.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+        game.set_petri_radius(petri_radius);
+
+        static float sprinkle_rate_eater = 0.0f;
+        static float sprinkle_rate_eatable = 0.0f;
+        static float sprinkle_rate_toxic = 0.0f;
+        ImGui::SliderFloat("Sprinkle Rate Eater (per s)", &sprinkle_rate_eater, 0.0f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("Sprinkle Rate Eatable (per s)", &sprinkle_rate_eatable, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+        ImGui::SliderFloat("Sprinkle Rate Toxic (per s)", &sprinkle_rate_toxic, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+        game.set_sprinkle_rate_eater(sprinkle_rate_eater);
+        game.set_sprinkle_rate_eatable(sprinkle_rate_eatable);
+        game.set_sprinkle_rate_toxic(sprinkle_rate_toxic);
+
         static int cursor_mode = static_cast<int>(Game::CursorMode::Add);
         if (ImGui::RadioButton("Add", cursor_mode == static_cast<int>(Game::CursorMode::Add))) {
             cursor_mode = static_cast<int>(Game::CursorMode::Add);

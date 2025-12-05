@@ -41,10 +41,17 @@ public:
     void set_poison_death_probability_normal(float p) { poison_death_probability_normal = p; }
     void set_boost_area(float area) { boost_area = area; }
     float get_boost_area() const { return boost_area; }
+    void set_petri_radius(float r) { petri_radius = r; }
+    float get_petri_radius() const { return petri_radius; }
+    void set_sprinkle_rate_eater(float r) { sprinkle_rate_eater = r; }
+    void set_sprinkle_rate_eatable(float r) { sprinkle_rate_eatable = r; }
+    void set_sprinkle_rate_toxic(float r) { sprinkle_rate_toxic = r; }
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
 private:
     void spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out);
+    b2Vec2 random_point_in_petri() const;
+    void sprinkle_with_rate(float rate, AddType type, float dt);
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
@@ -63,6 +70,10 @@ private:
     float boost_area = 0.3f;
     float poison_death_probability = 1.0f;
     float poison_death_probability_normal = 0.0f;
+    float petri_radius = 20.0f;
+    float sprinkle_rate_eater = 0.0f;
+    float sprinkle_rate_eatable = 0.0f;
+    float sprinkle_rate_toxic = 0.0f;
     bool dragging = false;
     bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};
