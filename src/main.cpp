@@ -76,6 +76,8 @@ void handle_events(sf::RenderWindow& window, sf::View& view, Game& game) {
 
 void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
     ImGui::Begin("Simulation Controls");
+    ImGui::Text("Circles: %zu", game.get_circle_count());
+    ImGui::Separator();
 
     if (ImGui::CollapsingHeader("World", ImGuiTreeNodeFlags_DefaultOpen)) {
         static float pixel_per_meter = 15.0f;
