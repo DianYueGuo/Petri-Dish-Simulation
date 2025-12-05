@@ -44,6 +44,8 @@ public:
     void set_petri_radius(float r) { petri_radius = r; }
     float get_petri_radius() const { return petri_radius; }
     void set_sprinkle_rate_eater(float r) { sprinkle_rate_eater = r; }
+    void set_average_eater_area(float area) { average_eater_area = area; }
+    float get_average_eater_area() const { return average_eater_area; }
     void set_sprinkle_rate_eatable(float r) { sprinkle_rate_eatable = r; }
     void set_sprinkle_rate_toxic(float r) { sprinkle_rate_toxic = r; }
     CursorMode get_cursor_mode() const { return cursor_mode; }
@@ -84,6 +86,7 @@ private:
     float poison_death_probability_normal = 0.0f;
     float petri_radius = 20.0f;
     float sprinkle_rate_eater = 0.0f;
+    float average_eater_area = 1.8f;
     float sprinkle_rate_eatable = 0.0f;
     float sprinkle_rate_toxic = 0.0f;
     bool dragging = false;

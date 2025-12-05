@@ -292,7 +292,9 @@ b2Vec2 Game::random_point_in_petri() const {
 }
 
 std::unique_ptr<EaterCircle> Game::create_eater_at(const b2Vec2& pos) const {
-    float radius = 1.0f * (0.5f + random_unit());
+    float base_area = std::max(average_eater_area, 0.0001f);
+    float varied_area = base_area * (0.5f + random_unit()); // random scale around the average
+    float radius = radius_from_area(varied_area);
     return std::make_unique<EaterCircle>(worldId, pos.x, pos.y, radius, 1.0f, 0.3f);
 }
 
