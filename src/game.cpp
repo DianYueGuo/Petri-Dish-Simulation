@@ -361,22 +361,12 @@ void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique
         float piece_radius = radius_from_area(use_area);
         float max_offset = std::max(0.0f, eater_radius - piece_radius);
 
-        float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2.0f * 3.14159f;
+        float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2.0f * PI;
         float dist = max_offset * std::sqrt(random_unit());
         b2Vec2 pos = eater.getPosition();
-        float x = pos.x + std::cos(angle) * dist;
-        float y = pos.y + std::sin(angle) * dist;
+        b2Vec2 piece_pos = {pos.x + std::cos(angle) * dist, pos.y + std::sin(angle) * dist};
 
-        auto piece = std::make_unique<EatableCircle>(
-            worldId,
-            x,
-            y,
-            piece_radius,
-            1.0f,
-            0.3f,
-            false
-        );
-        out.push_back(std::move(piece));
+        out.push_back(create_eatable_at(piece_pos, false));
 
         remaining_area -= use_area;
     }
