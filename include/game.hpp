@@ -104,7 +104,7 @@ private:
     float average_eater_area = 1.8f;
     float sprinkle_rate_eatable = 0.0f;
     float sprinkle_rate_toxic = 0.0f;
-    bool auto_remove_outside = false;
+    bool auto_remove_outside = true;
     bool dragging = false;
     bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};
