@@ -106,6 +106,35 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
 
         if (keyPressed->scancode == sf::Keyboard::Scancode::Right && probability > 0.8f)
             circles.at(0)->apply_right_turn_impulse();
+
+        sf::View view = window.getView();
+        constexpr float pan_pixels = 20.0f;
+        constexpr float zoom_step = 1.05f;
+
+        switch (keyPressed->scancode) {
+            case sf::Keyboard::Scancode::W:
+                view.move({0.0f, -pan_pixels});
+                break;
+            case sf::Keyboard::Scancode::S:
+                view.move({0.0f, pan_pixels});
+                break;
+            case sf::Keyboard::Scancode::A:
+                view.move({-pan_pixels, 0.0f});
+                break;
+            case sf::Keyboard::Scancode::D:
+                view.move({pan_pixels, 0.0f});
+                break;
+            case sf::Keyboard::Scancode::Q:
+                view.zoom(1.0f / zoom_step);
+                break;
+            case sf::Keyboard::Scancode::E:
+                view.zoom(zoom_step);
+                break;
+            default:
+                break;
+        }
+
+        window.setView(view);
     }
 }
 
