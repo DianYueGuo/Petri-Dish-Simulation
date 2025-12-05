@@ -8,8 +8,10 @@
 
 EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
     EatableCircle(worldId, position_x, position_y, radius, density, friction),
-    brain(0, 4) {
+    brain(0, 7) {
     initialize_brain();
+    brain.update();
+    update_color_from_brain();
 }
 
 float calculate_overlap_area(float r1, float r2, float distance) {
@@ -68,6 +70,7 @@ void EaterCircle::move_randomly(const b2WorldId &worldId, Game &game) {
 
 void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game) {
     brain.update();
+    update_color_from_brain();
 
     if (brain.read_output(0) >= 1.0f) {
         this->boost_forward(worldId, game);
@@ -149,6 +152,7 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
         new_circle_ptr->brain = parent_brain_copy;
         new_circle_ptr->setAngle(angle + 3.14159f, worldId);
         new_circle_ptr->apply_forward_impulse();
+        new_circle_ptr->update_color_from_brain();
     }
 
     this->apply_forward_impulse();
@@ -161,5 +165,13 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
         }
     }
 
+    update_color_from_brain();
     game.add_circle(std::move(new_circle));
+}
+
+void EaterCircle::update_color_from_brain() {
+    float r = std::clamp(brain.read_output_input_register(4), 0.0f, 1.0f);
+    float g = std::clamp(brain.read_output_input_register(5), 0.0f, 1.0f);
+    float b = std::clamp(brain.read_output_input_register(6), 0.0f, 1.0f);
+    set_color_rgb(r, g, b);
 }

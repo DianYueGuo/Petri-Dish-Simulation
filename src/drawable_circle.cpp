@@ -32,3 +32,9 @@ void DrawableCircle::draw(sf::RenderWindow& window, float pixle_per_meter) const
 
     window.draw(line);
 }
+
+void DrawableCircle::set_color_rgb(float r, float g, float b) {
+    color_rgb[0] = std::clamp(r, 0.0f, 1.0f);
+    color_rgb[1] = std::clamp(g, 0.0f, 1.0f);
+    color_rgb[2] = std::clamp(b, 0.0f, 1.0f);
+}

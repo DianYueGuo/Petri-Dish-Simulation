@@ -23,6 +23,7 @@ public:
 
 private:
     void initialize_brain();
+    void update_color_from_brain();
 
     EaterBrain brain;
 };

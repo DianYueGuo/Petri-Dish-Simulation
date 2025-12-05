@@ -12,6 +12,7 @@ public:
     DrawableCircle(const b2WorldId &worldId, float position_x = 0.0f, float position_y = 0.0f, float radius = 1.0f, float density = 1.0f, float friction = 0.0f);
 
     void draw(sf::RenderWindow& window, float pixle_per_meter) const;
+    void set_color_rgb(float r, float g, float b);
 protected:
     std::array<float, 3> color_rgb{};
 };
