@@ -7,9 +7,9 @@
 #include <SFML/Graphics.hpp>
 #include <box2d/box2d.h>
 
-#include "eater_circle.hpp"
-
 #include "eatable_circle.hpp"
+
+class EaterCircle;
 
 
 class Game {
@@ -41,6 +41,8 @@ public:
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
 private:
+    void spawn_eatable_cloud(const EaterCircle& eater);
+
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
     float pixles_per_meter = 100.0f;

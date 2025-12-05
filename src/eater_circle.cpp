@@ -1,4 +1,5 @@
 #include "eater_circle.hpp"
+#include "game.hpp"
 
 #include <algorithm>
 #include <cmath>

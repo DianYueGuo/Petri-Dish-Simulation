@@ -1,6 +1,9 @@
 #include <iostream>
+#include <cmath>
+#include <cstdlib>
 
 #include "game.hpp"
+#include "eater_circle.hpp"
 
 Game::Game() {
     b2WorldDef worldDef = b2DefaultWorldDef();
@@ -75,7 +78,17 @@ void Game::process_game_logic() {
     }
 
     for (auto it = circles.begin(); it != circles.end(); ) {
-        if ((*it)->is_eaten()) {
+        bool remove = (*it)->is_eaten();
+        if (!remove) {
+            if (auto* eater = dynamic_cast<EaterCircle*>(it->get())) {
+                if (eater->is_poisoned()) {
+                    spawn_eatable_cloud(*eater);
+                    remove = true;
+                }
+            }
+        }
+
+        if (remove) {
             it = circles.erase(it);
         } else {
             ++it;
@@ -299,4 +312,39 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
 
 void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
     circles.push_back(std::move(circle));
+}
+
+void Game::spawn_eatable_cloud(const EaterCircle& eater) {
+    float eater_radius = eater.getRadius();
+    float total_area = 3.14159f * eater_radius * eater_radius;
+    if (minimum_area <= 0.0f) {
+        return;
+    }
+
+    size_t count = static_cast<size_t>(total_area / minimum_area);
+    if (count == 0) {
+        return;
+    }
+
+    float piece_radius = std::sqrt(minimum_area / 3.14159f);
+    float max_offset = std::max(0.0f, eater_radius - piece_radius);
+
+    for (size_t i = 0; i < count; ++i) {
+        float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2.0f * 3.14159f;
+        float dist = max_offset * std::sqrt(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX));
+        b2Vec2 pos = eater.getPosition();
+        float x = pos.x + std::cos(angle) * dist;
+        float y = pos.y + std::sin(angle) * dist;
+
+        auto piece = std::make_unique<EatableCircle>(
+            worldId,
+            x,
+            y,
+            piece_radius,
+            1.0f,
+            0.3f,
+            false
+        );
+        circles.push_back(std::move(piece));
+    }
 }

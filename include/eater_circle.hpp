@@ -4,8 +4,6 @@
 #include "eatable_circle.hpp"
 #include "eater_brain.hpp"
 
-#include "game.hpp"
-
 class Game;
 
 
