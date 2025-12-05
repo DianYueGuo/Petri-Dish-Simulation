@@ -1,7 +1,7 @@
 #include "circle_physics.hpp"
 
 
-CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction) :
+CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float friction, float angle) :
     bodyId{},
     density(density),
     friction(friction),
@@ -11,7 +11,7 @@ CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float p
     angularDamping(1.0f) {
     BodyState initialState{};
     initialState.position = (b2Vec2){position_x, position_y};
-    initialState.rotation = b2MakeRot(0.0f);
+    initialState.rotation = b2MakeRot(angle);
     initialState.linearVelocity = (b2Vec2){0.0f, 0.0f};
     initialState.angularVelocity = 0.0f;
     initialState.radius = radius;

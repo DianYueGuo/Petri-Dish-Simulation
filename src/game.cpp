@@ -295,12 +295,13 @@ std::unique_ptr<EaterCircle> Game::create_eater_at(const b2Vec2& pos) const {
     float base_area = std::max(average_eater_area, 0.0001f);
     float varied_area = base_area * (0.5f + random_unit()); // random scale around the average
     float radius = radius_from_area(varied_area);
-    return std::make_unique<EaterCircle>(worldId, pos.x, pos.y, radius, 1.0f, 0.3f);
+    float angle = random_unit() * 2.0f * PI;
+    return std::make_unique<EaterCircle>(worldId, pos.x, pos.y, radius, 1.0f, 0.3f, angle);
 }
 
 std::unique_ptr<EatableCircle> Game::create_eatable_at(const b2Vec2& pos, bool toxic) const {
     float radius = radius_from_area(add_eatable_area);
-    return std::make_unique<EatableCircle>(worldId, pos.x, pos.y, radius, 1.0f, 0.3f, toxic);
+    return std::make_unique<EatableCircle>(worldId, pos.x, pos.y, radius, 1.0f, 0.3f, toxic, 0.0f);
 }
 
 void Game::sprinkle_entities(float dt) {
