@@ -121,6 +121,7 @@ public:
     std::size_t get_circle_count() const { return circles.size(); }
     void clear_selection();
     const neat::Genome* get_selected_brain() const;
+    const EaterCircle* get_selected_eater() const;
     int get_selected_generation() const;
     bool select_circle_at_world(const b2Vec2& pos);
     CursorMode get_cursor_mode() const { return cursor_mode; }

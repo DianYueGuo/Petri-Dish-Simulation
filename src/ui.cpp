@@ -2,6 +2,7 @@
 #include <imgui-SFML.h>
 
 #include "ui.hpp"
+#include "eater_circle.hpp"
 
 namespace {
 struct UiState {
@@ -151,6 +152,10 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                 ImGui::Text("Selected eater: generation %d", selected_gen);
                 ImGui::Text("Nodes: %zu", selected_brain->nodes.size());
                 ImGui::Text("Connections: %zu", selected_brain->connections.size());
+                // Show area/radius if we still have the circle
+                if (const auto* eater = game.get_selected_eater()) {
+                    ImGui::Text("Area: %.3f  Radius: %.3f", eater->getArea(), eater->getRadius());
+                }
 
                 if (ImGui::BeginChild("BrainGraph", ImVec2(0, 220), true)) {
                     // Layout nodes by layer: inputs (layer 0), hidden (1..max), outputs (max+1).

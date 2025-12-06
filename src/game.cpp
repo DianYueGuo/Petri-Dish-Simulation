@@ -295,6 +295,13 @@ const neat::Genome* Game::get_selected_brain() const {
     return nullptr;
 }
 
+const EaterCircle* Game::get_selected_eater() const {
+    if (!selected_index || *selected_index >= circles.size()) {
+        return nullptr;
+    }
+    return dynamic_cast<EaterCircle*>(circles[*selected_index].get());
+}
+
 int Game::get_selected_generation() const {
     if (!selected_index || *selected_index >= circles.size()) {
         return -1;
