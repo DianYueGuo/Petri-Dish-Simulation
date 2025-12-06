@@ -14,6 +14,7 @@ EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float posit
     update_brain_inputs_from_touching();
     brain.update();
     update_color_from_brain();
+    smooth_display_color(1.0f); // start display at brain-driven color immediately
 }
 
 float calculate_overlap_area(float r1, float r2, float distance) {
@@ -148,8 +149,9 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
 
         auto boost_circle = std::make_unique<EatableCircle>(worldId, back_position.x, back_position.y, boost_radius, game.get_circle_density(), false, 0.0f);
         EatableCircle* boost_circle_ptr = boost_circle.get();
-        const auto color = get_color_rgb();
-        boost_circle_ptr->set_color_rgb(color[0], color[1], color[2]);
+        const auto eater_signal_color = get_color_rgb(); // use true signal, not smoothed display
+        boost_circle_ptr->set_color_rgb(eater_signal_color[0], eater_signal_color[1], eater_signal_color[2]);
+        boost_circle_ptr->smooth_display_color(1.0f);
         boost_circle_ptr->set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
         boost_circle_ptr->set_linear_damping(game.get_linear_damping(), worldId);
         boost_circle_ptr->set_angular_damping(game.get_angular_damping(), worldId);

@@ -8,6 +8,7 @@ EatableCircle::EatableCircle(const b2WorldId &worldId, float position_x, float p
     } else {
         set_color_rgb(0.0f, 1.0f, 0.0f);
     }
+    smooth_display_color(1.0f);
 }
 
 void EatableCircle::be_eaten() {
