@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <optional>
+#include <algorithm>
 
 #include <SFML/Graphics.hpp>
 #include <box2d/box2d.h>
@@ -49,6 +50,16 @@ public:
     void set_boost_area(float area) { boost_area = area; }
     void set_circle_density(float d);
     float get_circle_density() const { return circle_density; }
+    void set_add_node_probability(float p) { add_node_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_add_node_probability() const { return add_node_probability; }
+    void set_remove_node_probability(float p) { remove_node_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_remove_node_probability() const { return remove_node_probability; }
+    void set_add_connection_probability(float p) { add_connection_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_add_connection_probability() const { return add_connection_probability; }
+    void set_remove_connection_probability(float p) { remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_remove_connection_probability() const { return remove_connection_probability; }
+    void set_mutation_rounds(int rounds) { mutation_rounds = std::max(0, rounds); }
+    int get_mutation_rounds() const { return mutation_rounds; }
     void set_linear_impulse_magnitude(float m);
     float get_linear_impulse_magnitude() const { return linear_impulse_magnitude; }
     void set_angular_impulse_magnitude(float m);
@@ -117,6 +128,11 @@ private:
     float sprinkle_rate_eatable = 0.0f;
     float sprinkle_rate_toxic = 0.0f;
     float eater_cloud_area_percentage = 70.0f;
+    float add_node_probability = 0.5f;
+    float remove_node_probability = 0.5f;
+    float add_connection_probability = 0.5f;
+    float remove_connection_probability = 0.5f;
+    int mutation_rounds = 4;
     bool auto_remove_outside = true;
     bool dragging = false;
     bool right_dragging = false;

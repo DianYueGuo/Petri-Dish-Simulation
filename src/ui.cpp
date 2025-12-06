@@ -19,6 +19,11 @@ struct UiState {
     float poison_death_probability = 0.0f;
     float poison_death_probability_normal = 0.0f;
     float eater_cloud_area_percentage = 0.0f;
+    float add_node_probability = 0.0f;
+    float remove_node_probability = 0.0f;
+    float add_connection_probability = 0.0f;
+    float remove_connection_probability = 0.0f;
+    int mutation_rounds = 0;
     float circle_density = 0.0f;
     float linear_impulse = 0.0f;
     float angular_impulse = 0.0f;
@@ -85,6 +90,11 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.poison_death_probability = game.get_poison_death_probability();
         state.poison_death_probability_normal = game.get_poison_death_probability_normal();
         state.eater_cloud_area_percentage = game.get_eater_cloud_area_percentage();
+        state.add_node_probability = game.get_add_node_probability();
+        state.remove_node_probability = game.get_remove_node_probability();
+        state.add_connection_probability = game.get_add_connection_probability();
+        state.remove_connection_probability = game.get_remove_connection_probability();
+        state.mutation_rounds = game.get_mutation_rounds();
         state.circle_density = game.get_circle_density();
         state.linear_impulse = game.get_linear_impulse_magnitude();
         state.angular_impulse = game.get_angular_impulse_magnitude();
@@ -161,6 +171,23 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             ImGui::SliderFloat("Poison cloud area %", &state.eater_cloud_area_percentage, 0.0f, 100.0f, "%.0f");
             show_hover_text("Percent of an eater's area that returns as pellets when it dies to poison.");
             game.set_eater_cloud_area_percentage(state.eater_cloud_area_percentage);
+
+            ImGui::SeparatorText("Division mutation probabilities");
+            ImGui::SliderFloat("Add node %", &state.add_node_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance each division step adds a node to the eater brain.");
+            ImGui::SliderFloat("Remove node %", &state.remove_node_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance each division step removes a hidden node from the eater brain.");
+            ImGui::SliderFloat("Add connection %", &state.add_connection_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance each division step adds a connection between brain nodes.");
+            ImGui::SliderFloat("Remove connection %", &state.remove_connection_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance each division step removes an existing brain connection.");
+            game.set_add_node_probability(state.add_node_probability);
+            game.set_remove_node_probability(state.remove_node_probability);
+            game.set_add_connection_probability(state.add_connection_probability);
+            game.set_remove_connection_probability(state.remove_connection_probability);
+            ImGui::SliderInt("Mutation rounds", &state.mutation_rounds, 0, 20);
+            show_hover_text("How many times to roll the mutation probabilities when an eater divides.");
+            game.set_mutation_rounds(state.mutation_rounds);
 
             ImGui::SliderFloat("Toxic death chance", &state.poison_death_probability, 0.0f, 1.0f, "%.2f");
             show_hover_text("Chance that eating a toxic pellet kills an eater.");

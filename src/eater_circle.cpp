@@ -181,11 +181,19 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
 
     this->apply_forward_impulse();
 
-    constexpr int mutation_rounds = 3;
+    const int mutation_rounds = std::max(0, game.get_mutation_rounds());
     for (int i = 0; i < mutation_rounds; ++i) {
-        brain.mutate(0.6f, 0.2f, 0.5f, 0.5f);
+        brain.mutate(
+            game.get_add_node_probability(),
+            game.get_remove_node_probability(),
+            game.get_add_connection_probability(),
+            game.get_remove_connection_probability());
         if (new_circle_ptr) {
-            new_circle_ptr->brain.mutate(0.6f, 0.2f, 0.5f, 0.5f);
+            new_circle_ptr->brain.mutate(
+                game.get_add_node_probability(),
+                game.get_remove_node_probability(),
+                game.get_add_connection_probability(),
+                game.get_remove_connection_probability());
         }
     }
 
