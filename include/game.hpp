@@ -66,6 +66,16 @@ public:
     float get_tick_add_connection_probability() const { return tick_add_connection_probability; }
     void set_tick_remove_connection_probability(float p) { tick_remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_tick_remove_connection_probability() const { return tick_remove_connection_probability; }
+    void set_init_add_node_probability(float p) { init_add_node_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_init_add_node_probability() const { return init_add_node_probability; }
+    void set_init_remove_node_probability(float p) { init_remove_node_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_init_remove_node_probability() const { return init_remove_node_probability; }
+    void set_init_add_connection_probability(float p) { init_add_connection_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_init_add_connection_probability() const { return init_add_connection_probability; }
+    void set_init_remove_connection_probability(float p) { init_remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_init_remove_connection_probability() const { return init_remove_connection_probability; }
+    void set_init_mutation_rounds(int rounds) { init_mutation_rounds = std::max(0, rounds); }
+    int get_init_mutation_rounds() const { return init_mutation_rounds; }
     void set_mutation_rounds(int rounds) { mutation_rounds = std::max(0, rounds); }
     int get_mutation_rounds() const { return mutation_rounds; }
     int get_max_generation() const { return max_generation; }
@@ -151,6 +161,11 @@ private:
     float tick_remove_node_probability = 0.0f;
     float tick_add_connection_probability = 0.0f;
     float tick_remove_connection_probability = 0.0f;
+    float init_add_node_probability = 0.8f;
+    float init_remove_node_probability = 0.0f;
+    float init_add_connection_probability = 1.0f;
+    float init_remove_connection_probability = 0.0f;
+    int init_mutation_rounds = 300;
     int mutation_rounds = 30;
     int max_generation = 0;
     bool show_true_color = false;

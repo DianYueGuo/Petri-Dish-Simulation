@@ -27,6 +27,11 @@ struct UiState {
     float tick_remove_node_probability = 0.0f;
     float tick_add_connection_probability = 0.0f;
     float tick_remove_connection_probability = 0.0f;
+    float init_add_node_probability = 0.0f;
+    float init_remove_node_probability = 0.0f;
+    float init_add_connection_probability = 0.0f;
+    float init_remove_connection_probability = 0.0f;
+    int init_mutation_rounds = 0;
     int mutation_rounds = 0;
     bool show_true_color = false;
     float inactivity_timeout = 0.0f;
@@ -104,6 +109,11 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.tick_remove_node_probability = game.get_tick_remove_node_probability();
         state.tick_add_connection_probability = game.get_tick_add_connection_probability();
         state.tick_remove_connection_probability = game.get_tick_remove_connection_probability();
+        state.init_add_node_probability = game.get_init_add_node_probability();
+        state.init_remove_node_probability = game.get_init_remove_node_probability();
+        state.init_add_connection_probability = game.get_init_add_connection_probability();
+        state.init_remove_connection_probability = game.get_init_remove_connection_probability();
+        state.init_mutation_rounds = game.get_init_mutation_rounds();
         state.mutation_rounds = game.get_mutation_rounds();
         state.show_true_color = game.get_show_true_color();
         state.inactivity_timeout = game.get_inactivity_timeout();
@@ -216,6 +226,23 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             game.set_tick_remove_node_probability(state.tick_remove_node_probability);
             game.set_tick_add_connection_probability(state.tick_add_connection_probability);
             game.set_tick_remove_connection_probability(state.tick_remove_connection_probability);
+
+            ImGui::SeparatorText("Initialization mutation");
+            ImGui::SliderFloat("Init add node %", &state.init_add_node_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance each initialization step adds a node to the eater brain.");
+            ImGui::SliderFloat("Init remove node %", &state.init_remove_node_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance each initialization step removes a node from the eater brain.");
+            ImGui::SliderFloat("Init add connection %", &state.init_add_connection_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance each initialization step adds a connection between brain nodes.");
+            ImGui::SliderFloat("Init remove connection %", &state.init_remove_connection_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance each initialization step removes a connection between brain nodes.");
+            ImGui::SliderInt("Init mutation rounds", &state.init_mutation_rounds, 0, 500);
+            show_hover_text("How many initialization iterations to perform when an eater is created.");
+            game.set_init_add_node_probability(state.init_add_node_probability);
+            game.set_init_remove_node_probability(state.init_remove_node_probability);
+            game.set_init_add_connection_probability(state.init_add_connection_probability);
+            game.set_init_remove_connection_probability(state.init_remove_connection_probability);
+            game.set_init_mutation_rounds(state.init_mutation_rounds);
 
             ImGui::Checkbox("Show true color (disable smoothing)", &state.show_true_color);
             show_hover_text("Toggle between smoothed display color and raw brain output color.");

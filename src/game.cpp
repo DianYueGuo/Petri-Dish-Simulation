@@ -322,7 +322,19 @@ std::unique_ptr<EaterCircle> Game::create_eater_at(const b2Vec2& pos) const {
     float varied_area = base_area * (0.5f + random_unit()); // random scale around the average
     float radius = radius_from_area(varied_area);
     float angle = random_unit() * 2.0f * PI;
-    auto circle = std::make_unique<EaterCircle>(worldId, pos.x, pos.y, radius, circle_density, angle);
+    auto circle = std::make_unique<EaterCircle>(
+        worldId,
+        pos.x,
+        pos.y,
+        radius,
+        circle_density,
+        angle,
+        0,
+        init_mutation_rounds,
+        init_add_node_probability,
+        init_remove_node_probability,
+        init_add_connection_probability,
+        init_remove_connection_probability);
     circle->set_impulse_magnitudes(linear_impulse_magnitude, angular_impulse_magnitude);
     circle->set_linear_damping(linear_damping, worldId);
     circle->set_angular_damping(angular_damping, worldId);

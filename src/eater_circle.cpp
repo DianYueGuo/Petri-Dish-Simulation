@@ -6,11 +6,27 @@
 
 #include <cstdlib>
 
-EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle, int generation) :
+EaterCircle::EaterCircle(const b2WorldId &worldId,
+                         float position_x,
+                         float position_y,
+                         float radius,
+                         float density,
+                         float angle,
+                         int generation,
+                         int init_mutation_rounds,
+                         float init_add_node_probability,
+                         float init_remove_node_probability,
+                         float init_add_connection_probability,
+                         float init_remove_connection_probability) :
     EatableCircle(worldId, position_x, position_y, radius, density, false, angle),
     brain(24, 7) {
     set_generation(generation);
-    initialize_brain();
+    initialize_brain(
+        init_mutation_rounds,
+        init_add_node_probability,
+        init_remove_node_probability,
+        init_add_connection_probability,
+        init_remove_connection_probability);
     update_brain_inputs_from_touching();
     brain.update();
     update_color_from_brain();
@@ -158,11 +174,11 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
     }
 }
 
-void EaterCircle::initialize_brain() {
+void EaterCircle::initialize_brain(int mutation_rounds, float add_node_p, float remove_node_p, float add_connection_p, float remove_connection_p) {
     // Mutate repeatedly to seed a non-trivial brain topology.
-    constexpr int mutation_rounds = 300;
-    for (int i = 0; i < mutation_rounds; ++i) {
-        brain.mutate(0.8f, 0.0f, 1.0f, 0.0f);
+    int rounds = std::max(0, mutation_rounds);
+    for (int i = 0; i < rounds; ++i) {
+        brain.mutate(add_node_p, remove_node_p, add_connection_p, remove_connection_p);
     }
 }
 
@@ -191,7 +207,21 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
 
     this->setPosition(parent_position, worldId);
 
-    auto new_circle = std::make_unique<EaterCircle>(worldId, child_position.x, child_position.y, new_radius, game.get_circle_density(), angle + 3.14159f);
+    const int next_generation = this->get_generation() + 1;
+
+    auto new_circle = std::make_unique<EaterCircle>(
+        worldId,
+        child_position.x,
+        child_position.y,
+        new_radius,
+        game.get_circle_density(),
+        angle + 3.14159f,
+        next_generation,
+        game.get_init_mutation_rounds(),
+        game.get_init_add_node_probability(),
+        game.get_init_remove_node_probability(),
+        game.get_init_add_connection_probability(),
+        game.get_init_remove_connection_probability());
     EaterCircle* new_circle_ptr = new_circle.get();
     if (new_circle_ptr) {
         new_circle_ptr->brain = parent_brain_copy;
@@ -203,7 +233,6 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
         new_circle_ptr->update_color_from_brain();
     }
 
-    const int next_generation = this->get_generation() + 1;
     this->set_generation(next_generation);
     if (new_circle_ptr) {
         new_circle_ptr->set_generation(next_generation);

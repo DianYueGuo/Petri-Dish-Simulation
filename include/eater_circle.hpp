@@ -12,7 +12,18 @@ class Game;
 
 class EaterCircle : public EatableCircle {
 public:
-    EaterCircle(const b2WorldId &worldId, float position_x = 0.0f, float position_y = 0.0f, float radius = 1.0f, float density = 1.0f, float angle = 0.0f, int generation = 0);
+    EaterCircle(const b2WorldId &worldId,
+                float position_x = 0.0f,
+                float position_y = 0.0f,
+                float radius = 1.0f,
+                float density = 1.0f,
+                float angle = 0.0f,
+                int generation = 0,
+                int init_mutation_rounds = 100,
+                float init_add_node_probability = 0.8f,
+                float init_remove_node_probability = 0.0f,
+                float init_add_connection_probability = 1.0f,
+                float init_remove_connection_probability = 0.0f);
 
     void set_minimum_area(float area) { minimum_area = area; }
     float get_minimum_area() const { return minimum_area; }
@@ -33,7 +44,7 @@ protected:
     bool should_draw_direction_indicator() const override { return true; }
 
 private:
-    void initialize_brain();
+    void initialize_brain(int mutation_rounds, float add_node_p, float remove_node_p, float add_connection_p, float remove_connection_p);
     void update_brain_inputs_from_touching();
     void update_color_from_brain();
 
