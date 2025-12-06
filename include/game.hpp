@@ -129,13 +129,13 @@ private:
     std::optional<sf::Vector2f> last_add_world_pos;
     std::optional<sf::Vector2f> last_drag_world_pos;
     float add_drag_distance = 0.0f;
-    float add_eatable_area = 1.0f;
+    float add_eatable_area = 0.3f;
     float boost_area = 0.3f;
     float poison_death_probability = 1.0f;
     float poison_death_probability_normal = 0.01f;
     float petri_radius = 100.0f;
     float sprinkle_rate_eater = 5.0f;
-    float average_eater_area = 1.8f;
+    float average_eater_area = 5.0f;
     float sprinkle_rate_eatable = 0.3f;
     float sprinkle_rate_toxic = 0.3f;
     float eater_cloud_area_percentage = 70.0f;
@@ -143,21 +143,21 @@ private:
     float remove_node_probability = 0.9f;
     float add_connection_probability = 0.9f;
     float remove_connection_probability = 0.9f;
-    float tick_add_node_probability = 0.03f;
-    float tick_remove_node_probability = 0.03f;
-    float tick_add_connection_probability = 0.03f;
-    float tick_remove_connection_probability = 0.03f;
-    int mutation_rounds = 7;
+    float tick_add_node_probability = 0.0f;
+    float tick_remove_node_probability = 0.0f;
+    float tick_add_connection_probability = 0.0f;
+    float tick_remove_connection_probability = 0.0f;
+    int mutation_rounds = 30;
     int max_generation = 0;
     bool auto_remove_outside = true;
     bool dragging = false;
     bool right_dragging = false;
     sf::Vector2i last_drag_pixels{};
     float circle_density = 1.0f;
-    float linear_impulse_magnitude = 5.0f;
-    float angular_impulse_magnitude = 5.0f;
-    float linear_damping = 0.3f;
-    float angular_damping = 1.0f;
+    float linear_impulse_magnitude = 1.0f;
+    float angular_impulse_magnitude = 1.0f;
+    float linear_damping = 0.5f;
+    float angular_damping = 0.5f;
 };
 
 #endif

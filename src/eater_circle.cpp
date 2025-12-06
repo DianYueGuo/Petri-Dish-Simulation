@@ -143,7 +143,7 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
 
 void EaterCircle::initialize_brain() {
     // Mutate repeatedly to seed a non-trivial brain topology.
-    constexpr int mutation_rounds = 60;
+    constexpr int mutation_rounds = 100;
     for (int i = 0; i < mutation_rounds; ++i) {
         brain.mutate(0.8f, 0.0f, 1.0f, 0.0f);
     }

@@ -137,7 +137,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             show_hover_text("Rendering scale only; higher values zoom in without altering physics.");
             game.set_pixles_per_meter(state.pixel_per_meter);
 
-            ImGui::SliderFloat("Dish radius (m)", &state.petri_radius, 1.0f, 200.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("Dish radius (m)", &state.petri_radius, 1.0f, 100.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Size of the petri dish in world meters.");
             game.set_petri_radius(state.petri_radius);
 
@@ -158,11 +158,11 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         }
 
         if (ImGui::BeginTabItem("Simulation")) {
-            ImGui::SliderFloat("Simulation speed", &state.time_scale, 0.01f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("Simulation speed", &state.time_scale, 0.01f, 8.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Multiplies the physics time step; lower values slow everything down.");
             game.set_time_scale(state.time_scale);
 
-            ImGui::SliderFloat("AI updates per sim second", &state.brain_updates_per_sim_second, 0.1f, 240.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("AI updates per sim second", &state.brain_updates_per_sim_second, 0.1f, 60.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("How many times eater AI brains tick per simulated second.");
             game.set_brain_updates_per_sim_second(state.brain_updates_per_sim_second);
 
@@ -195,7 +195,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             game.set_remove_node_probability(state.remove_node_probability);
             game.set_add_connection_probability(state.add_connection_probability);
             game.set_remove_connection_probability(state.remove_connection_probability);
-            ImGui::SliderInt("Mutation rounds", &state.mutation_rounds, 0, 20);
+            ImGui::SliderInt("Mutation rounds", &state.mutation_rounds, 0, 200);
             show_hover_text("How many times to roll the mutation probabilities when an eater divides.");
             game.set_mutation_rounds(state.mutation_rounds);
 
@@ -243,7 +243,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         }
 
         if (ImGui::BeginTabItem("Spawning")) {
-            ImGui::SliderFloat("Eater spawn rate (per s)", &state.sprinkle_rate_eater, 0.0f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("Eater spawn rate (per s)", &state.sprinkle_rate_eater, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("How many eater circles are added each second.");
             ImGui::SliderFloat("Food spawn rate (per s)", &state.sprinkle_rate_eatable, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Automatic feed rate for non-toxic food pellets.");
