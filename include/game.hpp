@@ -75,9 +75,9 @@ public:
     float get_init_add_connection_probability() const { return init_add_connection_probability; }
     void set_init_remove_connection_probability(float p) { init_remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_init_remove_connection_probability() const { return init_remove_connection_probability; }
-    void set_init_mutation_rounds(int rounds) { init_mutation_rounds = std::max(0, rounds); }
+    void set_init_mutation_rounds(int rounds) { init_mutation_rounds = std::clamp(rounds, 0, 100); }
     int get_init_mutation_rounds() const { return init_mutation_rounds; }
-    void set_mutation_rounds(int rounds) { mutation_rounds = std::max(0, rounds); }
+    void set_mutation_rounds(int rounds) { mutation_rounds = std::clamp(rounds, 0, 50); }
     int get_mutation_rounds() const { return mutation_rounds; }
     int get_max_generation() const { return max_generation; }
     const neat::Genome* get_max_generation_brain() const { return max_generation_brain ? &(*max_generation_brain) : nullptr; }
@@ -157,20 +157,20 @@ private:
     float sprinkle_rate_eatable = 0.3f;
     float sprinkle_rate_toxic = 0.3f;
     float eater_cloud_area_percentage = 70.0f;
-    float add_node_probability = 0.9f;
-    float remove_node_probability = 0.9f;
-    float add_connection_probability = 0.9f;
-    float remove_connection_probability = 0.9f;
+    float add_node_probability = 0.1f;
+    float remove_node_probability = 0.05f;
+    float add_connection_probability = 0.1f;
+    float remove_connection_probability = 0.05f;
     float tick_add_node_probability = 0.0f;
     float tick_remove_node_probability = 0.0f;
     float tick_add_connection_probability = 0.0f;
     float tick_remove_connection_probability = 0.0f;
-    float init_add_node_probability = 0.8f;
-    float init_remove_node_probability = 0.0f;
-    float init_add_connection_probability = 1.0f;
-    float init_remove_connection_probability = 0.0f;
-    int init_mutation_rounds = 300;
-    int mutation_rounds = 30;
+    float init_add_node_probability = 0.1f;
+    float init_remove_node_probability = 0.02f;
+    float init_add_connection_probability = 0.15f;
+    float init_remove_connection_probability = 0.02f;
+    int init_mutation_rounds = 10;
+    int mutation_rounds = 4;
     int max_generation = 0;
     std::optional<neat::Genome> max_generation_brain;
     std::vector<std::vector<int>> neat_innovations;

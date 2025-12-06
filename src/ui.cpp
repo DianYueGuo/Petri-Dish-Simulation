@@ -209,7 +209,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             game.set_remove_node_probability(state.remove_node_probability);
             game.set_add_connection_probability(state.add_connection_probability);
             game.set_remove_connection_probability(state.remove_connection_probability);
-            ImGui::SliderInt("Mutation rounds", &state.mutation_rounds, 0, 200);
+            ImGui::SliderInt("Mutation rounds", &state.mutation_rounds, 0, 50);
             show_hover_text("How many times to roll the mutation probabilities when an eater divides.");
             game.set_mutation_rounds(state.mutation_rounds);
 
@@ -236,7 +236,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             show_hover_text("Chance each initialization step adds a connection between brain nodes.");
             ImGui::SliderFloat("Init remove connection %", &state.init_remove_connection_probability, 0.0f, 1.0f, "%.2f");
             show_hover_text("Chance each initialization step removes a connection between brain nodes.");
-            ImGui::SliderInt("Init mutation rounds", &state.init_mutation_rounds, 0, 500);
+            ImGui::SliderInt("Init mutation rounds", &state.init_mutation_rounds, 0, 100);
             show_hover_text("How many initialization iterations to perform when an eater is created.");
             game.set_init_add_node_probability(state.init_add_node_probability);
             game.set_init_remove_node_probability(state.init_remove_node_probability);
