@@ -47,11 +47,11 @@ FetchContent_MakeAvailable(box2d)
 set(MULTINEAT_ENABLE_PYTHON OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
-    MultiNEAT
-    GIT_REPOSITORY https://github.com/DianYueGuo/MultiNEAT.git
-    GIT_TAG cmake-version-issue
+    NEAT
+    GIT_REPOSITORY https://github.com/DianYueGuo/NEAT.git
+    GIT_TAG fix-cmake-version
 )
-FetchContent_MakeAvailable(MultiNEAT)
+FetchContent_MakeAvailable(NEAT)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
