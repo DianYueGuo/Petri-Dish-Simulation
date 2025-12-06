@@ -102,6 +102,12 @@ void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game) {
     if (brain.read_output(3) >= 1.0f) {
         this->divide(worldId, game);
     }
+
+    brain.mutate(
+        game.get_tick_add_node_probability(),
+        game.get_tick_remove_node_probability(),
+        game.get_tick_add_connection_probability(),
+        game.get_tick_remove_connection_probability());
 }
 
 void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {

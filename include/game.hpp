@@ -58,6 +58,14 @@ public:
     float get_add_connection_probability() const { return add_connection_probability; }
     void set_remove_connection_probability(float p) { remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_remove_connection_probability() const { return remove_connection_probability; }
+    void set_tick_add_node_probability(float p) { tick_add_node_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_tick_add_node_probability() const { return tick_add_node_probability; }
+    void set_tick_remove_node_probability(float p) { tick_remove_node_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_tick_remove_node_probability() const { return tick_remove_node_probability; }
+    void set_tick_add_connection_probability(float p) { tick_add_connection_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_tick_add_connection_probability() const { return tick_add_connection_probability; }
+    void set_tick_remove_connection_probability(float p) { tick_remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_tick_remove_connection_probability() const { return tick_remove_connection_probability; }
     void set_mutation_rounds(int rounds) { mutation_rounds = std::max(0, rounds); }
     int get_mutation_rounds() const { return mutation_rounds; }
     int get_max_generation() const { return max_generation; }
@@ -135,6 +143,10 @@ private:
     float remove_node_probability = 0.5f;
     float add_connection_probability = 0.5f;
     float remove_connection_probability = 0.5f;
+    float tick_add_node_probability = 0.01f;
+    float tick_remove_node_probability = 0.01f;
+    float tick_add_connection_probability = 0.01f;
+    float tick_remove_connection_probability = 0.01f;
     int mutation_rounds = 4;
     int max_generation = 0;
     bool auto_remove_outside = true;

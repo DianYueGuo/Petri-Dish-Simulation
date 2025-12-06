@@ -23,6 +23,10 @@ struct UiState {
     float remove_node_probability = 0.0f;
     float add_connection_probability = 0.0f;
     float remove_connection_probability = 0.0f;
+    float tick_add_node_probability = 0.0f;
+    float tick_remove_node_probability = 0.0f;
+    float tick_add_connection_probability = 0.0f;
+    float tick_remove_connection_probability = 0.0f;
     int mutation_rounds = 0;
     float circle_density = 0.0f;
     float linear_impulse = 0.0f;
@@ -94,6 +98,10 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.remove_node_probability = game.get_remove_node_probability();
         state.add_connection_probability = game.get_add_connection_probability();
         state.remove_connection_probability = game.get_remove_connection_probability();
+        state.tick_add_node_probability = game.get_tick_add_node_probability();
+        state.tick_remove_node_probability = game.get_tick_remove_node_probability();
+        state.tick_add_connection_probability = game.get_tick_add_connection_probability();
+        state.tick_remove_connection_probability = game.get_tick_remove_connection_probability();
         state.mutation_rounds = game.get_mutation_rounds();
         state.circle_density = game.get_circle_density();
         state.linear_impulse = game.get_linear_impulse_magnitude();
@@ -190,6 +198,20 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             ImGui::SliderInt("Mutation rounds", &state.mutation_rounds, 0, 20);
             show_hover_text("How many times to roll the mutation probabilities when an eater divides.");
             game.set_mutation_rounds(state.mutation_rounds);
+
+            ImGui::SeparatorText("Live mutation probabilities");
+            ImGui::SliderFloat("Live add node %", &state.tick_add_node_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance an eater adds a brain node each behavior tick.");
+            ImGui::SliderFloat("Live remove node %", &state.tick_remove_node_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance an eater removes a brain node each behavior tick.");
+            ImGui::SliderFloat("Live add connection %", &state.tick_add_connection_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance an eater adds a brain connection each behavior tick.");
+            ImGui::SliderFloat("Live remove connection %", &state.tick_remove_connection_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Chance an eater removes a brain connection each behavior tick.");
+            game.set_tick_add_node_probability(state.tick_add_node_probability);
+            game.set_tick_remove_node_probability(state.tick_remove_node_probability);
+            game.set_tick_add_connection_probability(state.tick_add_connection_probability);
+            game.set_tick_remove_connection_probability(state.tick_remove_connection_probability);
 
             ImGui::SliderFloat("Toxic death chance", &state.poison_death_probability, 0.0f, 1.0f, "%.2f");
             show_hover_text("Chance that eating a toxic pellet kills an eater.");
