@@ -417,7 +417,7 @@ void EaterCircle::update_brain_inputs_from_touching() {
 
     // Size input at the end: normalized area to [0,1]
     float area = this->getArea();
-    float normalized = area / (area + 1.0f); // saturating transform
+    float normalized = area / (area + 25.0f); // gentler saturation for larger sizes
     brain_inputs[24] = normalized;
 
     // Memory inputs (indices 25-28)
