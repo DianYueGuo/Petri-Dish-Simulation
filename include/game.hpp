@@ -92,6 +92,8 @@ public:
     float get_eater_cloud_area_percentage() const { return eater_cloud_area_percentage; }
     void update_max_generation_from_circle(const EatableCircle* circle);
     void recompute_max_generation();
+    void set_show_true_color(bool value) { show_true_color = value; }
+    bool get_show_true_color() const { return show_true_color; }
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
     void remove_random_percentage(float percentage);
@@ -149,6 +151,7 @@ private:
     float tick_remove_connection_probability = 0.0f;
     int mutation_rounds = 30;
     int max_generation = 0;
+    bool show_true_color = false;
     bool auto_remove_outside = true;
     bool dragging = false;
     bool right_dragging = false;

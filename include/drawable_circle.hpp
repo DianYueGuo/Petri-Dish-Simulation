@@ -16,10 +16,12 @@ public:
     std::array<float, 3> get_color_rgb() const { return color_rgb; }
     std::array<float, 3> get_display_color_rgb() const { return display_color_rgb; }
     void smooth_display_color(float factor);
+    void set_use_smoothed_display(bool enabled) { use_smoothed_display = enabled; }
 protected:
     std::array<float, 3> color_rgb{};
     std::array<float, 3> display_color_rgb{};
     bool display_color_initialized = false;
+    bool use_smoothed_display = true;
 
     virtual bool should_draw_direction_indicator() const { return false; }
 };

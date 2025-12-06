@@ -15,9 +15,9 @@ DrawableCircle::DrawableCircle(const b2WorldId &worldId, float position_x, float
 void DrawableCircle::draw(sf::RenderWindow& window, float pixle_per_meter) const {
     sf::CircleShape shape(getRadius() * pixle_per_meter);
     sf::Color fill{
-        static_cast<std::uint8_t>(display_color_rgb[0] * 255.0f),
-        static_cast<std::uint8_t>(display_color_rgb[1] * 255.0f),
-        static_cast<std::uint8_t>(display_color_rgb[2] * 255.0f)
+        static_cast<std::uint8_t>((use_smoothed_display ? display_color_rgb[0] : color_rgb[0]) * 255.0f),
+        static_cast<std::uint8_t>((use_smoothed_display ? display_color_rgb[1] : color_rgb[1]) * 255.0f),
+        static_cast<std::uint8_t>((use_smoothed_display ? display_color_rgb[2] : color_rgb[2]) * 255.0f)
     };
     shape.setFillColor(fill);
 

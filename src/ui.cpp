@@ -28,6 +28,7 @@ struct UiState {
     float tick_add_connection_probability = 0.0f;
     float tick_remove_connection_probability = 0.0f;
     int mutation_rounds = 0;
+    bool show_true_color = false;
     float circle_density = 0.0f;
     float linear_impulse = 0.0f;
     float angular_impulse = 0.0f;
@@ -103,6 +104,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.tick_add_connection_probability = game.get_tick_add_connection_probability();
         state.tick_remove_connection_probability = game.get_tick_remove_connection_probability();
         state.mutation_rounds = game.get_mutation_rounds();
+        state.show_true_color = game.get_show_true_color();
         state.circle_density = game.get_circle_density();
         state.linear_impulse = game.get_linear_impulse_magnitude();
         state.angular_impulse = game.get_angular_impulse_magnitude();
@@ -212,6 +214,10 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             game.set_tick_remove_node_probability(state.tick_remove_node_probability);
             game.set_tick_add_connection_probability(state.tick_add_connection_probability);
             game.set_tick_remove_connection_probability(state.tick_remove_connection_probability);
+
+            ImGui::Checkbox("Show true color (disable smoothing)", &state.show_true_color);
+            show_hover_text("Toggle between smoothed display color and raw brain output color.");
+            game.set_show_true_color(state.show_true_color);
 
             ImGui::SliderFloat("Toxic death chance", &state.poison_death_probability, 0.0f, 1.0f, "%.2f");
             show_hover_text("Chance that eating a toxic pellet kills an eater.");
