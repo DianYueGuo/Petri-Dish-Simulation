@@ -150,6 +150,8 @@ void Game::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseBu
             dragging = true;
             right_dragging = false;
             last_drag_pixels = e.position;
+        } else if (cursor_mode == CursorMode::Select) {
+            select_circle_at_world({worldPos.x, worldPos.y});
         }
     } else if (e.button == sf::Mouse::Button::Right) {
         dragging = true;
@@ -256,6 +258,47 @@ void Game::handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPresse
 void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
     update_max_generation_from_circle(circle.get());
     circles.push_back(std::move(circle));
+}
+
+void Game::clear_selection() {
+    selected_index.reset();
+}
+
+bool Game::select_circle_at_world(const b2Vec2& pos) {
+    std::optional<std::size_t> hit;
+    for (std::size_t i = 0; i < circles.size(); ++i) {
+        const auto& c = circles[i];
+        b2Vec2 p = c->getPosition();
+        float dx = p.x - pos.x;
+        float dy = p.y - pos.y;
+        float dist2 = dx * dx + dy * dy;
+        float r = c->getRadius();
+        if (dist2 <= r * r) {
+            hit = i;
+        }
+    }
+    selected_index = hit;
+    return selected_index.has_value();
+}
+
+const neat::Genome* Game::get_selected_brain() const {
+    if (!selected_index || *selected_index >= circles.size()) {
+        return nullptr;
+    }
+    if (auto* eater = dynamic_cast<EaterCircle*>(circles[*selected_index].get())) {
+        return &eater->get_brain();
+    }
+    return nullptr;
+}
+
+int Game::get_selected_generation() const {
+    if (!selected_index || *selected_index >= circles.size()) {
+        return -1;
+    }
+    if (auto* eater = dynamic_cast<EaterCircle*>(circles[*selected_index].get())) {
+        return eater->get_generation();
+    }
+    return -1;
 }
 
 void Game::update_max_generation_from_circle(const EatableCircle* circle) {
@@ -414,6 +457,7 @@ void Game::cull_consumed() {
         }
     }
 
+    clear_selection();
     recompute_max_generation();
 
     for (auto& c : spawned_cloud) {
@@ -463,6 +507,7 @@ void Game::remove_outside_petri() {
             }),
         circles.end());
 
+    clear_selection();
     recompute_max_generation();
 }
 
@@ -490,6 +535,7 @@ void Game::remove_random_percentage(float percentage) {
         circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
     }
 
+    clear_selection();
     recompute_max_generation();
 }
 

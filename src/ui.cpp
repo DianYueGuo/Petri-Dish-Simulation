@@ -60,6 +60,10 @@ void render_cursor_controls(Game& game, UiState& state) {
     if (ImGui::RadioButton("Move view", state.cursor_mode == static_cast<int>(Game::CursorMode::Drag))) {
         state.cursor_mode = static_cast<int>(Game::CursorMode::Drag);
     }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Select", state.cursor_mode == static_cast<int>(Game::CursorMode::Select))) {
+        state.cursor_mode = static_cast<int>(Game::CursorMode::Select);
+    }
     show_hover_text("Add mode places new circles; Move view lets you pan the camera.");
     game.set_cursor_mode(static_cast<Game::CursorMode>(state.cursor_mode));
 
@@ -135,6 +139,33 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             show_hover_text("How many circles currently exist inside the dish.");
             ImGui::Text("Max generation: %d", game.get_max_generation());
             show_hover_text("Highest division count reached by any eater so far.");
+            const neat::Genome* selected_brain = game.get_selected_brain();
+            int selected_gen = game.get_selected_generation();
+            if (selected_brain) {
+                ImGui::Separator();
+                ImGui::Text("Selected eater: generation %d", selected_gen);
+                ImGui::Text("Nodes: %zu", selected_brain->nodes.size());
+                ImGui::Text("Connections: %zu", selected_brain->connections.size());
+
+                if (ImGui::BeginChild("BrainDetails", ImVec2(0, 150), true)) {
+                    ImGui::Text("Connections (first 32):");
+                    size_t limit = std::min<size_t>(selected_brain->connections.size(), 32);
+                    for (size_t i = 0; i < limit; ++i) {
+                        const auto& c = selected_brain->connections[i];
+                        ImGui::Text("%zu: %d -> %d w=%.3f %s %s",
+                                    i,
+                                    c.inNodeId,
+                                    c.outNodeId,
+                                    c.weight,
+                                    c.enabled ? "on" : "off",
+                                    c.isRecurrent ? "rec" : "fwd");
+                    }
+                }
+                ImGui::EndChild();
+            } else {
+                ImGui::Separator();
+                ImGui::Text("No eater selected");
+            }
 
             ImGui::Separator();
             ImGui::SliderFloat("Remove random %", &state.delete_percentage, 0.0f, 100.0f, "%.1f");

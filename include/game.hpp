@@ -18,7 +18,8 @@ class Game {
 public:
     enum class CursorMode {
         Add,
-        Drag
+        Drag,
+        Select
     };
     enum class AddType {
         Eater,
@@ -110,13 +111,17 @@ public:
     void recompute_max_generation();
     void set_show_true_color(bool value) { show_true_color = value; }
     bool get_show_true_color() const { return show_true_color; }
-    CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
     void remove_random_percentage(float percentage);
     void remove_outside_petri();
     void set_auto_remove_outside(bool enabled) { auto_remove_outside = enabled; }
     bool get_auto_remove_outside() const { return auto_remove_outside; }
     std::size_t get_circle_count() const { return circles.size(); }
+    void clear_selection();
+    const neat::Genome* get_selected_brain() const;
+    int get_selected_generation() const;
+    bool select_circle_at_world(const b2Vec2& pos);
+    CursorMode get_cursor_mode() const { return cursor_mode; }
 private:
     void spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out);
     b2Vec2 random_point_in_petri() const;
@@ -186,6 +191,7 @@ private:
     float angular_impulse_magnitude = 1.0f;
     float linear_damping = 0.5f;
     float angular_damping = 0.5f;
+    std::optional<std::size_t> selected_index;
 };
 
 #endif
