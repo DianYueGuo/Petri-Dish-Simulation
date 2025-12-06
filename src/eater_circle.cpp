@@ -8,7 +8,7 @@
 
 EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle) :
     EatableCircle(worldId, position_x, position_y, radius, density, false, angle),
-    brain(3, 7) {
+    brain(12, 7) {
     initialize_brain();
     update_brain_inputs_from_touching();
     brain.update();
@@ -200,37 +200,81 @@ void EaterCircle::update_color_from_brain() {
     set_color_rgb(r, g, b);
 }
 
-std::array<float, 3> EaterCircle::average_touching_color() const {
-    std::array<float, 3> summed_color = {0.0f, 0.0f, 0.0f};
-    if (touching_circles.empty()) {
-        return summed_color;
-    }
+void EaterCircle::update_brain_inputs_from_touching() {
+    constexpr float PI = 3.14159f;
+    constexpr float HALF_PI = PI * 0.5f;
+    constexpr float QUARTER_PI = PI * 0.25f;
 
-    int count = 0;
-    for (auto* circle : touching_circles) {
-        if (auto* drawable = dynamic_cast<DrawableCircle*>(circle)) {
+    std::array<std::array<float, 3>, 4> summed_colors{};
+    std::array<int, 4> counts{};
+
+    if (!touching_circles.empty()) {
+        const b2Vec2 self_pos = this->getPosition();
+        const float heading = this->getAngle();
+
+        auto normalize_angle = [](float angle) {
+            constexpr float TWO_PI = PI * 2.0f;
+            angle = std::fmod(angle, TWO_PI);
+            if (angle > PI) {
+                angle -= TWO_PI;
+            } else if (angle < -PI) {
+                angle += TWO_PI;
+            }
+            return angle;
+        };
+
+        auto classify_quadrant = [&](float relative_angle) {
+            if (relative_angle >= -QUARTER_PI && relative_angle < QUARTER_PI) {
+                return 0; // front
+            } else if (relative_angle >= QUARTER_PI && relative_angle < (QUARTER_PI + HALF_PI)) {
+                return 1; // right
+            } else if (relative_angle >= -(QUARTER_PI + HALF_PI) && relative_angle < -QUARTER_PI) {
+                return 2; // left
+            }
+            return 3; // back
+        };
+
+        for (auto* circle : touching_circles) {
+            auto* drawable = dynamic_cast<DrawableCircle*>(circle);
+            if (!drawable) {
+                continue;
+            }
+
+            const b2Vec2 other_pos = circle->getPosition();
+            const float dx = other_pos.x - self_pos.x;
+            const float dy = other_pos.y - self_pos.y;
+
+            if (dx == 0.0f && dy == 0.0f) {
+                continue;
+            }
+
+            float relative_angle = std::atan2(dy, dx) - heading;
+            relative_angle = normalize_angle(relative_angle);
+
+            int quadrant = classify_quadrant(relative_angle);
             const auto color = drawable->get_color_rgb();
-            summed_color[0] += color[0];
-            summed_color[1] += color[1];
-            summed_color[2] += color[2];
-            ++count;
+            summed_colors[quadrant][0] += color[0];
+            summed_colors[quadrant][1] += color[1];
+            summed_colors[quadrant][2] += color[2];
+            ++counts[quadrant];
         }
     }
 
-    if (count == 0) {
-        return {0.0f, 0.0f, 0.0f};
-    }
+    auto set_inputs_for_quadrant = [&](int base_index, const std::array<float, 3>& color_sum, int count) {
+        if (count > 0) {
+            float inv = 1.0f / static_cast<float>(count);
+            brain.set_input(base_index,     color_sum[0] * inv);
+            brain.set_input(base_index + 1, color_sum[1] * inv);
+            brain.set_input(base_index + 2, color_sum[2] * inv);
+        } else {
+            brain.set_input(base_index,     0.0f);
+            brain.set_input(base_index + 1, 0.0f);
+            brain.set_input(base_index + 2, 0.0f);
+        }
+    };
 
-    float inv_count = 1.0f / static_cast<float>(count);
-    summed_color[0] *= inv_count;
-    summed_color[1] *= inv_count;
-    summed_color[2] *= inv_count;
-    return summed_color;
-}
-
-void EaterCircle::update_brain_inputs_from_touching() {
-    const auto average_color = average_touching_color();
-    brain.set_input(0, average_color[0]);
-    brain.set_input(1, average_color[1]);
-    brain.set_input(2, average_color[2]);
+    set_inputs_for_quadrant(0,  summed_colors[0], counts[0]); // front
+    set_inputs_for_quadrant(3,  summed_colors[3], counts[3]); // back
+    set_inputs_for_quadrant(6,  summed_colors[2], counts[2]); // left
+    set_inputs_for_quadrant(9,  summed_colors[1], counts[1]); // right
 }

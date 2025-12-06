@@ -32,7 +32,6 @@ protected:
 private:
     void initialize_brain();
     void update_brain_inputs_from_touching();
-    std::array<float, 3> average_touching_color() const;
     void update_color_from_brain();
 
     EaterBrain brain;
