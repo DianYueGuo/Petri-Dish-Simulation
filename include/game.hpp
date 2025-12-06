@@ -119,6 +119,11 @@ public:
     void set_auto_remove_outside(bool enabled) { auto_remove_outside = enabled; }
     bool get_auto_remove_outside() const { return auto_remove_outside; }
     std::size_t get_circle_count() const { return circles.size(); }
+    float get_sim_time() const { return sim_time_accum; }
+    float get_real_time() const { return real_time_accum; }
+    float get_last_fps() const { return fps_last; }
+    void accumulate_real_time(float dt);
+    void frame_rendered();
     void clear_selection();
     const neat::Genome* get_selected_brain() const;
     const EaterCircle* get_selected_eater() const;
@@ -146,6 +151,11 @@ private:
     std::vector<std::unique_ptr<EatableCircle>> circles;
     float pixles_per_meter = 15.0f;
     float time_scale = 1.0f;
+    float sim_time_accum = 0.0f;
+    float real_time_accum = 0.0f;
+    float fps_accum_time = 0.0f;
+    int fps_frames = 0;
+    float fps_last = 0.0f;
     float brain_updates_per_sim_second = 10.0f;
     float brain_time_accumulator = 0.0f;
     float minimum_area = 1.0f;

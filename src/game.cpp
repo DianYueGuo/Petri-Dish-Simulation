@@ -61,6 +61,8 @@ void Game::process_game_logic() {
     float timeStep = (1.0f / 60.0f) * time_scale;
     int subStepCount = 4;
     b2World_Step(worldId, timeStep, subStepCount);
+    sim_time_accum += timeStep;
+    // real_time_accum should be updated by caller using frame delta; leave as is here.
 
     process_touch_events(worldId);
 
@@ -548,6 +550,22 @@ void Game::remove_random_percentage(float percentage) {
 
     clear_selection();
     recompute_max_generation();
+}
+
+void Game::accumulate_real_time(float dt) {
+    if (dt <= 0.0f) return;
+    real_time_accum += dt;
+    fps_accum_time += dt;
+    ++fps_frames;
+    if (fps_accum_time >= 0.5f) {
+        fps_last = static_cast<float>(fps_frames) / fps_accum_time;
+        fps_accum_time = 0.0f;
+        fps_frames = 0;
+    }
+}
+
+void Game::frame_rendered() {
+    // reserved for any per-frame hooks; fps handled in accumulate_real_time
 }
 
 void Game::set_circle_density(float d) {

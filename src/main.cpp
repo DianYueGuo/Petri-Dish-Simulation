@@ -31,12 +31,15 @@ int main() {
     view.setCenter({0.0f, 0.0f});
     window.setView(view);
     while (window.isOpen()) {
+        float dt = deltaClock.restart().asSeconds();
+        game.accumulate_real_time(dt);
+
         game.process_game_logic();
 
         handle_events(window, view, game);
 
         view = window.getView(); // sync view after input handling
-        ImGui::SFML::Update(window, deltaClock.restart());
+        ImGui::SFML::Update(window, sf::seconds(dt));
 
         render_ui(window, view, game);
 
