@@ -60,6 +60,7 @@ public:
     float get_remove_connection_probability() const { return remove_connection_probability; }
     void set_mutation_rounds(int rounds) { mutation_rounds = std::max(0, rounds); }
     int get_mutation_rounds() const { return mutation_rounds; }
+    int get_max_generation() const { return max_generation; }
     void set_linear_impulse_magnitude(float m);
     float get_linear_impulse_magnitude() const { return linear_impulse_magnitude; }
     void set_angular_impulse_magnitude(float m);
@@ -81,6 +82,8 @@ public:
     float get_sprinkle_rate_toxic() const { return sprinkle_rate_toxic; }
     void set_eater_cloud_area_percentage(float percentage) { eater_cloud_area_percentage = percentage; }
     float get_eater_cloud_area_percentage() const { return eater_cloud_area_percentage; }
+    void update_max_generation_from_circle(const EatableCircle* circle);
+    void recompute_max_generation();
     CursorMode get_cursor_mode() const { return cursor_mode; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
     void remove_random_percentage(float percentage);
@@ -133,6 +136,7 @@ private:
     float add_connection_probability = 0.5f;
     float remove_connection_probability = 0.5f;
     int mutation_rounds = 4;
+    int max_generation = 0;
     bool auto_remove_outside = true;
     bool dragging = false;
     bool right_dragging = false;

@@ -122,7 +122,10 @@ void Game::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseBu
         auto add_circle_at = [&](sf::Vector2f pos) {
             switch (add_type) {
                 case AddType::Eater:
-                    circles.push_back(create_eater_at({pos.x, pos.y}));
+                    if (auto circle = create_eater_at({pos.x, pos.y})) {
+                        update_max_generation_from_circle(circle.get());
+                        circles.push_back(std::move(circle));
+                    }
                     break;
                 case AddType::Eatable:
                 case AddType::ToxicEatable:
@@ -251,7 +254,24 @@ void Game::handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPresse
 }
 
 void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
+    update_max_generation_from_circle(circle.get());
     circles.push_back(std::move(circle));
+}
+
+void Game::update_max_generation_from_circle(const EatableCircle* circle) {
+    if (auto* eater = dynamic_cast<const EaterCircle*>(circle)) {
+        max_generation = std::max(max_generation, eater->get_generation());
+    }
+}
+
+void Game::recompute_max_generation() {
+    int new_max = 0;
+    for (const auto& circle : circles) {
+        if (auto* eater = dynamic_cast<const EaterCircle*>(circle.get())) {
+            new_max = std::max(new_max, eater->get_generation());
+        }
+    }
+    max_generation = new_max;
 }
 
 void Game::sprinkle_with_rate(float rate, AddType type, float dt) {
@@ -267,7 +287,10 @@ void Game::sprinkle_with_rate(float rate, AddType type, float dt) {
         b2Vec2 pos = random_point_in_petri();
         switch (type) {
             case AddType::Eater:
-                circles.push_back(create_eater_at(pos));
+                if (auto eater = create_eater_at(pos)) {
+                    update_max_generation_from_circle(eater.get());
+                    circles.push_back(std::move(eater));
+                }
                 break;
             case AddType::Eatable:
                 circles.push_back(create_eatable_at(pos, false));
@@ -366,6 +389,8 @@ void Game::cull_consumed() {
         }
     }
 
+    recompute_max_generation();
+
     for (auto& c : spawned_cloud) {
         circles.push_back(std::move(c));
     }
@@ -412,6 +437,8 @@ void Game::remove_outside_petri() {
                 return distance + circle->getRadius() > petri_radius;
             }),
         circles.end());
+
+    recompute_max_generation();
 }
 
 void Game::remove_random_percentage(float percentage) {
@@ -437,6 +464,8 @@ void Game::remove_random_percentage(float percentage) {
     for (std::size_t idx : indices) {
         circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
     }
+
+    recompute_max_generation();
 }
 
 void Game::set_circle_density(float d) {

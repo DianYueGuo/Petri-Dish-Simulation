@@ -6,9 +6,10 @@
 
 #include <cstdlib>
 
-EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle) :
+EaterCircle::EaterCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle, int generation) :
     EatableCircle(worldId, position_x, position_y, radius, density, false, angle),
     brain(12, 7) {
+    set_generation(generation);
     initialize_brain();
     update_brain_inputs_from_touching();
     brain.update();
@@ -178,6 +179,15 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
         new_circle_ptr->apply_forward_impulse();
         new_circle_ptr->update_color_from_brain();
     }
+
+    const int next_generation = this->get_generation() + 1;
+    this->set_generation(next_generation);
+    if (new_circle_ptr) {
+        new_circle_ptr->set_generation(next_generation);
+    }
+
+    game.update_max_generation_from_circle(this);
+    game.update_max_generation_from_circle(new_circle_ptr);
 
     this->apply_forward_impulse();
 
