@@ -29,6 +29,7 @@ struct UiState {
     float tick_remove_connection_probability = 0.0f;
     int mutation_rounds = 0;
     bool show_true_color = false;
+    float inactivity_timeout = 0.0f;
     float circle_density = 0.0f;
     float linear_impulse = 0.0f;
     float angular_impulse = 0.0f;
@@ -105,6 +106,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.tick_remove_connection_probability = game.get_tick_remove_connection_probability();
         state.mutation_rounds = game.get_mutation_rounds();
         state.show_true_color = game.get_show_true_color();
+        state.inactivity_timeout = game.get_inactivity_timeout();
         state.circle_density = game.get_circle_density();
         state.linear_impulse = game.get_linear_impulse_magnitude();
         state.angular_impulse = game.get_angular_impulse_magnitude();
@@ -218,6 +220,10 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             ImGui::Checkbox("Show true color (disable smoothing)", &state.show_true_color);
             show_hover_text("Toggle between smoothed display color and raw brain output color.");
             game.set_show_true_color(state.show_true_color);
+
+            ImGui::SliderFloat("Inactivity timeout (s)", &state.inactivity_timeout, 0.0f, 60.0f, "%.1f");
+            show_hover_text("If an eater fails to boost forward for this many seconds, it dies like poison.");
+            game.set_inactivity_timeout(state.inactivity_timeout);
 
             ImGui::SliderFloat("Toxic death chance", &state.poison_death_probability, 0.0f, 1.0f, "%.2f");
             show_hover_text("Chance that eating a toxic pellet kills an eater.");

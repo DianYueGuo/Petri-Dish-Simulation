@@ -22,7 +22,7 @@ public:
     void process_eating(const b2WorldId &worldId, float poison_death_probability_toxic, float poison_death_probability_normal);
 
     void move_randomly(const b2WorldId &worldId, Game &game);
-    void move_intelligently(const b2WorldId &worldId, Game &game);
+    void move_intelligently(const b2WorldId &worldId, Game &game, float dt);
 
     void boost_forward(const b2WorldId &worldId, Game& game);
     void divide(const b2WorldId &worldId, Game& game);
@@ -41,6 +41,7 @@ private:
     float minimum_area = 1.0f;
     bool poisoned = false;
     int generation = 0;
+    float inactivity_timer = 0.0f;
 };
 
 #endif

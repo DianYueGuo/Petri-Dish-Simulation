@@ -356,12 +356,12 @@ void Game::run_brain_updates(const b2WorldId& worldId, float timeStep) {
     const float brain_period = (brain_updates_per_sim_second > 0.0f) ? (1.0f / brain_updates_per_sim_second) : std::numeric_limits<float>::max();
     while (brain_time_accumulator >= brain_period) {
         for (size_t i = 0; i < circles.size(); ++i) {
-        if (auto* eater_circle = dynamic_cast<EaterCircle*>(circles[i].get())) {
-            eater_circle->set_minimum_area(minimum_area);
-            eater_circle->set_use_smoothed_display(!show_true_color);
-            eater_circle->move_intelligently(worldId, *this);
+            if (auto* eater_circle = dynamic_cast<EaterCircle*>(circles[i].get())) {
+                eater_circle->set_minimum_area(minimum_area);
+                eater_circle->set_use_smoothed_display(!show_true_color);
+                eater_circle->move_intelligently(worldId, *this, brain_period);
+            }
         }
-    }
         brain_time_accumulator -= brain_period;
     }
 }

@@ -85,13 +85,22 @@ void EaterCircle::move_randomly(const b2WorldId &worldId, Game &game) {
         this->apply_right_turn_impulse();
 }
 
-void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game) {
+void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game, float dt) {
+    inactivity_timer += std::max(0.0f, dt);
+
     update_brain_inputs_from_touching();
     brain.update();
     update_color_from_brain();
 
+    bool moved = false;
+
     if (brain.read_output(0) >= 1.0f) {
+        float area_before = this->getArea();
         this->boost_forward(worldId, game);
+        float area_after = this->getArea();
+        if (area_after < area_before) {
+            moved = true;
+        }
     }
     if (brain.read_output(1) >= 1.0f) {
         this->apply_left_turn_impulse();
@@ -101,6 +110,17 @@ void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game) {
     }
     if (brain.read_output(3) >= 1.0f) {
         this->divide(worldId, game);
+    }
+
+    if (moved) {
+        inactivity_timer = 0.0f;
+    }
+
+    float timeout = game.get_inactivity_timeout();
+    if (timeout > 0.0f && inactivity_timer >= timeout && !is_eaten()) {
+        poisoned = true;
+        this->be_eaten();
+        inactivity_timer = 0.0f;
     }
 
     brain.mutate(

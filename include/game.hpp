@@ -69,6 +69,8 @@ public:
     void set_mutation_rounds(int rounds) { mutation_rounds = std::max(0, rounds); }
     int get_mutation_rounds() const { return mutation_rounds; }
     int get_max_generation() const { return max_generation; }
+    void set_inactivity_timeout(float t) { inactivity_timeout = std::max(0.0f, t); }
+    float get_inactivity_timeout() const { return inactivity_timeout; }
     void set_linear_impulse_magnitude(float m);
     float get_linear_impulse_magnitude() const { return linear_impulse_magnitude; }
     void set_angular_impulse_magnitude(float m);
@@ -152,6 +154,7 @@ private:
     int mutation_rounds = 30;
     int max_generation = 0;
     bool show_true_color = false;
+    float inactivity_timeout = 10.0f;
     bool auto_remove_outside = true;
     bool dragging = false;
     bool right_dragging = false;
