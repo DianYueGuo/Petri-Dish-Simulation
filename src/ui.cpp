@@ -334,7 +334,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
 
     ImGui::Begin("Simulation Controls");
 
-    ImGui::SeparatorText("Cursor & Tools");
+    ImGui::SeparatorText("Cursor mode");
     render_cursor_controls(game, state);
 
     ImGui::SeparatorText("Simulation control");
