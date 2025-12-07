@@ -151,6 +151,10 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             show_hover_text("Stop simulation updates so you can inspect selected eater info.");
             ImGui::Text("Sim time: %.2fs  Real time: %.2fs  FPS: %.1f", game.get_sim_time(), game.get_real_time(), game.get_last_fps());
             show_hover_text("Sim time is the accumulated simulated seconds; real is wall time since start.");
+            ImGui::Text("Longest life  creation/division: %.2fs / %.2fs",
+                        game.get_longest_life_since_creation(),
+                        game.get_longest_life_since_division());
+            show_hover_text("Longest survival among eaters since spawn and since their last division.");
             ImGui::Text("Max generation: %d", game.get_max_generation());
             show_hover_text("Highest division count reached by any eater so far.");
             const neat::Genome* selected_brain = game.get_selected_brain();

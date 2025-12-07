@@ -75,6 +75,7 @@ void Game::process_game_logic() {
     if (auto_remove_outside) {
         remove_outside_petri();
     }
+    update_max_ages();
 }
 
 void Game::draw(sf::RenderWindow& window) const {
@@ -349,6 +350,21 @@ void Game::recompute_max_generation() {
     max_generation_brain = std::move(new_brain);
 }
 
+void Game::update_max_ages() {
+    float creation_max = 0.0f;
+    float division_max = 0.0f;
+    for (const auto& circle : circles) {
+        if (auto* eater = dynamic_cast<const EaterCircle*>(circle.get())) {
+            float age_creation = std::max(0.0f, sim_time_accum - eater->get_creation_time());
+            float age_division = std::max(0.0f, sim_time_accum - eater->get_last_division_time());
+            if (age_creation > creation_max) creation_max = age_creation;
+            if (age_division > division_max) division_max = age_division;
+        }
+    }
+    max_age_since_creation = creation_max;
+    max_age_since_division = division_max;
+}
+
 void Game::sprinkle_with_rate(float rate, AddType type, float dt) {
     if (rate <= 0.0f || dt <= 0.0f || petri_radius <= 0.0f) {
         return;
@@ -414,6 +430,8 @@ std::unique_ptr<EaterCircle> Game::create_eater_at(const b2Vec2& pos) {
         base_brain,
         &neat_innovations,
         &neat_last_innov_id);
+    circle->set_creation_time(sim_time_accum);
+    circle->set_last_division_time(sim_time_accum);
     circle->set_impulse_magnitudes(linear_impulse_magnitude, angular_impulse_magnitude);
     circle->set_linear_damping(linear_damping, worldId);
     circle->set_angular_damping(angular_damping, worldId);
@@ -533,6 +551,7 @@ void Game::remove_outside_petri() {
 
     clear_selection();
     recompute_max_generation();
+    update_max_ages();
 }
 
 void Game::remove_random_percentage(float percentage) {
@@ -561,6 +580,7 @@ void Game::remove_random_percentage(float percentage) {
 
     clear_selection();
     recompute_max_generation();
+    update_max_ages();
 }
 
 void Game::remove_stopped_boost_particles() {
@@ -580,6 +600,7 @@ void Game::remove_stopped_boost_particles() {
     if (selected_index && *selected_index >= circles.size()) {
         selected_index.reset();
     }
+    update_max_ages();
 }
 
 void Game::accumulate_real_time(float dt) {

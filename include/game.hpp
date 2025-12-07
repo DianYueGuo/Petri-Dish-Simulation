@@ -127,6 +127,8 @@ public:
     float get_sim_time() const { return sim_time_accum; }
     float get_real_time() const { return real_time_accum; }
     float get_last_fps() const { return fps_last; }
+    float get_longest_life_since_creation() const { return max_age_since_creation; }
+    float get_longest_life_since_division() const { return max_age_since_division; }
     void accumulate_real_time(float dt);
     void frame_rendered();
     void clear_selection();
@@ -152,6 +154,7 @@ private:
     void handle_mouse_release(const sf::Event::MouseButtonReleased& e);
     void handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e);
     void handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e);
+    void update_max_ages();
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
@@ -214,6 +217,8 @@ private:
     bool paused = false;
     float boost_particle_impulse_fraction = 0.003f;
     float boost_particle_linear_damping = 3.0f;
+    float max_age_since_creation = 0.0f;
+    float max_age_since_division = 0.0f;
 };
 
 #endif

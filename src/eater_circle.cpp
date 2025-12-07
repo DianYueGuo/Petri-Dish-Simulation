@@ -284,12 +284,15 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
         new_circle_ptr->setAngle(angle + 3.14159f, worldId);
         new_circle_ptr->apply_forward_impulse();
         new_circle_ptr->update_color_from_brain();
+        new_circle_ptr->set_creation_time(game.get_sim_time());
+        new_circle_ptr->set_last_division_time(game.get_sim_time());
     }
 
     this->set_generation(next_generation);
     if (new_circle_ptr) {
         new_circle_ptr->set_generation(next_generation);
     }
+    set_last_division_time(game.get_sim_time());
 
     game.update_max_generation_from_circle(this);
     game.update_max_generation_from_circle(new_circle_ptr);

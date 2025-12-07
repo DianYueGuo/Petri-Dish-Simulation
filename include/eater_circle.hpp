@@ -44,6 +44,10 @@ public:
     void divide(const b2WorldId &worldId, Game& game);
 
     bool is_poisoned() const { return poisoned; }
+    void set_creation_time(float t) { creation_time = t; }
+    float get_creation_time() const { return creation_time; }
+    void set_last_division_time(float t) { last_division_time = t; }
+    float get_last_division_time() const { return last_division_time; }
 
 protected:
     bool should_draw_direction_indicator() const override { return true; }
@@ -63,6 +67,8 @@ private:
     bool poisoned = false;
     int generation = 0;
     float inactivity_timer = 0.0f;
+    float creation_time = 0.0f;
+    float last_division_time = 0.0f;
 };
 
 #endif
