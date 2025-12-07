@@ -58,6 +58,7 @@ int main() {
 }
 
 void handle_events(sf::RenderWindow& window, sf::View& view, Game& game) {
+    static sf::Vector2u previous_window_size = window.getSize();
     while (const auto event = window.pollEvent()) {
         ImGui::SFML::ProcessEvent(window, *event);
 
@@ -65,8 +66,15 @@ void handle_events(sf::RenderWindow& window, sf::View& view, Game& game) {
             window.close();
         }
         if (const auto* resize = event->getIf<sf::Event::Resized>()) {
-            view.setSize({static_cast<float>(resize->size.x), static_cast<float>(resize->size.y)});
-            view.setCenter({0.0f, 0.0f});
+            // Preserve current center/zoom: scale the view size by the pixel change.
+            sf::Vector2u old_size = previous_window_size;
+            previous_window_size = resize->size;
+            if (old_size.x > 0 && old_size.y > 0) {
+                float world_per_pixel_x = view.getSize().x / static_cast<float>(old_size.x);
+                float world_per_pixel_y = view.getSize().y / static_cast<float>(old_size.y);
+                view.setSize({world_per_pixel_x * static_cast<float>(resize->size.x),
+                              world_per_pixel_y * static_cast<float>(resize->size.y)});
+            }
             window.setView(view);
         }
 

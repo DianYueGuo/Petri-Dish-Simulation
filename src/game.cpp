@@ -333,6 +333,7 @@ void Game::clear_selection() {
 
 bool Game::select_circle_at_world(const b2Vec2& pos) {
     std::optional<std::size_t> hit;
+    float best_dist2 = std::numeric_limits<float>::max();
     for (std::size_t i = 0; i < circles.size(); ++i) {
         const auto& c = circles[i];
         b2Vec2 p = c->getPosition();
@@ -340,8 +341,9 @@ bool Game::select_circle_at_world(const b2Vec2& pos) {
         float dy = p.y - pos.y;
         float dist2 = dx * dx + dy * dy;
         float r = c->getRadius();
-        if (dist2 <= r * r) {
+        if (dist2 <= r * r && dist2 < best_dist2) {
             hit = i;
+            best_dist2 = dist2;
         }
     }
     selected_index = hit;
