@@ -501,7 +501,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                 show_hover_text("Area an eater spends to dash forward; 0 means no pellet is left behind. Finer range.");
             }
 
-            if (ImGui::CollapsingHeader("Movement & boosting", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::CollapsingHeader("Impulse & damping", ImGuiTreeNodeFlags_DefaultOpen)) {
                 bool movement_changed = false;
                 ImGui::Separator();
                 movement_changed |= ImGui::SliderFloat("Forward impulse", &state.linear_impulse, 0.01f, 50.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
