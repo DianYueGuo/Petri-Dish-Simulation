@@ -219,16 +219,11 @@ void render_cursor_controls(Game& game, UiState& state) {
         cursor_mode_changed = true;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Move view", state.cursor_mode == static_cast<int>(Game::CursorMode::Drag))) {
-        state.cursor_mode = static_cast<int>(Game::CursorMode::Drag);
-        cursor_mode_changed = true;
-    }
-    ImGui::SameLine();
     if (ImGui::RadioButton("Select", state.cursor_mode == static_cast<int>(Game::CursorMode::Select))) {
         state.cursor_mode = static_cast<int>(Game::CursorMode::Select);
         cursor_mode_changed = true;
     }
-    show_hover_text("Add mode places new circles; Move view lets you pan the camera.");
+    show_hover_text("Add mode places new circles; Select lets you pick existing circles.");
     if (cursor_mode_changed) {
         game.set_cursor_mode(static_cast<Game::CursorMode>(state.cursor_mode));
     }

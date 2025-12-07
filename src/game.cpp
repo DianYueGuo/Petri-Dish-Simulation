@@ -226,7 +226,7 @@ void Game::start_view_drag(const sf::Event::MouseButtonPressed& e, bool is_right
 }
 
 void Game::pan_view(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
-    if (!dragging || (cursor_mode != CursorMode::Drag && !right_dragging)) {
+    if (!dragging) {
         return;
     }
 
@@ -255,8 +255,6 @@ void Game::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseBu
         if (cursor_mode == CursorMode::Add) {
             try_add_circle_at(worldPos);
             begin_add_drag_if_applicable(worldPos);
-        } else if (cursor_mode == CursorMode::Drag) {
-            start_view_drag(e, false);
         } else if (cursor_mode == CursorMode::Select) {
             select_circle_at_world({worldPos.x, worldPos.y});
         }
@@ -266,8 +264,7 @@ void Game::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseBu
 }
 
 void Game::handle_mouse_release(const sf::Event::MouseButtonReleased& e) {
-    if ((e.button == sf::Mouse::Button::Left && cursor_mode == CursorMode::Drag) ||
-        e.button == sf::Mouse::Button::Right) {
+    if (e.button == sf::Mouse::Button::Right) {
         dragging = false;
         right_dragging = false;
     }

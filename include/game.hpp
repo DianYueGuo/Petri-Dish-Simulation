@@ -18,7 +18,6 @@ class Game {
 public:
     enum class CursorMode {
         Add,
-        Drag,
         Select
     };
     enum class AddType {
