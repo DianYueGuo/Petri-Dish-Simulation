@@ -283,8 +283,8 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             show_hover_text("Area given to newly created eater circles.");
             game.set_average_eater_area(state.average_eater_area);
 
-            ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.0f, 3.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-            show_hover_text("Area an eater spends to dash forward; 0 means no pellet is left behind.");
+            ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+            show_hover_text("Area an eater spends to dash forward; 0 means no pellet is left behind. Finer range.");
             game.set_boost_area(state.boost_area);
 
             ImGui::SliderFloat("Poison cloud area %", &state.eater_cloud_area_percentage, 0.0f, 100.0f, "%.0f");
