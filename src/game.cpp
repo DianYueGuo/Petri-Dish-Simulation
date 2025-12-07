@@ -133,52 +133,121 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
     }
 }
 
+sf::Vector2f Game::pixel_to_world(sf::RenderWindow& window, const sf::Vector2i& pixel) const {
+    sf::Vector2f viewPos = window.mapPixelToCoords(pixel);
+    return {viewPos.x / pixles_per_meter, viewPos.y / pixles_per_meter};
+}
+
+void Game::try_add_circle_at(const sf::Vector2f& worldPos) {
+    switch (add_type) {
+        case AddType::Eater:
+            if (auto circle = create_eater_at({worldPos.x, worldPos.y})) {
+                update_max_generation_from_circle(circle.get());
+                circles.push_back(std::move(circle));
+            }
+            break;
+        case AddType::Eatable:
+        case AddType::ToxicEatable:
+        case AddType::DivisionEatable:
+            circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, add_type == AddType::ToxicEatable, add_type == AddType::DivisionEatable));
+            break;
+        default:
+            break;
+    }
+}
+
+void Game::begin_add_drag_if_applicable(const sf::Vector2f& worldPos) {
+    if (add_type == AddType::Eater) {
+        reset_add_drag_state();
+        return;
+    }
+    add_dragging = true;
+    last_add_world_pos = worldPos;
+    last_drag_world_pos = worldPos;
+    add_drag_distance = 0.0f;
+}
+
+void Game::continue_add_drag(const sf::Vector2f& worldPos) {
+    if (!add_dragging || cursor_mode != CursorMode::Add) {
+        return;
+    }
+
+    if (!last_drag_world_pos) {
+        last_drag_world_pos = worldPos;
+    }
+
+    float dx_move = worldPos.x - last_drag_world_pos->x;
+    float dy_move = worldPos.y - last_drag_world_pos->y;
+    add_drag_distance += std::sqrt(dx_move * dx_move + dy_move * dy_move);
+    last_drag_world_pos = worldPos;
+
+    const float min_spacing = radius_from_area(add_eatable_area) * 2.0f;
+
+    if (add_drag_distance >= min_spacing) {
+        switch (add_type) {
+            case AddType::Eater:
+                break;
+            case AddType::Eatable:
+            case AddType::ToxicEatable:
+            case AddType::DivisionEatable:
+                circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, add_type == AddType::ToxicEatable, true));
+                last_add_world_pos = worldPos;
+                break;
+        }
+        add_drag_distance = 0.0f;
+    }
+}
+
+void Game::reset_add_drag_state() {
+    add_dragging = false;
+    last_add_world_pos.reset();
+    last_drag_world_pos.reset();
+    add_drag_distance = 0.0f;
+}
+
+void Game::start_view_drag(const sf::Event::MouseButtonPressed& e, bool is_right_button) {
+    dragging = true;
+    right_dragging = is_right_button;
+    last_drag_pixels = e.position;
+}
+
+void Game::pan_view(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
+    if (!dragging || (cursor_mode != CursorMode::Drag && !right_dragging)) {
+        return;
+    }
+
+    sf::View view = window.getView();
+    sf::Vector2f pixels_to_world = {
+        view.getSize().x / static_cast<float>(window.getSize().x),
+        view.getSize().y / static_cast<float>(window.getSize().y)
+    };
+
+    sf::Vector2i current_pixels = e.position;
+    sf::Vector2i delta_pixels = last_drag_pixels - current_pixels;
+    sf::Vector2f delta_world = {
+        static_cast<float>(delta_pixels.x) * pixels_to_world.x,
+        static_cast<float>(delta_pixels.y) * pixels_to_world.y
+    };
+
+    view.move(delta_world);
+    window.setView(view);
+    last_drag_pixels = current_pixels;
+}
+
 void Game::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseButtonPressed& e) {
     if (e.button == sf::Mouse::Button::Left) {
-        sf::Vector2f viewPos = window.mapPixelToCoords(e.position);
-        sf::Vector2f worldPos = {viewPos.x / pixles_per_meter, viewPos.y / pixles_per_meter};
-
-        auto add_circle_at = [&](sf::Vector2f pos) {
-            switch (add_type) {
-                case AddType::Eater:
-                    if (auto circle = create_eater_at({pos.x, pos.y})) {
-                        update_max_generation_from_circle(circle.get());
-                        circles.push_back(std::move(circle));
-                    }
-                    break;
-                case AddType::Eatable:
-                case AddType::ToxicEatable:
-                case AddType::DivisionEatable:
-                    circles.push_back(create_eatable_at({pos.x, pos.y}, add_type == AddType::ToxicEatable, add_type == AddType::DivisionEatable));
-                    break;
-                default:
-                    break;
-            }
-        };
+        sf::Vector2f worldPos = pixel_to_world(window, e.position);
 
         if (cursor_mode == CursorMode::Add) {
-            add_circle_at(worldPos);
-            add_dragging = (add_type != AddType::Eater);
-            if (add_dragging) {
-                last_add_world_pos = worldPos;
-                last_drag_world_pos = worldPos;
-                add_drag_distance = 0.0f;
-            } else {
-                last_add_world_pos.reset();
-                last_drag_world_pos.reset();
-                add_drag_distance = 0.0f;
-            }
+            try_add_circle_at(worldPos);
+            begin_add_drag_if_applicable(worldPos);
         } else if (cursor_mode == CursorMode::Drag) {
-            dragging = true;
-            right_dragging = false;
-            last_drag_pixels = e.position;
+            start_view_drag(e, false);
         } else if (cursor_mode == CursorMode::Select) {
             select_circle_at_world({worldPos.x, worldPos.y});
         }
     } else if (e.button == sf::Mouse::Button::Right) {
-        dragging = true;
-        right_dragging = true;
-        last_drag_pixels = e.position;
+        start_view_drag(e, true);
     }
 }
 
@@ -189,62 +258,13 @@ void Game::handle_mouse_release(const sf::Event::MouseButtonReleased& e) {
         right_dragging = false;
     }
     if (e.button == sf::Mouse::Button::Left) {
-        add_dragging = false;
-        last_add_world_pos.reset();
-        last_drag_world_pos.reset();
-        add_drag_distance = 0.0f;
+        reset_add_drag_state();
     }
 }
 
 void Game::handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
-    if (add_dragging && cursor_mode == CursorMode::Add) {
-        sf::Vector2f viewPos = window.mapPixelToCoords({e.position.x, e.position.y});
-        sf::Vector2f worldPos = {viewPos.x / pixles_per_meter, viewPos.y / pixles_per_meter};
-
-        if (!last_drag_world_pos) {
-            last_drag_world_pos = worldPos;
-        }
-
-        float dx_move = worldPos.x - last_drag_world_pos->x;
-        float dy_move = worldPos.y - last_drag_world_pos->y;
-        add_drag_distance += std::sqrt(dx_move * dx_move + dy_move * dy_move);
-        last_drag_world_pos = worldPos;
-
-        const float min_spacing = radius_from_area(add_eatable_area) * 2.0f;
-
-        if (add_drag_distance >= min_spacing) {
-            switch (add_type) {
-                case AddType::Eater:
-                    break;
-                case AddType::Eatable:
-                case AddType::ToxicEatable:
-                case AddType::DivisionEatable:
-                    circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, add_type == AddType::ToxicEatable, true));
-                    last_add_world_pos = worldPos;
-                    break;
-            }
-            add_drag_distance = 0.0f;
-        }
-    }
-
-    if (dragging && (cursor_mode == CursorMode::Drag || right_dragging)) {
-        sf::View view = window.getView();
-        sf::Vector2f pixels_to_world = {
-            view.getSize().x / static_cast<float>(window.getSize().x),
-            view.getSize().y / static_cast<float>(window.getSize().y)
-        };
-
-        sf::Vector2i current_pixels = e.position;
-        sf::Vector2i delta_pixels = last_drag_pixels - current_pixels;
-        sf::Vector2f delta_world = {
-            static_cast<float>(delta_pixels.x) * pixels_to_world.x,
-            static_cast<float>(delta_pixels.y) * pixels_to_world.y
-        };
-
-        view.move(delta_world);
-        window.setView(view);
-        last_drag_pixels = current_pixels;
-    }
+    continue_add_drag(pixel_to_world(window, {e.position.x, e.position.y}));
+    pan_view(window, e);
 }
 
 void Game::handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e) {
@@ -417,79 +437,9 @@ int Game::get_selected_generation() const {
 }
 
 void Game::update_follow_view(sf::View& view) const {
-    auto center_on = [&](const EaterCircle* eater) {
-        if (!eater) return false;
+    if (const EaterCircle* eater = get_follow_target_eater()) {
         b2Vec2 p = eater->getPosition();
         view.setCenter({p.x * pixles_per_meter, p.y * pixles_per_meter});
-        return true;
-    };
-
-    // Priority: selected eater, then oldest-largest if enabled.
-    if (follow_selected) {
-        if (center_on(get_selected_eater())) {
-            return;
-        }
-    }
-
-    if (follow_oldest_largest) {
-        const EaterCircle* best = nullptr;
-        float best_age = -1.0f;
-        float best_area = -1.0f;
-        for (const auto& c : circles) {
-            if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
-                float age = std::max(0.0f, sim_time_accum - eater->get_creation_time());
-                float area = eater->getArea();
-                if (age > best_age || (std::abs(age - best_age) < 1e-6f && area > best_area)) {
-                    best_age = age;
-                    best_area = area;
-                    best = eater;
-                }
-            }
-        }
-        center_on(best);
-        return;
-    }
-
-    if (follow_oldest_smallest) {
-        const EaterCircle* best = nullptr;
-        float best_age = -1.0f;
-        float best_area = std::numeric_limits<float>::max();
-        for (const auto& c : circles) {
-            if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
-                float age = std::max(0.0f, sim_time_accum - eater->get_creation_time());
-                float area = eater->getArea();
-                if (age > best_age || (std::abs(age - best_age) < 1e-6f && area < best_area)) {
-                    best = eater;
-                    best_age = age;
-                    best_area = area;
-                }
-            }
-        }
-        center_on(best);
-        return;
-    }
-
-    if (follow_oldest_middle) {
-        std::vector<std::pair<float, const EaterCircle*>> candidates;
-        float best_age = -1.0f;
-        constexpr float age_eps = 1e-6f;
-        for (const auto& c : circles) {
-            if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
-                float age = std::max(0.0f, sim_time_accum - eater->get_creation_time());
-                if (age > best_age + age_eps) {
-                    best_age = age;
-                    candidates.clear();
-                    candidates.emplace_back(eater->getArea(), eater);
-                } else if (std::abs(age - best_age) <= age_eps) {
-                    candidates.emplace_back(eater->getArea(), eater);
-                }
-            }
-        }
-        if (!candidates.empty()) {
-            std::sort(candidates.begin(), candidates.end(), [](auto& a, auto& b) { return a.first < b.first; });
-            const EaterCircle* mid = candidates[candidates.size() / 2].second;
-            center_on(mid);
-        }
     }
 }
 
@@ -749,6 +699,30 @@ void Game::cull_consumed() {
     }
 }
 
+void Game::erase_indices_descending(std::vector<std::size_t>& indices) {
+    if (indices.empty()) {
+        return;
+    }
+
+    const EatableCircle* prev_selected = nullptr;
+    if (selected_index && *selected_index < circles.size()) {
+        prev_selected = circles[*selected_index].get();
+    }
+
+    std::sort(indices.begin(), indices.end(), std::greater<std::size_t>());
+    indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
+
+    for (std::size_t idx : indices) {
+        if (idx < circles.size()) {
+            circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
+        }
+    }
+
+    revalidate_selection(prev_selected);
+    recompute_max_generation();
+    update_max_ages();
+}
+
 void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out) {
     float eater_radius = eater.getRadius();
     float total_area = eater.getArea();
@@ -830,20 +804,7 @@ void Game::remove_random_percentage(float percentage) {
     std::shuffle(indices.begin(), indices.end(), rng);
 
     indices.resize(target);
-    std::sort(indices.begin(), indices.end(), std::greater<std::size_t>());
-
-    const EatableCircle* prev_selected = nullptr;
-    if (selected_index && *selected_index < circles.size()) {
-        prev_selected = circles[*selected_index].get();
-    }
-
-    for (std::size_t idx : indices) {
-        circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
-    }
-
-    revalidate_selection(prev_selected);
-    recompute_max_generation();
-    update_max_ages();
+    erase_indices_descending(indices);
 }
 
 void Game::remove_percentage_pellets(float percentage, bool toxic, bool division_boost) {
@@ -878,20 +839,7 @@ void Game::remove_percentage_pellets(float percentage, bool toxic, bool division
     static std::mt19937 rng{std::random_device{}()};
     std::shuffle(indices.begin(), indices.end(), rng);
     indices.resize(target);
-    std::sort(indices.begin(), indices.end(), std::greater<std::size_t>());
-
-    const EatableCircle* prev_selected = nullptr;
-    if (selected_index && *selected_index < circles.size()) {
-        prev_selected = circles[*selected_index].get();
-    }
-
-    for (std::size_t idx : indices) {
-        circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
-    }
-
-    revalidate_selection(prev_selected);
-    recompute_max_generation();
-    update_max_ages();
+    erase_indices_descending(indices);
 }
 
 std::size_t Game::count_pellets(bool toxic, bool division_boost) const {

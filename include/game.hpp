@@ -194,6 +194,13 @@ private:
     b2Vec2 random_point_in_petri() const;
     void sprinkle_with_rate(float rate, AddType type, float dt);
     void sprinkle_entities(float dt);
+    sf::Vector2f pixel_to_world(sf::RenderWindow& window, const sf::Vector2i& pixel) const;
+    void try_add_circle_at(const sf::Vector2f& worldPos);
+    void begin_add_drag_if_applicable(const sf::Vector2f& worldPos);
+    void continue_add_drag(const sf::Vector2f& worldPos);
+    void reset_add_drag_state();
+    void start_view_drag(const sf::Event::MouseButtonPressed& e, bool is_right_button);
+    void pan_view(sf::RenderWindow& window, const sf::Event::MouseMoved& e);
     void update_eaters(const b2WorldId& worldId, float dt);
     void run_brain_updates(const b2WorldId& worldId, float timeStep);
     void cull_consumed();
@@ -210,6 +217,7 @@ private:
     void revalidate_selection(const EatableCircle* previously_selected);
     void adjust_cleanup_rates();
     std::size_t count_pellets(bool toxic, bool division_boost) const;
+    void erase_indices_descending(std::vector<std::size_t>& indices);
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
