@@ -761,10 +761,13 @@ void Game::remove_outside_petri() {
     }
 
     const EatableCircle* prev_selected = nullptr;
+    b2Vec2 prev_pos{0, 0};
     if (selected_index && *selected_index < circles.size()) {
         prev_selected = circles[*selected_index].get();
+        prev_pos = prev_selected->getPosition();
     }
 
+    bool selected_removed = false;
     circles.erase(
         std::remove_if(
             circles.begin(),
@@ -772,11 +775,19 @@ void Game::remove_outside_petri() {
             [&](const std::unique_ptr<EatableCircle>& circle) {
                 b2Vec2 pos = circle->getPosition();
                 float distance = std::sqrt(pos.x * pos.x + pos.y * pos.y);
-                return distance + circle->getRadius() > petri_radius;
+                bool out = distance + circle->getRadius() > petri_radius;
+                if (out && prev_selected && circle.get() == prev_selected) {
+                    selected_removed = true;
+                }
+                return out;
             }),
         circles.end());
 
-    revalidate_selection(prev_selected);
+    if (selected_removed && follow_selected) {
+        set_selection_to_eater(find_nearest_eater(prev_pos));
+    } else if (prev_selected) {
+        revalidate_selection(prev_selected);
+    }
     recompute_max_generation();
     update_max_ages();
 }
