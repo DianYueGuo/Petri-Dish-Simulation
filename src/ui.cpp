@@ -333,22 +333,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
     }
 
     ImGui::Begin("Simulation Controls");
-    ImGui::SeparatorText("Quick presets");
-    if (ImGui::Button("Default mix")) {
-        apply_preset(Preset::Default, state, game);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Peaceful / growth")) {
-        apply_preset(Preset::Peaceful, state, game);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Toxic challenge")) {
-        apply_preset(Preset::ToxicHeavy, state, game);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Division stress test")) {
-        apply_preset(Preset::DivisionTest, state, game);
-    }
+
     ImGui::SeparatorText("Cursor & Tools");
     render_cursor_controls(game, state);
 
@@ -385,6 +370,23 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         window.setView(view);
     }
     show_hover_text("Recenter and reset the camera zoom to fit the dish.");
+
+    ImGui::SeparatorText("Quick presets");
+    if (ImGui::Button("Default mix")) {
+        apply_preset(Preset::Default, state, game);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Peaceful / growth")) {
+        apply_preset(Preset::Peaceful, state, game);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Toxic challenge")) {
+        apply_preset(Preset::ToxicHeavy, state, game);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Division stress test")) {
+        apply_preset(Preset::DivisionTest, state, game);
+    }
 
     if (ImGui::BeginTabBar("ControlsTabs")) {
         if (ImGui::BeginTabItem("Overview")) {
