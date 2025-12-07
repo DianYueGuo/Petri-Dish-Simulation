@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(simple-2d-game VERSION 0.1.0)
+project(petri-dish-simulation VERSION 0.1.0)
 
-set(APP_BUNDLE_NAME "Simple2DGame")
+set(APP_BUNDLE_NAME "Petri Dish Simulation")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -119,7 +119,7 @@ set_target_properties(
         OUTPUT_NAME ${APP_BUNDLE_NAME}
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_BUNDLE_NAME ${APP_BUNDLE_NAME}
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.example.simple2dgame"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.example.petridishsimulation"
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
 )

@@ -1,6 +1,6 @@
-# Evolutionary Agar.io-like 2D Game  
+# Petri Dish Simulation  
 **Technologies:** SFML • ImGui • Box2D • C++  
-**Concept:** Evolving cells controlled by neural node-graphs, reproducing, mutating, emitting RGB signals, sensing 16 directions, consuming mass to survive.
+**Concept:** Evolutionary Agar.io-like game with cells controlled by neural node-graphs, reproducing, mutating, emitting RGB signals, sensing 16 directions, consuming mass to survive.
 
 ---
 
@@ -156,12 +156,12 @@ Follow the phases strictly and the project will remain maintainable and scalable
 1. Configure Release: `cmake -B build -DCMAKE_BUILD_TYPE=Release`
 2. Build: `cmake --build build --config Release`
 3. Install the bundle: `cmake --install build --prefix dist`
-4. Run or ship `dist/Simple2DGame.app` (double-clickable); zip that folder or wrap it in a DMG for distribution.
-5. Optional sanity check: `otool -L dist/Simple2DGame.app/Contents/MacOS/Simple2DGame` should show `@executable_path/../Frameworks` for deps.
+4. Run or ship `dist/Petri Dish Simulation.app` (double-clickable); zip that folder or wrap it in a DMG for distribution.
+5. Optional sanity check: `otool -L "dist/Petri Dish Simulation.app/Contents/MacOS/Petri Dish Simulation"` should show `@executable_path/../Frameworks` for deps.
 
 ### macOS DMG options
 
-- CPack DragNDrop: from the build dir run `cpack -G DragNDrop` (after Release configure/build). It emits `Simple2DGame-<version>.dmg`.
+- CPack DragNDrop: from the build dir run `cpack -G DragNDrop` (after Release configure/build). It emits `PetriDishSimulation-<version>.dmg`.
 - Manual DMG (works now): after `cmake --install build --prefix dist`, run from repo root:  
-  `hdiutil create -volname "Simple2DGame" -srcfolder dist -ov -format UDZO Simple2DGame.dmg`
-  Share `Simple2DGame.dmg`; users mount it and run/drag `Simple2DGame.app` inside.
+  `hdiutil create -volname "Petri Dish Simulation" -srcfolder dist -ov -format UDZO PetriDishSimulation.dmg`
+  Share `PetriDishSimulation.dmg`; users mount it and run/drag `Petri Dish Simulation.app` inside.
