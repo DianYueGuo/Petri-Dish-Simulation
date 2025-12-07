@@ -131,11 +131,6 @@ install(
 )
 
 if(APPLE)
-    install(
-        CODE "
-            include(BundleUtilities)
-            set(bundle \"${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}.app\")
-            fixup_bundle(\"${bundle}\" \"\" \"${CMAKE_BINARY_DIR}\")
-        "
-    )
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FixupBundle.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/FixupBundle.cmake @ONLY)
+    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/FixupBundle.cmake")
 endif()

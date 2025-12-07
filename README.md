@@ -158,3 +158,10 @@ Follow the phases strictly and the project will remain maintainable and scalable
 3. Install the bundle: `cmake --install build --prefix dist`
 4. Run or ship `dist/Simple2DGame.app` (double-clickable); zip that folder or wrap it in a DMG for distribution.
 5. Optional sanity check: `otool -L dist/Simple2DGame.app/Contents/MacOS/Simple2DGame` should show `@executable_path/../Frameworks` for deps.
+
+### macOS DMG options
+
+- CPack DragNDrop: from the build dir run `cpack -G DragNDrop` (after Release configure/build). It emits `Simple2DGame-<version>.dmg`.
+- Manual DMG (works now): after `cmake --install build --prefix dist`, run from repo root:  
+  `hdiutil create -volname "Simple2DGame" -srcfolder dist -ov -format UDZO Simple2DGame.dmg`
+  Share `Simple2DGame.dmg`; users mount it and run/drag `Simple2DGame.app` inside.

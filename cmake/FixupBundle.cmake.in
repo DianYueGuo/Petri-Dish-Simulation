@@ -1,0 +1,26 @@
+include(BundleUtilities)
+
+set(_prefix "${CMAKE_INSTALL_PREFIX}")
+if(NOT IS_ABSOLUTE "${_prefix}")
+    set(_prefix "@CMAKE_SOURCE_DIR@/${_prefix}")
+endif()
+
+set(bundle "")
+set(_candidate "${_prefix}/@APP_BUNDLE_NAME@.app")
+if(IS_DIRECTORY "${_candidate}")
+    set(bundle "${_candidate}")
+endif()
+
+if(NOT bundle)
+    file(GLOB_RECURSE app_bundle "@CMAKE_BINARY_DIR@/_CPack_Packages/*.app" "@CMAKE_BINARY_DIR@/*.app")
+    if(app_bundle)
+        list(GET app_bundle 0 bundle)
+    endif()
+endif()
+
+if(NOT bundle)
+    message(FATAL_ERROR "fixup_bundle: no .app candidate found")
+endif()
+
+message(STATUS "fixup_bundle using bundle: ${bundle}")
+fixup_bundle("${bundle}" "" "@CMAKE_BINARY_DIR@")
