@@ -532,15 +532,15 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
 
             if (ImGui::CollapsingHeader("Hazards & division outcomes", ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::SeparatorText("Hazards & failure");
-                if (ImGui::SliderFloat("Toxic death chance", &state.poison_death_probability, 0.0f, 1.0f, "%.2f")) {
+                if (ImGui::SliderFloat("Toxic pellet death prob", &state.poison_death_probability, 0.0f, 1.0f, "%.2f")) {
                     game.set_poison_death_probability(state.poison_death_probability);
                 }
                 show_hover_text("Chance that eating a toxic pellet kills an eater.");
-                if (ImGui::SliderFloat("Toxic death chance (normal)", &state.poison_death_probability_normal, 0.0f, 1.0f, "%.2f")) {
+                if (ImGui::SliderFloat("Food pellet death prob", &state.poison_death_probability_normal, 0.0f, 1.0f, "%.2f")) {
                     game.set_poison_death_probability_normal(state.poison_death_probability_normal);
                 }
                 show_hover_text("Baseline toxic lethality when circles are not boosted.");
-                if (ImGui::SliderFloat("Poison cloud area %", &state.eater_cloud_area_percentage, 0.0f, 100.0f, "%.0f")) {
+                if (ImGui::SliderFloat("Death Remain Area %", &state.eater_cloud_area_percentage, 0.0f, 100.0f, "%.0f")) {
                     game.set_eater_cloud_area_percentage(state.eater_cloud_area_percentage);
                 }
                 show_hover_text("Percent of an eater's area that returns as pellets when it dies to poison.");
