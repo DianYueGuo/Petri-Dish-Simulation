@@ -47,6 +47,8 @@ struct UiState {
     float sprinkle_rate_eatable = 50.0f;
     float sprinkle_rate_toxic = 0.0f;
     bool initialized = false;
+    bool follow_selected = false;
+    bool follow_oldest = false;
 };
 
 void show_hover_text(const char* description) {
@@ -134,6 +136,8 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.sprinkle_rate_eater = game.get_sprinkle_rate_eater();
         state.sprinkle_rate_eatable = game.get_sprinkle_rate_eatable();
         state.sprinkle_rate_toxic = game.get_sprinkle_rate_toxic();
+        state.follow_selected = game.get_follow_selected();
+        state.follow_oldest = game.get_follow_oldest_largest();
         state.initialized = true;
     }
 
@@ -149,11 +153,14 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                 game.set_paused(paused);
             }
             show_hover_text("Stop simulation updates so you can inspect selected eater info.");
-            bool follow = game.get_follow_selected();
-            if (ImGui::Checkbox("Follow selected eater", &follow)) {
-                game.set_follow_selected(follow);
+            if (ImGui::Checkbox("Follow selected eater", &state.follow_selected)) {
+                game.set_follow_selected(state.follow_selected);
             }
             show_hover_text("Automatically center the view on the selected eater until it disappears.");
+            if (ImGui::Checkbox("Follow oldest eater (largest if tie)", &state.follow_oldest)) {
+                game.set_follow_oldest_largest(state.follow_oldest);
+            }
+            show_hover_text("Auto-center on the oldest eater; if multiple share the age, the largest area wins.");
             ImGui::Text("Sim time: %.2fs  Real time: %.2fs  FPS: %.1f", game.get_sim_time(), game.get_real_time(), game.get_last_fps());
             show_hover_text("Sim time is the accumulated simulated seconds; real is wall time since start.");
             ImGui::Text("Longest life  creation/division: %.2fs / %.2fs",

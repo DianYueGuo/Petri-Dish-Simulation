@@ -327,15 +327,37 @@ int Game::get_selected_generation() const {
 }
 
 void Game::update_follow_view(sf::View& view) const {
-    if (!follow_selected) {
-        return;
+    auto center_on = [&](const EaterCircle* eater) {
+        if (!eater) return false;
+        b2Vec2 p = eater->getPosition();
+        view.setCenter({p.x * pixles_per_meter, p.y * pixles_per_meter});
+        return true;
+    };
+
+    // Priority: selected eater, then oldest-largest if enabled.
+    if (follow_selected) {
+        if (center_on(get_selected_eater())) {
+            return;
+        }
     }
-    const EaterCircle* eater = get_selected_eater();
-    if (!eater) {
-        return;
+
+    if (follow_oldest_largest) {
+        const EaterCircle* best = nullptr;
+        float best_age = -1.0f;
+        float best_area = -1.0f;
+        for (const auto& c : circles) {
+            if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
+                float age = std::max(0.0f, sim_time_accum - eater->get_creation_time());
+                float area = eater->getArea();
+                if (age > best_age || (std::abs(age - best_age) < 1e-6f && area > best_area)) {
+                    best_age = age;
+                    best_area = area;
+                    best = eater;
+                }
+            }
+        }
+        center_on(best);
     }
-    b2Vec2 p = eater->getPosition();
-    view.setCenter({p.x * pixles_per_meter, p.y * pixles_per_meter});
 }
 
 void Game::update_max_generation_from_circle(const EatableCircle* circle) {

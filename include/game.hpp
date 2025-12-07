@@ -131,6 +131,8 @@ public:
     float get_longest_life_since_division() const { return max_age_since_division; }
     void set_follow_selected(bool v) { follow_selected = v; }
     bool get_follow_selected() const { return follow_selected; }
+    void set_follow_oldest_largest(bool v) { follow_oldest_largest = v; }
+    bool get_follow_oldest_largest() const { return follow_oldest_largest; }
     void accumulate_real_time(float dt);
     void frame_rendered();
     void update_follow_view(sf::View& view) const;
@@ -224,6 +226,7 @@ private:
     float max_age_since_creation = 0.0f;
     float max_age_since_division = 0.0f;
     bool follow_selected = false;
+    bool follow_oldest_largest = false;
 };
 
 #endif
