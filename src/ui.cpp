@@ -431,26 +431,6 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                     ImGui::Text("No eater selected");
                 }
             }
-
-            if (ImGui::CollapsingHeader("Cleanup & utilities", ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::SliderFloat("Remove random %", &state.delete_percentage, 0.0f, 100.0f, "%.1f");
-                show_hover_text("Percent of all circles to delete at random when the button is pressed.");
-                if (ImGui::Button("Cull random circles")) {
-                    game.remove_random_percentage(state.delete_percentage);
-                }
-                show_hover_text("Deletes a random selection of circles using the percentage above.");
-                ImGui::SeparatorText("Cleanup pellets (max targets)");
-                bool pellet_limits_changed = false;
-                pellet_limits_changed |= ImGui::SliderInt("Max food pellets", &state.max_food_pellets, 0, 1000);
-                pellet_limits_changed |= ImGui::SliderInt("Max toxic pellets", &state.max_toxic_pellets, 0, 1000);
-                pellet_limits_changed |= ImGui::SliderInt("Max division pellets", &state.max_division_pellets, 0, 1000);
-                show_hover_text("System auto-adjusts cleanup rates to keep pellets near these targets.");
-                if (pellet_limits_changed) {
-                    game.set_max_food_pellets(state.max_food_pellets);
-                    game.set_max_toxic_pellets(state.max_toxic_pellets);
-                    game.set_max_division_pellets(state.max_division_pellets);
-                }
-            }
             ImGui::EndTabItem();
         }
 
@@ -669,6 +649,26 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                             game.get_food_pellet_count(),
                             game.get_toxic_pellet_count(),
                             game.get_division_pellet_count());
+            }
+
+            if (ImGui::CollapsingHeader("Cleanup & utilities", ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::SliderFloat("Remove random %", &state.delete_percentage, 0.0f, 100.0f, "%.1f");
+                show_hover_text("Percent of all circles to delete at random when the button is pressed.");
+                if (ImGui::Button("Cull random circles")) {
+                    game.remove_random_percentage(state.delete_percentage);
+                }
+                show_hover_text("Deletes a random selection of circles using the percentage above.");
+                ImGui::SeparatorText("Cleanup pellets (max targets)");
+                bool pellet_limits_changed = false;
+                pellet_limits_changed |= ImGui::SliderInt("Max food pellets", &state.max_food_pellets, 0, 1000);
+                pellet_limits_changed |= ImGui::SliderInt("Max toxic pellets", &state.max_toxic_pellets, 0, 1000);
+                pellet_limits_changed |= ImGui::SliderInt("Max division pellets", &state.max_division_pellets, 0, 1000);
+                show_hover_text("System auto-adjusts cleanup rates to keep pellets near these targets.");
+                if (pellet_limits_changed) {
+                    game.set_max_food_pellets(state.max_food_pellets);
+                    game.set_max_toxic_pellets(state.max_toxic_pellets);
+                    game.set_max_division_pellets(state.max_division_pellets);
+                }
             }
             ImGui::EndTabItem();
         }
