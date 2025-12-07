@@ -320,7 +320,7 @@ void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
 std::size_t Game::get_eater_count() const {
     std::size_t count = 0;
     for (const auto& c : circles) {
-        if (dynamic_cast<EaterCircle*>(c.get())) {
+        if (c && c->get_kind() == CircleKind::Eater) {
             ++count;
         }
     }
@@ -352,7 +352,9 @@ const neat::Genome* Game::get_selected_brain() const {
     if (!selected_index || *selected_index >= circles.size()) {
         return nullptr;
     }
-    if (auto* eater = dynamic_cast<EaterCircle*>(circles[*selected_index].get())) {
+    auto* base = circles[*selected_index].get();
+    if (base && base->get_kind() == CircleKind::Eater) {
+        auto* eater = static_cast<EaterCircle*>(base);
         return &eater->get_brain();
     }
     return nullptr;
@@ -362,7 +364,11 @@ const EaterCircle* Game::get_selected_eater() const {
     if (!selected_index || *selected_index >= circles.size()) {
         return nullptr;
     }
-    return dynamic_cast<EaterCircle*>(circles[*selected_index].get());
+    auto* base = circles[*selected_index].get();
+    if (base && base->get_kind() == CircleKind::Eater) {
+        return static_cast<EaterCircle*>(base);
+    }
+    return nullptr;
 }
 
 const EaterCircle* Game::get_oldest_largest_eater() const {
@@ -370,7 +376,8 @@ const EaterCircle* Game::get_oldest_largest_eater() const {
     float best_age = -1.0f;
     float best_area = -1.0f;
     for (const auto& c : circles) {
-        if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
+        if (c && c->get_kind() == CircleKind::Eater) {
+            auto* eater = static_cast<const EaterCircle*>(c.get());
             float age = std::max(0.0f, sim_time_accum - eater->get_creation_time());
             float area = eater->getArea();
             if (age > best_age || (std::abs(age - best_age) < 1e-6f && area > best_area)) {
@@ -389,7 +396,8 @@ const EaterCircle* Game::get_oldest_smallest_eater() const {
     float best_area = std::numeric_limits<float>::max();
     constexpr float eps = 1e-6f;
     for (const auto& c : circles) {
-        if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
+        if (c && c->get_kind() == CircleKind::Eater) {
+            auto* eater = static_cast<const EaterCircle*>(c.get());
             float age = std::max(0.0f, sim_time_accum - eater->get_creation_time());
             float area = eater->getArea();
             if (age > best_age + eps || (std::abs(age - best_age) <= eps && area < best_area)) {
@@ -407,7 +415,8 @@ const EaterCircle* Game::get_oldest_middle_eater() const {
     float best_age = -1.0f;
     constexpr float eps = 1e-6f;
     for (const auto& c : circles) {
-        if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
+        if (c && c->get_kind() == CircleKind::Eater) {
+            auto* eater = static_cast<const EaterCircle*>(c.get());
             float age = std::max(0.0f, sim_time_accum - eater->get_creation_time());
             float area = eater->getArea();
             if (age > best_age + eps) {
@@ -444,8 +453,9 @@ int Game::get_selected_generation() const {
     if (!selected_index || *selected_index >= circles.size()) {
         return -1;
     }
-    if (auto* eater = dynamic_cast<EaterCircle*>(circles[*selected_index].get())) {
-        return eater->get_generation();
+    auto* base = circles[*selected_index].get();
+    if (base && base->get_kind() == CircleKind::Eater) {
+        return static_cast<EaterCircle*>(base)->get_generation();
     }
     return -1;
 }
@@ -458,7 +468,8 @@ void Game::update_follow_view(sf::View& view) const {
 }
 
 void Game::update_max_generation_from_circle(const EatableCircle* circle) {
-    if (auto* eater = dynamic_cast<const EaterCircle*>(circle)) {
+    if (circle && circle->get_kind() == CircleKind::Eater) {
+        auto* eater = static_cast<const EaterCircle*>(circle);
         if (eater->get_generation() > max_generation) {
             max_generation = eater->get_generation();
             max_generation_brain = eater->get_brain();
@@ -470,7 +481,8 @@ void Game::recompute_max_generation() {
     int new_max = 0;
     std::optional<neat::Genome> new_brain;
     for (const auto& circle : circles) {
-        if (auto* eater = dynamic_cast<const EaterCircle*>(circle.get())) {
+        if (circle && circle->get_kind() == CircleKind::Eater) {
+            auto* eater = static_cast<const EaterCircle*>(circle.get());
             if (eater->get_generation() >= new_max) {
                 new_max = eater->get_generation();
                 new_brain = eater->get_brain();
@@ -485,7 +497,8 @@ void Game::update_max_ages() {
     float creation_max = 0.0f;
     float division_max = 0.0f;
     for (const auto& circle : circles) {
-        if (auto* eater = dynamic_cast<const EaterCircle*>(circle.get())) {
+        if (circle && circle->get_kind() == CircleKind::Eater) {
+            auto* eater = static_cast<const EaterCircle*>(circle.get());
             float age_creation = std::max(0.0f, sim_time_accum - eater->get_creation_time());
             float age_division = std::max(0.0f, sim_time_accum - eater->get_last_division_time());
             if (age_creation > creation_max) creation_max = age_creation;
@@ -527,7 +540,8 @@ const EaterCircle* Game::find_nearest_eater(const b2Vec2& pos) const {
     const EaterCircle* best = nullptr;
     float best_dist2 = std::numeric_limits<float>::max();
     for (const auto& c : circles) {
-        if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
+        if (c && c->get_kind() == CircleKind::Eater) {
+            auto* eater = static_cast<const EaterCircle*>(c.get());
             b2Vec2 p = eater->getPosition();
             float dx = p.x - pos.x;
             float dy = p.y - pos.y;
@@ -636,7 +650,8 @@ void Game::sprinkle_entities(float dt) {
 
 void Game::update_eaters(const b2WorldId& worldId, float dt) {
     for (size_t i = 0; i < circles.size(); ++i) {
-        if (auto* eater_circle = dynamic_cast<EaterCircle*>(circles[i].get())) {
+        if (circles[i] && circles[i]->get_kind() == CircleKind::Eater) {
+            auto* eater_circle = static_cast<EaterCircle*>(circles[i].get());
             eater_circle->process_eating(worldId, *this, poison_death_probability, poison_death_probability_normal);
             eater_circle->update_inactivity(dt, inactivity_timeout);
         }
@@ -647,9 +662,10 @@ void Game::run_brain_updates(const b2WorldId& worldId, float timeStep) {
     const float brain_period = (brain_updates_per_sim_second > 0.0f) ? (1.0f / brain_updates_per_sim_second) : std::numeric_limits<float>::max();
     while (brain_time_accumulator >= brain_period) {
         for (size_t i = 0; i < circles.size(); ++i) {
-            if (auto* eater_circle = dynamic_cast<EaterCircle*>(circles[i].get())) {
+            if (circles[i] && circles[i]->get_kind() == CircleKind::Eater) {
+                auto* eater_circle = static_cast<EaterCircle*>(circles[i].get());
                 eater_circle->set_minimum_area(minimum_area);
-                eater_circle->set_use_smoothed_display(!show_true_color);
+                eater_circle->set_display_mode(!show_true_color);
                 eater_circle->move_intelligently(worldId, *this, brain_period);
             }
         }
@@ -685,7 +701,8 @@ void Game::refresh_generation_and_age() {
 
 Game::RemovalResult Game::evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud) {
     RemovalResult result{};
-    if (auto* eater = dynamic_cast<EaterCircle*>(&circle)) {
+    if (circle.get_kind() == CircleKind::Eater) {
+        auto* eater = static_cast<EaterCircle*>(&circle);
         if (eater->is_poisoned()) {
             spawn_eatable_cloud(*eater, spawned_cloud);
             result.should_remove = true;
@@ -831,10 +848,7 @@ void Game::remove_percentage_pellets(float percentage, bool toxic, bool division
     for (std::size_t i = 0; i < circles.size(); ++i) {
         if (auto* e = dynamic_cast<EatableCircle*>(circles[i].get())) {
             if (e->is_boost_particle()) continue;
-            if (auto* eater = dynamic_cast<EaterCircle*>(e)) {
-                (void)eater;
-                continue;
-            }
+            if (e->get_kind() == CircleKind::Eater) continue;
             if (e->is_toxic() == toxic && e->is_division_boost() == division_boost) {
                 indices.push_back(i);
             }
@@ -861,7 +875,7 @@ std::size_t Game::count_pellets(bool toxic, bool division_boost) const {
     for (const auto& c : circles) {
         if (auto* e = dynamic_cast<const EatableCircle*>(c.get())) {
             if (e->is_boost_particle()) continue;
-            if (dynamic_cast<const EaterCircle*>(c.get())) continue;
+            if (e->get_kind() == CircleKind::Eater) continue;
             // Only count pellets inside the petri dish.
             b2Vec2 pos = e->getPosition();
             float dist = std::sqrt(pos.x * pos.x + pos.y * pos.y);

@@ -132,8 +132,9 @@ EaterCircle::EaterCircle(const b2WorldId &worldId,
                          std::vector<std::vector<int>>* innov_ids,
                          int* last_innov_id,
                          Game* owner) :
-    EatableCircle(worldId, position_x, position_y, radius, density, false, angle),
+    EatableCircle(worldId, position_x, position_y, radius, density, /*toxic=*/false, /*division_boost=*/false, angle, /*boost_particle=*/false),
     brain(base_brain ? *base_brain : neat::Genome(29, 11, 0, 0.5f, innov_ids, last_innov_id)) {
+    set_kind(CircleKind::Eater);
     neat_innovations = innov_ids;
     neat_last_innov_id = last_innov_id;
     owner_game = owner;
@@ -168,23 +169,20 @@ float calculate_overlap_area(float r1, float r2, float distance) {
 
 void EaterCircle::process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal) {
     poisoned = false;
-    for (auto* touching_circle : touching_circles) {
-        if (!can_eat_circle(*touching_circle)) {
-            continue;
+    for_each_touching([&](CirclePhysics& touching_circle) {
+        if (!can_eat_circle(touching_circle)) {
+            return;
         }
-
-        auto* eatable = dynamic_cast<EatableCircle*>(touching_circle);
+        auto* eatable = dynamic_cast<EatableCircle*>(&touching_circle);
         if (!eatable) {
-            continue;
+            return;
         }
-
-        if (!has_overlap_to_eat(*touching_circle)) {
-            continue;
+        if (!has_overlap_to_eat(touching_circle)) {
+            return;
         }
-
         float touching_area = eatable->getArea();
         consume_touching_circle(worldId, game, *eatable, touching_area, poison_death_probability_toxic, poison_death_probability_normal);
-    }
+    });
 
     if (poisoned) {
         this->be_eaten();
@@ -228,7 +226,7 @@ void EaterCircle::consume_touching_circle(const b2WorldId &worldId, Game& game, 
     }
 
     float new_area = this->getArea() + touching_area;
-    this->setArea(new_area, worldId);
+    this->grow_by_area(touching_area, worldId);
 }
 
 void EaterCircle::move_randomly(const b2WorldId &worldId, Game &game) {
@@ -542,30 +540,30 @@ void EaterCircle::update_brain_inputs_from_touching() {
         const float heading = this->getAngle();
         const auto sector_segments = build_sector_segments();
 
-        for (auto* circle : touching_circles) {
-            auto* drawable = dynamic_cast<DrawableCircle*>(circle);
+        for_each_touching([&](const CirclePhysics& circle) {
+            auto* drawable = dynamic_cast<const DrawableCircle*>(&circle);
             if (!drawable) {
-                continue;
+                return;
             }
 
-            const b2Vec2 other_pos = circle->getPosition();
+            const b2Vec2 other_pos = circle.getPosition();
             const float dx = other_pos.x - self_pos.x;
             const float dy = other_pos.y - self_pos.y;
-            const float area = std::max(circle->getArea(), 0.0f);
+            const float area = std::max(circle.getArea(), 0.0f);
 
             if (dx == 0.0f && dy == 0.0f) {
                 accumulate_coincident_circle(*drawable, area, summed_colors, weights);
-                continue;
+                return;
             }
 
             float relative_angle = normalize_angle(std::atan2(dy, dx) - heading);
             float distance = std::sqrt(dx * dx + dy * dy);
-            float other_r = circle->getRadius();
+            float other_r = circle.getRadius();
             float half_span = compute_half_span(distance, other_r);
 
             auto span_segments = build_span_segments(relative_angle, half_span);
             accumulate_offset_circle(*drawable, area, span_segments, sector_segments, summed_colors, weights);
-        }
+        });
     }
 
     apply_sensor_inputs(summed_colors, weights);

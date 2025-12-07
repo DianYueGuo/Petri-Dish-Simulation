@@ -2,7 +2,17 @@
 #include "eater_circle.hpp"
 
 EatableCircle::EatableCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, bool toxic, bool division_boost, float angle, bool boost_particle) :
-    DrawableCircle(worldId, position_x, position_y, radius, density, angle),
+    DrawableCircle(
+        worldId,
+        position_x,
+        position_y,
+        radius,
+        density,
+        angle,
+        boost_particle ? CircleKind::BoostParticle
+                       : division_boost ? CircleKind::DivisionPellet
+                                        : toxic ? CircleKind::ToxicPellet
+                                                : CircleKind::Pellet),
     toxic(toxic),
     division_boost(division_boost),
     boost_particle(boost_particle) {
@@ -23,4 +33,16 @@ void EatableCircle::be_eaten() {
 
 bool EatableCircle::is_eaten() const {
     return eaten;
+}
+
+void EatableCircle::update_kind_from_flags() {
+    if (boost_particle) {
+        set_kind(CircleKind::BoostParticle);
+    } else if (division_boost) {
+        set_kind(CircleKind::DivisionPellet);
+    } else if (toxic) {
+        set_kind(CircleKind::ToxicPellet);
+    } else {
+        set_kind(CircleKind::Pellet);
+    }
 }

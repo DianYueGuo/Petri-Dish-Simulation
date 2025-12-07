@@ -1,14 +1,29 @@
 #ifndef CIRCLE_PHYSICS_HPP
 #define CIRCLE_PHYSICS_HPP
 
+#include <functional>
 #include <unordered_set>
 
 #include <box2d/box2d.h>
 
+enum class CircleKind {
+    Unknown,
+    Eater,
+    Pellet,
+    ToxicPellet,
+    DivisionPellet,
+    BoostParticle
+};
 
 class CirclePhysics {
 public:
-    CirclePhysics(const b2WorldId &worldId, float position_x = 0.0f, float position_y = 0.0f, float radius = 1.0f, float density = 1.0f, float angle = 0.0f);
+    CirclePhysics(const b2WorldId &worldId,
+                  float position_x = 0.0f,
+                  float position_y = 0.0f,
+                  float radius = 1.0f,
+                  float density = 1.0f,
+                  float angle = 0.0f,
+                  CircleKind kind = CircleKind::Unknown);
 
     virtual ~CirclePhysics();
 
@@ -25,6 +40,7 @@ public:
     float getRadius() const;
     float getArea() const;
     void setArea(float area, const b2WorldId& worldId);
+    void grow_by_area(float delta_area, const b2WorldId& worldId);
 
     void apply_forward_force() const;
     void stop_applying_force() const;
@@ -49,6 +65,9 @@ public:
     void setRadius(float new_radius, const b2WorldId &worldId);
     void setPosition(const b2Vec2& new_position, const b2WorldId &worldId);
     void setAngle(float new_angle, const b2WorldId &worldId);
+    CircleKind get_kind() const { return kind; }
+    void for_each_touching(const std::function<void(CirclePhysics&)>& fn);
+    void for_each_touching(const std::function<void(const CirclePhysics&)>& fn) const;
 private:
     struct BodyState {
         b2Vec2 position;
@@ -72,8 +91,10 @@ private:
     float angularDamping;
     float linearImpulseMagnitude;
     float angularImpulseMagnitude;
+    CircleKind kind;
 protected:
     std::unordered_set<CirclePhysics*> touching_circles;
+    void set_kind(CircleKind k) { kind = k; }
 };
 
 #endif

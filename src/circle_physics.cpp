@@ -4,7 +4,7 @@
 #include <cmath>
 
 
-CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle) :
+CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, float angle, CircleKind kind) :
     bodyId{},
     density(density),
     isSensor(true),
@@ -12,7 +12,8 @@ CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float p
     linearDamping(0.3f),
     angularDamping(1.0f),
     linearImpulseMagnitude(5.0f),
-    angularImpulseMagnitude(5.0f) {
+    angularImpulseMagnitude(5.0f),
+    kind(kind) {
     BodyState initialState{};
     initialState.position = (b2Vec2){position_x, position_y};
     initialState.rotation = b2MakeRot(angle);
@@ -156,6 +157,14 @@ float CirclePhysics::getArea() const {
     return 3.14159f * r * r;
 }
 
+void CirclePhysics::grow_by_area(float delta_area, const b2WorldId& worldId) {
+    if (delta_area <= 0.0f) {
+        return;
+    }
+    float new_area = getArea() + delta_area;
+    setArea(new_area, worldId);
+}
+
 void CirclePhysics::apply_forward_force() const {
     b2Rot rotation = b2Body_GetRotation(bodyId);
     float force_magnitude = 50.0f;
@@ -204,6 +213,22 @@ void CirclePhysics::add_touching_circle(CirclePhysics* circle_physics) {
 
 void CirclePhysics::remove_touching_circle(CirclePhysics* circle_physics) {
     touching_circles.erase(circle_physics);
+}
+
+void CirclePhysics::for_each_touching(const std::function<void(CirclePhysics&)>& fn) {
+    for (auto* c : touching_circles) {
+        if (c) {
+            fn(*c);
+        }
+    }
+}
+
+void CirclePhysics::for_each_touching(const std::function<void(const CirclePhysics&)>& fn) const {
+    for (auto* c : touching_circles) {
+        if (c) {
+            fn(*c);
+        }
+    }
 }
 
 void CirclePhysics::setRadius(float new_radius, const b2WorldId &worldId) {
