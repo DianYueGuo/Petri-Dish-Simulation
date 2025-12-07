@@ -662,7 +662,7 @@ void Game::sprinkle_entities(float dt) {
 void Game::update_eaters(const b2WorldId& worldId) {
     for (size_t i = 0; i < circles.size(); ++i) {
         if (auto* eater_circle = dynamic_cast<EaterCircle*>(circles[i].get())) {
-            eater_circle->process_eating(worldId, poison_death_probability, poison_death_probability_normal);
+            eater_circle->process_eating(worldId, *this, poison_death_probability, poison_death_probability_normal);
         }
     }
 }

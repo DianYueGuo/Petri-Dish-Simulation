@@ -66,7 +66,7 @@ float calculate_overlap_area(float r1, float r2, float distance) {
     return part1 + part2 - part3;
 }
 
-void EaterCircle::process_eating(const b2WorldId &worldId, float poison_death_probability_toxic, float poison_death_probability_normal) {
+void EaterCircle::process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal) {
     poisoned = false;
     for (auto* touching_circle : touching_circles) {
         if (touching_circle->getRadius() < this->getRadius()) {
@@ -93,8 +93,9 @@ void EaterCircle::process_eating(const b2WorldId &worldId, float poison_death_pr
                         eatable->set_eaten_by(this);
                         if (eatable->is_division_boost()) {
                             float div_roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-                            // Need access to Game for probability; pass through move_intelligently caller
-                            // so we simply mark division here is not safe; handled in move_intelligently.
+                            if (div_roll <= game.get_division_pellet_divide_probability()) {
+                                this->divide(worldId, game);
+                            }
                         }
                     }
                 }
@@ -180,17 +181,6 @@ void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game, float
         memory_state[i] = std::clamp(brain_outputs[7 + i], 0.0f, 1.0f);
     }
 
-    // Process any pending division boosts from touching circles consumed this tick.
-    for (auto* touching_circle : touching_circles) {
-        if (auto* eatable = dynamic_cast<EatableCircle*>(touching_circle)) {
-            if (eatable->is_eaten() && eatable->is_division_boost()) {
-                float div_roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-                if (div_roll <= game.get_division_pellet_divide_probability()) {
-                    this->divide(worldId, game);
-                }
-            }
-        }
-    }
 }
 
 void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {

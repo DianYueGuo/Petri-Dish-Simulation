@@ -36,7 +36,7 @@ public:
     void set_generation(int g) { generation = std::max(0, g); }
     const neat::Genome& get_brain() const { return brain; }
 
-    void process_eating(const b2WorldId &worldId, float poison_death_probability_toxic, float poison_death_probability_normal);
+    void process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal);
 
     void move_randomly(const b2WorldId &worldId, Game &game);
     void move_intelligently(const b2WorldId &worldId, Game &game, float dt);
