@@ -190,6 +190,16 @@ public:
     bool select_circle_at_world(const b2Vec2& pos);
     CursorMode get_cursor_mode() const { return cursor_mode; }
 private:
+    struct SelectionSnapshot {
+        const EatableCircle* circle = nullptr;
+        b2Vec2 position{0.0f, 0.0f};
+    };
+
+    struct RemovalResult {
+        bool should_remove = false;
+        const EaterCircle* killer = nullptr;
+    };
+
     void spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out);
     b2Vec2 random_point_in_petri() const;
     void sprinkle_with_rate(float rate, AddType type, float dt);
@@ -218,6 +228,10 @@ private:
     void adjust_cleanup_rates();
     std::size_t count_pellets(bool toxic, bool division_boost) const;
     void erase_indices_descending(std::vector<std::size_t>& indices);
+    SelectionSnapshot capture_selection_state() const;
+    void handle_selection_after_removal(const SelectionSnapshot& snapshot, bool was_removed, const EaterCircle* preferred_fallback, const b2Vec2& fallback_position);
+    void refresh_generation_and_age();
+    RemovalResult evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;

@@ -17,6 +17,29 @@ inline float random_unit() {
 inline float radius_from_area(float area) {
     return std::sqrt(std::max(area, 0.0f) / PI);
 }
+
+CirclePhysics* circle_from_shape(const b2ShapeId& shapeId) {
+    return static_cast<CirclePhysics*>(b2Shape_GetUserData(shapeId));
+}
+
+void handle_sensor_begin_touch(const b2SensorBeginTouchEvent& beginTouch) {
+    if (auto* sensor = circle_from_shape(beginTouch.sensorShapeId)) {
+        if (auto* visitor = circle_from_shape(beginTouch.visitorShapeId)) {
+            sensor->add_touching_circle(visitor);
+        }
+    }
+}
+
+void handle_sensor_end_touch(const b2SensorEndTouchEvent& endTouch) {
+    if (!b2Shape_IsValid(endTouch.sensorShapeId) || !b2Shape_IsValid(endTouch.visitorShapeId)) {
+        return;
+    }
+    if (auto* sensor = circle_from_shape(endTouch.sensorShapeId)) {
+        if (auto* visitor = circle_from_shape(endTouch.visitorShapeId)) {
+            sensor->remove_touching_circle(visitor);
+        }
+    }
+}
 } // namespace
 
 Game::Game() {
@@ -34,22 +57,13 @@ void process_touch_events(const b2WorldId& worldId) {
     for (int i = 0; i < sensorEvents.beginCount; ++i)
     {
         b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;
-        void* sensorShapeUserData = b2Shape_GetUserData(beginTouch->sensorShapeId);
-        void* visitorShapeUserData = b2Shape_GetUserData(beginTouch->visitorShapeId);
-
-        static_cast<CirclePhysics*>(sensorShapeUserData)->add_touching_circle(static_cast<CirclePhysics*>(visitorShapeUserData));
+        handle_sensor_begin_touch(*beginTouch);
     }
 
     for (int i = 0; i < sensorEvents.endCount; ++i)
     {
         b2SensorEndTouchEvent* endTouch = sensorEvents.endEvents + i;
-        if (b2Shape_IsValid(endTouch->sensorShapeId) && b2Shape_IsValid(endTouch->visitorShapeId))
-        {
-            void* sensorShapeUserData = b2Shape_GetUserData(endTouch->sensorShapeId);
-            void* visitorShapeUserData = b2Shape_GetUserData(endTouch->visitorShapeId);
-
-            static_cast<CirclePhysics*>(sensorShapeUserData)->remove_touching_circle(static_cast<CirclePhysics*>(visitorShapeUserData));
-        }
+        handle_sensor_end_touch(*endTouch);
     }
 }
 
@@ -643,38 +657,61 @@ void Game::run_brain_updates(const b2WorldId& worldId, float timeStep) {
     }
 }
 
+Game::SelectionSnapshot Game::capture_selection_state() const {
+    SelectionSnapshot snapshot{};
+    if (selected_index && *selected_index < circles.size()) {
+        snapshot.circle = circles[*selected_index].get();
+        snapshot.position = snapshot.circle->getPosition();
+    }
+    return snapshot;
+}
+
+void Game::handle_selection_after_removal(const SelectionSnapshot& snapshot, bool was_removed, const EaterCircle* preferred_fallback, const b2Vec2& fallback_position) {
+    if (was_removed && follow_selected) {
+        const EaterCircle* fallback = preferred_fallback;
+        if (!fallback) {
+            fallback = find_nearest_eater(fallback_position);
+        }
+        set_selection_to_eater(fallback);
+    } else if (!was_removed && snapshot.circle) {
+        revalidate_selection(snapshot.circle);
+    }
+}
+
+void Game::refresh_generation_and_age() {
+    recompute_max_generation();
+    update_max_ages();
+}
+
+Game::RemovalResult Game::evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud) {
+    RemovalResult result{};
+    if (auto* eater = dynamic_cast<EaterCircle*>(&circle)) {
+        if (eater->is_poisoned()) {
+            spawn_eatable_cloud(*eater, spawned_cloud);
+            result.should_remove = true;
+            result.killer = eater->get_eaten_by();
+        } else if (eater->is_eaten()) {
+            result.should_remove = true;
+            result.killer = eater->get_eaten_by();
+        }
+    } else if (circle.is_eaten()) {
+        result.should_remove = true;
+    }
+    return result;
+}
+
 void Game::cull_consumed() {
     std::vector<std::unique_ptr<EatableCircle>> spawned_cloud;
-    const EatableCircle* prev_selected = (selected_index && *selected_index < circles.size())
-                                             ? circles[*selected_index].get()
-                                             : nullptr;
-    b2Vec2 prev_pos{0, 0};
-    if (prev_selected) {
-        prev_pos = prev_selected->getPosition();
-    }
+    SelectionSnapshot selection = capture_selection_state();
     bool selected_was_removed = false;
     const EaterCircle* selected_killer = nullptr;
 
     for (auto it = circles.begin(); it != circles.end(); ) {
-        bool remove = false;
-
-        if (auto* eater = dynamic_cast<EaterCircle*>(it->get())) {
-            if (eater->is_poisoned()) {
-                spawn_eatable_cloud(*eater, spawned_cloud);
-                remove = true;
-            } else if (eater->is_eaten()) {
-                remove = true;
-            }
-        } else if ((*it)->is_eaten()) {
-            remove = true;
-        }
-
-        if (remove) {
-            if (prev_selected && prev_selected == it->get()) {
+        RemovalResult removal = evaluate_circle_removal(**it, spawned_cloud);
+        if (removal.should_remove) {
+            if (selection.circle && selection.circle == it->get()) {
                 selected_was_removed = true;
-                if (auto* eater_prev = dynamic_cast<EaterCircle*>(it->get())) {
-                    selected_killer = eater_prev->get_eaten_by();
-                }
+                selected_killer = removal.killer;
             }
             it = circles.erase(it);
         } else {
@@ -682,17 +719,8 @@ void Game::cull_consumed() {
         }
     }
 
-    if (selected_was_removed && follow_selected) {
-        const EaterCircle* fallback = selected_killer;
-        if (!fallback) {
-            fallback = find_nearest_eater(prev_pos);
-        }
-        set_selection_to_eater(fallback);
-    } else if (!selected_was_removed && prev_selected) {
-        revalidate_selection(prev_selected);
-    }
-    recompute_max_generation();
-    update_max_ages();
+    handle_selection_after_removal(selection, selected_was_removed, selected_killer, selection.position);
+    refresh_generation_and_age();
 
     for (auto& c : spawned_cloud) {
         circles.push_back(std::move(c));
@@ -704,10 +732,7 @@ void Game::erase_indices_descending(std::vector<std::size_t>& indices) {
         return;
     }
 
-    const EatableCircle* prev_selected = nullptr;
-    if (selected_index && *selected_index < circles.size()) {
-        prev_selected = circles[*selected_index].get();
-    }
+    SelectionSnapshot selection = capture_selection_state();
 
     std::sort(indices.begin(), indices.end(), std::greater<std::size_t>());
     indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
@@ -718,9 +743,8 @@ void Game::erase_indices_descending(std::vector<std::size_t>& indices) {
         }
     }
 
-    revalidate_selection(prev_selected);
-    recompute_max_generation();
-    update_max_ages();
+    revalidate_selection(selection.circle);
+    refresh_generation_and_age();
 }
 
 void Game::spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out) {
@@ -754,12 +778,7 @@ void Game::remove_outside_petri() {
         return;
     }
 
-    const EatableCircle* prev_selected = nullptr;
-    b2Vec2 prev_pos{0, 0};
-    if (selected_index && *selected_index < circles.size()) {
-        prev_selected = circles[*selected_index].get();
-        prev_pos = prev_selected->getPosition();
-    }
+    SelectionSnapshot selection = capture_selection_state();
 
     bool selected_removed = false;
     circles.erase(
@@ -770,20 +789,15 @@ void Game::remove_outside_petri() {
                 b2Vec2 pos = circle->getPosition();
                 float distance = std::sqrt(pos.x * pos.x + pos.y * pos.y);
                 bool out = distance + circle->getRadius() > petri_radius;
-                if (out && prev_selected && circle.get() == prev_selected) {
+                if (out && selection.circle && circle.get() == selection.circle) {
                     selected_removed = true;
                 }
                 return out;
             }),
         circles.end());
 
-    if (selected_removed && follow_selected) {
-        set_selection_to_eater(find_nearest_eater(prev_pos));
-    } else if (prev_selected) {
-        revalidate_selection(prev_selected);
-    }
-    recompute_max_generation();
-    update_max_ages();
+    handle_selection_after_removal(selection, selected_removed, nullptr, selection.position);
+    refresh_generation_and_age();
 }
 
 void Game::remove_random_percentage(float percentage) {
@@ -912,10 +926,7 @@ void Game::adjust_cleanup_rates() {
 
 void Game::remove_stopped_boost_particles() {
     constexpr float vel_epsilon = 1e-3f;
-    const EatableCircle* prev_selected = nullptr;
-    if (selected_index && *selected_index < circles.size()) {
-        prev_selected = circles[*selected_index].get();
-    }
+    SelectionSnapshot selection = capture_selection_state();
     circles.erase(
         std::remove_if(
             circles.begin(),
@@ -928,8 +939,8 @@ void Game::remove_stopped_boost_particles() {
                 return (std::fabs(v.x) <= vel_epsilon && std::fabs(v.y) <= vel_epsilon);
             }),
         circles.end());
-    revalidate_selection(prev_selected);
-    update_max_ages();
+    handle_selection_after_removal(selection, false, nullptr, selection.position);
+    refresh_generation_and_age();
 }
 
 void Game::accumulate_real_time(float dt) {
