@@ -70,6 +70,7 @@ void Game::process_game_logic() {
     sprinkle_entities(timeStep);
     update_eaters(worldId, timeStep);
     run_brain_updates(worldId, timeStep);
+    adjust_cleanup_rates();
     // continuous pellet cleanup by rate (percent per second)
     if (cleanup_rate_food > 0.0f) {
         remove_percentage_pellets(cleanup_rate_food * timeStep, false, false);
@@ -891,6 +892,34 @@ void Game::remove_percentage_pellets(float percentage, bool toxic, bool division
     revalidate_selection(prev_selected);
     recompute_max_generation();
     update_max_ages();
+}
+
+std::size_t Game::count_pellets(bool toxic, bool division_boost) const {
+    std::size_t count = 0;
+    for (const auto& c : circles) {
+        if (auto* e = dynamic_cast<const EatableCircle*>(c.get())) {
+            if (e->is_boost_particle()) continue;
+            if (dynamic_cast<const EaterCircle*>(c.get())) continue;
+            if (e->is_toxic() == toxic && e->is_division_boost() == division_boost) {
+                ++count;
+            }
+        }
+    }
+    return count;
+}
+
+void Game::adjust_cleanup_rates() {
+    auto compute_rate = [](std::size_t count, int max_allowed) {
+        if (max_allowed <= 0) return 100.0f;
+        if (count <= static_cast<std::size_t>(max_allowed)) return 0.0f;
+        float ratio = (static_cast<float>(count) - static_cast<float>(max_allowed)) / static_cast<float>(max_allowed);
+        float rate = ratio * 50.0f; // 50%/s when count is double the max
+        return std::clamp(rate, 0.0f, 100.0f);
+    };
+
+    cleanup_rate_food = compute_rate(count_pellets(false, false), max_food_pellets);
+    cleanup_rate_toxic = compute_rate(count_pellets(true, false), max_toxic_pellets);
+    cleanup_rate_division = compute_rate(count_pellets(false, true), max_division_pellets);
 }
 
 void Game::remove_stopped_boost_particles() {

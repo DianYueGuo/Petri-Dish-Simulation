@@ -134,12 +134,12 @@ public:
     float get_eater_cloud_area_percentage() const { return eater_cloud_area_percentage; }
     void set_division_pellet_divide_probability(float p) { division_pellet_divide_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_division_pellet_divide_probability() const { return division_pellet_divide_probability; }
-    void set_cleanup_rate_food(float pct_per_sec) { cleanup_rate_food = std::max(0.0f, pct_per_sec); }
-    float get_cleanup_rate_food() const { return cleanup_rate_food; }
-    void set_cleanup_rate_toxic(float pct_per_sec) { cleanup_rate_toxic = std::max(0.0f, pct_per_sec); }
-    float get_cleanup_rate_toxic() const { return cleanup_rate_toxic; }
-    void set_cleanup_rate_division(float pct_per_sec) { cleanup_rate_division = std::max(0.0f, pct_per_sec); }
-    float get_cleanup_rate_division() const { return cleanup_rate_division; }
+    void set_max_food_pellets(int v) { max_food_pellets = std::max(0, v); }
+    int get_max_food_pellets() const { return max_food_pellets; }
+    void set_max_toxic_pellets(int v) { max_toxic_pellets = std::max(0, v); }
+    int get_max_toxic_pellets() const { return max_toxic_pellets; }
+    void set_max_division_pellets(int v) { max_division_pellets = std::max(0, v); }
+    int get_max_division_pellets() const { return max_division_pellets; }
     void update_max_generation_from_circle(const EatableCircle* circle);
     void recompute_max_generation();
     void set_show_true_color(bool value) { show_true_color = value; }
@@ -199,6 +199,8 @@ private:
     void handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e);
     void update_max_ages();
     void revalidate_selection(const EatableCircle* previously_selected);
+    void adjust_cleanup_rates();
+    std::size_t count_pellets(bool toxic, bool division_boost) const;
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
@@ -230,9 +232,12 @@ private:
     float sprinkle_rate_division = 1.0f;
     float eater_cloud_area_percentage = 70.0f;
     float division_pellet_divide_probability = 1.0f;
-    float cleanup_rate_food = 0.0f;     // percent per second
-    float cleanup_rate_toxic = 0.0f;    // percent per second
-    float cleanup_rate_division = 0.0f; // percent per second
+    float cleanup_rate_food = 0.0f;     // percent per second (computed)
+    float cleanup_rate_toxic = 0.0f;    // percent per second (computed)
+    float cleanup_rate_division = 0.0f; // percent per second (computed)
+    int max_food_pellets = 200;
+    int max_toxic_pellets = 50;
+    int max_division_pellets = 50;
     float add_node_probability = 0.1f;
     float remove_node_probability = 0.05f;
     float add_connection_probability = 0.1f;
