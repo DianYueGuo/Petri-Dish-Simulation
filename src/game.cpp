@@ -208,7 +208,7 @@ void Game::handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMov
                 case AddType::Eatable:
                 case AddType::ToxicEatable:
                 case AddType::DivisionEatable:
-                    circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, add_type == AddType::ToxicEatable));
+                    circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, add_type == AddType::ToxicEatable, true));
                     last_add_world_pos = worldPos;
                     break;
             }
