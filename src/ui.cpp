@@ -290,8 +290,8 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Area an eater spends to dash forward; 0 means no pellet is left behind. Finer range.");
             game.set_boost_area(state.boost_area);
-            ImGui::SliderFloat("Boost pellet impulse fraction", &state.boost_particle_impulse_fraction, 0.0f, 1.0f, "%.2f");
-            show_hover_text("Fraction of the eater's impulse given to the spawned boost pellet.");
+            ImGui::SliderFloat("Boost pellet impulse fraction", &state.boost_particle_impulse_fraction, 0.0f, 0.1f, "%.4f", ImGuiSliderFlags_Logarithmic);
+            show_hover_text("Fraction of the eater's impulse given to the spawned boost pellet (fine range).");
             game.set_boost_particle_impulse_fraction(state.boost_particle_impulse_fraction);
 
             ImGui::SliderFloat("Poison cloud area %", &state.eater_cloud_area_percentage, 0.0f, 100.0f, "%.0f");

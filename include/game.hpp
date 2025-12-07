@@ -210,7 +210,7 @@ private:
     float angular_damping = 0.5f;
     std::optional<std::size_t> selected_index;
     bool paused = false;
-    float boost_particle_impulse_fraction = 0.2f;
+    float boost_particle_impulse_fraction = 0.003f;
 };
 
 #endif
