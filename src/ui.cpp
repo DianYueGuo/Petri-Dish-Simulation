@@ -467,14 +467,14 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         }
 
         if (ImGui::BeginTabItem("Simulation")) {
-            if (ImGui::CollapsingHeader("Simulation control", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::CollapsingHeader("Timing & brains", ImGuiTreeNodeFlags_DefaultOpen)) {
                 if (ImGui::SliderFloat("AI updates per sim second", &state.brain_updates_per_sim_second, 0.1f, 60.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_brain_updates_per_sim_second(state.brain_updates_per_sim_second);
                 }
                 show_hover_text("How many times eater AI brains tick per simulated second.");
             }
 
-            if (ImGui::CollapsingHeader("Base sizes", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::CollapsingHeader("Sizes & spawn areas", ImGuiTreeNodeFlags_DefaultOpen)) {
 
                 if (ImGui::SliderFloat("Minimum circle area", &state.minimum_area, 0.1f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_minimum_area(state.minimum_area);
@@ -492,7 +492,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                 show_hover_text("Area given to each food pellet you add or drag out.");
             }
 
-            if (ImGui::CollapsingHeader("Boost & hazards", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::CollapsingHeader("Boosts, hazards & division", ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::SeparatorText("Boost");
                 if (ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_boost_area(state.boost_area);
