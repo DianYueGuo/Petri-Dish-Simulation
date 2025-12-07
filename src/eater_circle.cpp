@@ -225,7 +225,6 @@ void EaterCircle::consume_touching_circle(const b2WorldId &worldId, Game& game, 
         }
     }
 
-    float new_area = this->getArea() + touching_area;
     this->grow_by_area(touching_area, worldId);
 }
 
@@ -252,6 +251,7 @@ void EaterCircle::run_brain_cycle_from_touching() {
 }
 
 void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game, float dt) {
+    (void)dt;
     run_brain_cycle_from_touching();
 
     if (brain_outputs[0] >= 0.5f) {
@@ -364,7 +364,7 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
     }
 }
 
-void EaterCircle::initialize_brain(int mutation_rounds, float add_node_p, float remove_node_p, float add_connection_p, float remove_connection_p) {
+void EaterCircle::initialize_brain(int mutation_rounds, float add_node_p, float /*remove_node_p*/, float add_connection_p, float /*remove_connection_p*/) {
     // Mutate repeatedly to seed a non-trivial brain topology.
     int rounds = std::max(0, mutation_rounds);
     for (int i = 0; i < rounds; ++i) {

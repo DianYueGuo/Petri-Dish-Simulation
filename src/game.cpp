@@ -44,7 +44,7 @@ void handle_sensor_end_touch(const b2SensorEndTouchEvent& endTouch) {
 
 Game::Game() {
     b2WorldDef worldDef = b2DefaultWorldDef();
-    worldDef.gravity = (b2Vec2){0.0f, 0.0f};
+    worldDef.gravity = b2Vec2{0.0f, 0.0f};
     worldId = b2CreateWorld(&worldDef);
 }
 
@@ -661,6 +661,7 @@ void Game::update_eaters(const b2WorldId& worldId, float dt) {
 }
 
 void Game::run_brain_updates(const b2WorldId& worldId, float timeStep) {
+    (void)timeStep;
     const float brain_period = (brain_updates_per_sim_second > 0.0f) ? (1.0f / brain_updates_per_sim_second) : std::numeric_limits<float>::max();
     while (brain_time_accumulator >= brain_period) {
         for (size_t i = 0; i < circles.size(); ++i) {

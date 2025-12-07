@@ -15,9 +15,9 @@ CirclePhysics::CirclePhysics(const b2WorldId &worldId, float position_x, float p
     angularImpulseMagnitude(5.0f),
     kind(kind) {
     BodyState initialState{};
-    initialState.position = (b2Vec2){position_x, position_y};
+    initialState.position = b2Vec2{position_x, position_y};
     initialState.rotation = b2MakeRot(angle);
-    initialState.linearVelocity = (b2Vec2){0.0f, 0.0f};
+    initialState.linearVelocity = b2Vec2{0.0f, 0.0f};
     initialState.angularVelocity = 0.0f;
     initialState.radius = radius;
 
@@ -71,7 +71,7 @@ void CirclePhysics::createBodyWithState(const b2WorldId& worldId, const BodyStat
 
     b2ShapeDef shapeDef = buildCircleShapeDef();
     b2Circle circle;
-    circle.center = (b2Vec2){0.0f, 0.0f};
+    circle.center = b2Vec2{0.0f, 0.0f};
     circle.radius = state.radius;
 
     b2CreateCircleShape(bodyId, &shapeDef, &circle);
@@ -99,7 +99,7 @@ CirclePhysics::CirclePhysics(CirclePhysics&& other_circle_physics) noexcept :
     b2Body_GetShapes(bodyId, &shapeId, 1);
     b2Shape_SetUserData(shapeId, this);
 
-    other_circle_physics.bodyId = (b2BodyId){};
+    other_circle_physics.bodyId = b2BodyId{};
 
     for (auto* touching_circle : touching_circles) {
         touching_circle->remove_touching_circle(&other_circle_physics);
@@ -126,7 +126,7 @@ CirclePhysics& CirclePhysics::operator=(CirclePhysics&& other_circle_physics) no
     b2Body_GetShapes(bodyId, &shapeId, 1);
     b2Shape_SetUserData(shapeId, this);
 
-    other_circle_physics.bodyId = (b2BodyId){};
+    other_circle_physics.bodyId = b2BodyId{};
 
     touching_circles = std::move(other_circle_physics.touching_circles);
     for (auto* touching_circle : touching_circles) {
