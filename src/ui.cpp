@@ -395,7 +395,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         if (ImGui::BeginTabItem("Spawning")) {
             ImGui::SliderFloat("Eater spawn rate (per s)", &state.sprinkle_rate_eater, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("How many eater circles are added each second.");
-            ImGui::SliderFloat("Food spawn rate (per s)", &state.sprinkle_rate_eatable, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            ImGui::SliderFloat("Food spawn rate (per s)", &state.sprinkle_rate_eatable, 0.0f, 100.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Automatic feed rate for non-toxic food pellets.");
             ImGui::SliderFloat("Toxic spawn rate (per s)", &state.sprinkle_rate_toxic, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Automatic spawn rate for poisonous pellets.");
