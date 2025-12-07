@@ -165,3 +165,9 @@ Follow the phases strictly and the project will remain maintainable and scalable
 - Manual DMG (works now): after `cmake --install build --prefix dist`, run from repo root:  
   `hdiutil create -volname "Petri Dish Simulation" -srcfolder dist -ov -format UDZO PetriDishSimulation.dmg`
   Share `PetriDishSimulation.dmg`; users mount it and run/drag `Petri Dish Simulation.app` inside.
+
+## Fast dev build+run
+
+1. Configure once: `cmake -B build -DCMAKE_BUILD_TYPE=Debug`
+2. One-liner for iterative dev: `cmake --build build --config Debug --target run`
+   - This builds (incrementally) and launches the app from the build tree.

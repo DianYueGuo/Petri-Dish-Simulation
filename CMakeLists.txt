@@ -124,6 +124,17 @@ set_target_properties(
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
 )
 
+add_custom_target(
+    run
+    COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}
+            ${CMAKE_COMMAND} -E env
+            "DYLD_LIBRARY_PATH=$<TARGET_FILE_DIR:app>"
+            "$<TARGET_FILE:app>"
+    DEPENDS app
+    USES_TERMINAL
+    COMMENT "Build and run ${APP_BUNDLE_NAME}"
+)
+
 install(
     TARGETS app
     BUNDLE DESTINATION .
