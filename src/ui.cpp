@@ -475,7 +475,6 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             }
 
             if (ImGui::CollapsingHeader("Sizes & spawn areas", ImGuiTreeNodeFlags_DefaultOpen)) {
-
                 if (ImGui::SliderFloat("Minimum circle area", &state.minimum_area, 0.1f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_minimum_area(state.minimum_area);
                 }
@@ -490,6 +489,10 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                     game.set_add_eatable_area(state.eatable_area);
                 }
                 show_hover_text("Area given to each food pellet you add or drag out.");
+                if (ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
+                    game.set_boost_area(state.boost_area);
+                }
+                show_hover_text("Area an eater spends to dash forward; 0 means no pellet is left behind. Finer range.");
             }
 
             if (ImGui::CollapsingHeader("Movement & boosts", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -505,10 +508,6 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                 movement_changed |= ImGui::SliderFloat("Angular damping", &state.angular_damping, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
                 show_hover_text("How quickly spinning slows down.");
                 ImGui::Separator();
-                if (ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
-                    game.set_boost_area(state.boost_area);
-                }
-                show_hover_text("Area an eater spends to dash forward; 0 means no pellet is left behind. Finer range.");
                 if (ImGui::SliderFloat("Boost pellet impulse fraction", &state.boost_particle_impulse_fraction, 0.0f, 0.1f, "%.4f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_boost_particle_impulse_fraction(state.boost_particle_impulse_fraction);
                 }
