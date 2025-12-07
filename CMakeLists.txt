@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 
 project(petri-dish-simulation VERSION 0.1.0)
 
+set(APP_TARGET "petridish")
 set(APP_BUNDLE_NAME "Petri Dish Simulation")
 
 set(CMAKE_CXX_STANDARD 20)
@@ -78,7 +79,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(NEAT)
 
 add_executable(
-    app
+    ${APP_TARGET}
     MACOSX_BUNDLE
     src/main.cpp
     src/game.cpp
@@ -89,32 +90,32 @@ add_executable(
     src/eater_brain.cpp
     src/ui.cpp
 )
-target_include_directories(app PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(app PRIVATE SFML::Graphics SFML::Audio SFML::Network)
-target_link_libraries(app PRIVATE imgui)
-target_link_libraries(app PRIVATE ImGui-SFML::ImGui-SFML)
-target_link_libraries(app PRIVATE box2d)
-target_link_libraries(app PRIVATE neat)
+target_include_directories(${APP_TARGET} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(${APP_TARGET} PRIVATE SFML::Graphics SFML::Audio SFML::Network)
+target_link_libraries(${APP_TARGET} PRIVATE imgui)
+target_link_libraries(${APP_TARGET} PRIVATE ImGui-SFML::ImGui-SFML)
+target_link_libraries(${APP_TARGET} PRIVATE box2d)
+target_link_libraries(${APP_TARGET} PRIVATE neat)
 
 option(ENABLE_WARNINGS "Enable compiler warnings" ON)
 option(ENABLE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 
 if(ENABLE_WARNINGS)
     if(MSVC)
-        target_compile_options(app PRIVATE /W4)
+        target_compile_options(${APP_TARGET} PRIVATE /W4)
         if(ENABLE_WARNINGS_AS_ERRORS)
-            target_compile_options(app PRIVATE /WX)
+            target_compile_options(${APP_TARGET} PRIVATE /WX)
         endif()
     else()
-        target_compile_options(app PRIVATE -Wall -Wextra -Wpedantic)
+        target_compile_options(${APP_TARGET} PRIVATE -Wall -Wextra -Wpedantic)
         if(ENABLE_WARNINGS_AS_ERRORS)
-        target_compile_options(app PRIVATE -Werror)
+        target_compile_options(${APP_TARGET} PRIVATE -Werror)
         endif()
     endif()
 endif()
 
 set_target_properties(
-    app
+    ${APP_TARGET}
     PROPERTIES
         OUTPUT_NAME ${APP_BUNDLE_NAME}
         MACOSX_BUNDLE TRUE
@@ -128,15 +129,15 @@ add_custom_target(
     run
     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}
             ${CMAKE_COMMAND} -E env
-            "DYLD_LIBRARY_PATH=$<TARGET_FILE_DIR:app>"
-            "$<TARGET_FILE:app>"
-    DEPENDS app
+            "DYLD_LIBRARY_PATH=$<TARGET_FILE_DIR:${APP_TARGET}>"
+            "$<TARGET_FILE:${APP_TARGET}>"
+    DEPENDS ${APP_TARGET}
     USES_TERMINAL
     COMMENT "Build and run ${APP_BUNDLE_NAME}"
 )
 
 install(
-    TARGETS app
+    TARGETS ${APP_TARGET}
     BUNDLE DESTINATION .
     RUNTIME DESTINATION .
 )
