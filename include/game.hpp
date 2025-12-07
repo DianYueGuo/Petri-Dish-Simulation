@@ -158,6 +158,7 @@ private:
     void handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e);
     void handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e);
     void update_max_ages();
+    void revalidate_selection(const EatableCircle* previously_selected);
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;

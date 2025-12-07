@@ -377,6 +377,19 @@ void Game::update_max_ages() {
     max_age_since_division = division_max;
 }
 
+void Game::revalidate_selection(const EatableCircle* previously_selected) {
+    if (!previously_selected) {
+        return;
+    }
+    selected_index.reset();
+    for (std::size_t i = 0; i < circles.size(); ++i) {
+        if (circles[i].get() == previously_selected) {
+            selected_index = i;
+            break;
+        }
+    }
+}
+
 void Game::sprinkle_with_rate(float rate, AddType type, float dt) {
     if (rate <= 0.0f || dt <= 0.0f || petri_radius <= 0.0f) {
         return;
@@ -489,6 +502,10 @@ void Game::run_brain_updates(const b2WorldId& worldId, float timeStep) {
 
 void Game::cull_consumed() {
     std::vector<std::unique_ptr<EatableCircle>> spawned_cloud;
+    const EatableCircle* prev_selected = nullptr;
+    if (selected_index && *selected_index < circles.size()) {
+        prev_selected = circles[*selected_index].get();
+    }
 
     for (auto it = circles.begin(); it != circles.end(); ) {
         bool remove = false;
@@ -511,8 +528,9 @@ void Game::cull_consumed() {
         }
     }
 
-    clear_selection();
+    revalidate_selection(prev_selected);
     recompute_max_generation();
+    update_max_ages();
 
     for (auto& c : spawned_cloud) {
         circles.push_back(std::move(c));
@@ -550,6 +568,11 @@ void Game::remove_outside_petri() {
         return;
     }
 
+    const EatableCircle* prev_selected = nullptr;
+    if (selected_index && *selected_index < circles.size()) {
+        prev_selected = circles[*selected_index].get();
+    }
+
     circles.erase(
         std::remove_if(
             circles.begin(),
@@ -561,7 +584,7 @@ void Game::remove_outside_petri() {
             }),
         circles.end());
 
-    clear_selection();
+    revalidate_selection(prev_selected);
     recompute_max_generation();
     update_max_ages();
 }
@@ -586,17 +609,26 @@ void Game::remove_random_percentage(float percentage) {
     indices.resize(target);
     std::sort(indices.begin(), indices.end(), std::greater<std::size_t>());
 
+    const EatableCircle* prev_selected = nullptr;
+    if (selected_index && *selected_index < circles.size()) {
+        prev_selected = circles[*selected_index].get();
+    }
+
     for (std::size_t idx : indices) {
         circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
     }
 
-    clear_selection();
+    revalidate_selection(prev_selected);
     recompute_max_generation();
     update_max_ages();
 }
 
 void Game::remove_stopped_boost_particles() {
     constexpr float vel_epsilon = 1e-3f;
+    const EatableCircle* prev_selected = nullptr;
+    if (selected_index && *selected_index < circles.size()) {
+        prev_selected = circles[*selected_index].get();
+    }
     circles.erase(
         std::remove_if(
             circles.begin(),
@@ -609,9 +641,7 @@ void Game::remove_stopped_boost_particles() {
                 return (std::fabs(v.x) <= vel_epsilon && std::fabs(v.y) <= vel_epsilon);
             }),
         circles.end());
-    if (selected_index && *selected_index >= circles.size()) {
-        selected_index.reset();
-    }
+    revalidate_selection(prev_selected);
     update_max_ages();
 }
 
