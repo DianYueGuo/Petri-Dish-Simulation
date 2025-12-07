@@ -50,7 +50,7 @@ struct UiState {
     float angular_impulse = 0.0f;
     float linear_damping = 0.0f;
     float angular_damping = 0.0f;
-    float sprinkle_rate_eater = 0.0f;
+    int minimum_eaters = 0;
     float sprinkle_rate_eatable = 50.0f;
     float sprinkle_rate_toxic = 0.0f;
     float sprinkle_rate_division = 0.0f;
@@ -99,7 +99,7 @@ void apply_preset(Preset preset, UiState& state, Game& game) {
             set_and_apply(state.boost_particle_linear_damping, 2.0f, [&](float v) { game.set_boost_particle_linear_damping(v); });
             set_and_apply(state.poison_death_probability, 0.3f, [&](float v) { game.set_poison_death_probability(v); });
             set_and_apply(state.poison_death_probability_normal, 0.2f, [&](float v) { game.set_poison_death_probability_normal(v); });
-            set_and_apply(state.sprinkle_rate_eater, 0.5f, [&](float v) { game.set_sprinkle_rate_eater(v); });
+            set_and_apply(state.minimum_eaters, 12, [&](int v) { game.set_minimum_eater_count(v); });
             set_and_apply(state.food_density, 0.02f, [&](float v) { game.set_food_pellet_density(v); });
             set_and_apply(state.toxic_density, 0.005f, [&](float v) { game.set_toxic_pellet_density(v); });
             set_and_apply(state.division_density, 0.003f, [&](float v) { game.set_division_pellet_density(v); });
@@ -112,7 +112,7 @@ void apply_preset(Preset preset, UiState& state, Game& game) {
             set_and_apply(state.boost_particle_impulse_fraction, 0.01f, [&](float v) { game.set_boost_particle_impulse_fraction(v); });
             set_and_apply(state.poison_death_probability, 0.05f, [&](float v) { game.set_poison_death_probability(v); });
             set_and_apply(state.poison_death_probability_normal, 0.02f, [&](float v) { game.set_poison_death_probability_normal(v); });
-            set_and_apply(state.sprinkle_rate_eater, 0.3f, [&](float v) { game.set_sprinkle_rate_eater(v); });
+            set_and_apply(state.minimum_eaters, 8, [&](int v) { game.set_minimum_eater_count(v); });
             set_and_apply(state.food_density, 0.03f, [&](float v) { game.set_food_pellet_density(v); });
             set_and_apply(state.toxic_density, 0.0f, [&](float v) { game.set_toxic_pellet_density(v); });
             set_and_apply(state.division_density, 0.001f, [&](float v) { game.set_division_pellet_density(v); });
@@ -125,7 +125,7 @@ void apply_preset(Preset preset, UiState& state, Game& game) {
             set_and_apply(state.poison_death_probability, 0.7f, [&](float v) { game.set_poison_death_probability(v); });
             set_and_apply(state.poison_death_probability_normal, 0.5f, [&](float v) { game.set_poison_death_probability_normal(v); });
             set_and_apply(state.eater_cloud_area_percentage, 60.0f, [&](float v) { game.set_eater_cloud_area_percentage(v); });
-            set_and_apply(state.sprinkle_rate_eater, 0.6f, [&](float v) { game.set_sprinkle_rate_eater(v); });
+            set_and_apply(state.minimum_eaters, 18, [&](int v) { game.set_minimum_eater_count(v); });
             set_and_apply(state.food_density, 0.01f, [&](float v) { game.set_food_pellet_density(v); });
             set_and_apply(state.toxic_density, 0.015f, [&](float v) { game.set_toxic_pellet_density(v); });
             set_and_apply(state.division_density, 0.0f, [&](float v) { game.set_division_pellet_density(v); });
@@ -135,7 +135,7 @@ void apply_preset(Preset preset, UiState& state, Game& game) {
             set_and_apply(state.time_scale, 1.0f, [&](float v) { game.set_time_scale(v); });
             set_and_apply(state.brain_updates_per_sim_second, 8.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
             set_and_apply(state.boost_area, 0.04f, [&](float v) { game.set_boost_area(v); });
-            set_and_apply(state.sprinkle_rate_eater, 0.4f, [&](float v) { game.set_sprinkle_rate_eater(v); });
+            set_and_apply(state.minimum_eaters, 15, [&](int v) { game.set_minimum_eater_count(v); });
             set_and_apply(state.food_density, 0.01f, [&](float v) { game.set_food_pellet_density(v); });
             set_and_apply(state.toxic_density, 0.002f, [&](float v) { game.set_toxic_pellet_density(v); });
             set_and_apply(state.division_density, 0.02f, [&](float v) { game.set_division_pellet_density(v); });
@@ -314,7 +314,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.angular_impulse = game.get_angular_impulse_magnitude();
         state.linear_damping = game.get_linear_damping();
         state.angular_damping = game.get_angular_damping();
-        state.sprinkle_rate_eater = game.get_sprinkle_rate_eater();
+        state.minimum_eaters = game.get_minimum_eater_count();
         state.sprinkle_rate_eatable = game.get_sprinkle_rate_eatable();
         state.sprinkle_rate_toxic = game.get_sprinkle_rate_toxic();
         state.sprinkle_rate_division = game.get_sprinkle_rate_division();
@@ -651,8 +651,8 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         if (ImGui::BeginTabItem("Spawning")) {
             if (ImGui::CollapsingHeader("Spawn & density targets", ImGuiTreeNodeFlags_DefaultOpen)) {
                 bool spawning_changed = false;
-                spawning_changed |= ImGui::SliderFloat("Eater spawn rate (per s)", &state.sprinkle_rate_eater, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-                show_hover_text("How many eater circles are added each second.");
+                spawning_changed |= ImGui::SliderInt("Minimum eater count", &state.minimum_eaters, 0, 500);
+                show_hover_text("The simulation auto-spawns new eaters until this count is reached.");
                 spawning_changed |= ImGui::SliderFloat("Food area density (m^2 per m^2)", &state.food_density, 0.0f, 0.1f, "%.4f", ImGuiSliderFlags_Logarithmic);
                 show_hover_text("Target area fraction for non-toxic pellets; the system adjusts spawn/cleanup automatically.");
                 spawning_changed |= ImGui::SliderFloat("Toxic area density (m^2 per m^2)", &state.toxic_density, 0.0f, 0.02f, "%.4f", ImGuiSliderFlags_Logarithmic);
@@ -660,7 +660,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                 spawning_changed |= ImGui::SliderFloat("Division area density (m^2 per m^2)", &state.division_density, 0.0f, 0.02f, "%.4f", ImGuiSliderFlags_Logarithmic);
                 show_hover_text("Target area fraction for division-triggering blue pellets.");
                 if (spawning_changed) {
-                    game.set_sprinkle_rate_eater(state.sprinkle_rate_eater);
+                    game.set_minimum_eater_count(state.minimum_eaters);
                     game.set_food_pellet_density(state.food_density);
                     game.set_toxic_pellet_density(state.toxic_density);
                     game.set_division_pellet_density(state.division_density);

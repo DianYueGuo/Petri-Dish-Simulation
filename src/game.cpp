@@ -599,6 +599,21 @@ void Game::sprinkle_with_rate(float rate, AddType type, float dt) {
     }
 }
 
+void Game::ensure_minimum_eaters() {
+    int eater_count = static_cast<int>(get_eater_count());
+    if (eater_count >= minimum_eater_count) {
+        return;
+    }
+
+    int to_spawn = minimum_eater_count - eater_count;
+    for (int i = 0; i < to_spawn; ++i) {
+        if (auto eater = create_eater_at(random_point_in_petri())) {
+            update_max_generation_from_circle(eater.get());
+            circles.push_back(std::move(eater));
+        }
+    }
+}
+
 b2Vec2 Game::random_point_in_petri() const {
     float angle = random_unit() * 2.0f * PI;
     float radius = petri_radius * std::sqrt(random_unit());
@@ -646,7 +661,7 @@ std::unique_ptr<EatableCircle> Game::create_eatable_at(const b2Vec2& pos, bool t
 }
 
 void Game::sprinkle_entities(float dt) {
-    sprinkle_with_rate(sprinkle_rate_eater, AddType::Eater, dt);
+    ensure_minimum_eaters();
     sprinkle_with_rate(sprinkle_rate_eatable, AddType::Eatable, dt);
     sprinkle_with_rate(sprinkle_rate_toxic, AddType::ToxicEatable, dt);
     sprinkle_with_rate(sprinkle_rate_division, AddType::DivisionEatable, dt);

@@ -118,13 +118,13 @@ public:
     float get_boost_area() const { return boost_area; }
     void set_petri_radius(float r) { petri_radius = r; }
     float get_petri_radius() const { return petri_radius; }
-    void set_sprinkle_rate_eater(float r) { sprinkle_rate_eater = r; }
+    void set_minimum_eater_count(int count) { minimum_eater_count = std::max(0, count); }
+    int get_minimum_eater_count() const { return minimum_eater_count; }
     void set_average_eater_area(float area) { average_eater_area = area; }
     float get_average_eater_area() const { return average_eater_area; }
     void set_sprinkle_rate_eatable(float r) { sprinkle_rate_eatable = r; }
     void set_sprinkle_rate_toxic(float r) { sprinkle_rate_toxic = r; }
     void set_sprinkle_rate_division(float r) { sprinkle_rate_division = r; }
-    float get_sprinkle_rate_eater() const { return sprinkle_rate_eater; }
     float get_sprinkle_rate_eatable() const { return sprinkle_rate_eatable; }
     float get_sprinkle_rate_toxic() const { return sprinkle_rate_toxic; }
     float get_sprinkle_rate_division() const { return sprinkle_rate_division; }
@@ -201,6 +201,7 @@ private:
     void spawn_eatable_cloud(const EaterCircle& eater, std::vector<std::unique_ptr<EatableCircle>>& out);
     b2Vec2 random_point_in_petri() const;
     void sprinkle_with_rate(float rate, AddType type, float dt);
+    void ensure_minimum_eaters();
     void sprinkle_entities(float dt);
     sf::Vector2f pixel_to_world(sf::RenderWindow& window, const sf::Vector2i& pixel) const;
     void try_add_circle_at(const sf::Vector2f& worldPos);
@@ -253,7 +254,7 @@ private:
     float poison_death_probability = 1.0f;
     float poison_death_probability_normal = 0.0f;
     float petri_radius = 50.0f;
-    float sprinkle_rate_eater = 5.0f;
+    int minimum_eater_count = 10;
     float average_eater_area = 5.0f;
     float sprinkle_rate_eatable = 50.0f;
     float sprinkle_rate_toxic = 1.0f;
