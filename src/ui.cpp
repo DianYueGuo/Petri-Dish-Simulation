@@ -503,8 +503,6 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
 
             if (ImGui::CollapsingHeader("Movement & boosting", ImGuiTreeNodeFlags_DefaultOpen)) {
                 bool movement_changed = false;
-                movement_changed |= ImGui::SliderFloat("Object density", &state.circle_density, 0.01f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
-                show_hover_text("Mass density for all circles; heavier circles resist movement more.");
                 ImGui::Separator();
                 movement_changed |= ImGui::SliderFloat("Forward impulse", &state.linear_impulse, 0.01f, 50.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
                 show_hover_text("Force applied when brains choose to move straight ahead.");
