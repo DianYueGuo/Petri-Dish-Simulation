@@ -214,7 +214,7 @@ void render_brain_graph(const neat::Genome& brain) {
 
 void render_cursor_controls(Game& game, UiState& state) {
     bool cursor_mode_changed = false;
-    if (ImGui::RadioButton("Add circles", state.cursor_mode == static_cast<int>(Game::CursorMode::Add))) {
+    if (ImGui::RadioButton("Manual spawning", state.cursor_mode == static_cast<int>(Game::CursorMode::Add))) {
         state.cursor_mode = static_cast<int>(Game::CursorMode::Add);
         cursor_mode_changed = true;
     }
@@ -391,7 +391,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
     if (ImGui::BeginTabBar("ControlsTabs")) {
         if (ImGui::BeginTabItem("Overview")) {
             if (ImGui::CollapsingHeader("Status", ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::Text("Active circles: %zu", game.get_circle_count());
+                ImGui::Text("Object count: %zu", game.get_circle_count());
                 show_hover_text("How many circles currently exist inside the dish.");
                 ImGui::Text("Eaters: %zu", game.get_eater_count());
                 show_hover_text("Number of eater circles currently alive.");
@@ -470,14 +470,14 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
 
         if (ImGui::BeginTabItem("Simulation")) {
             if (ImGui::CollapsingHeader("Brain update rate", ImGuiTreeNodeFlags_DefaultOpen)) {
-                if (ImGui::SliderFloat("AI updates per sim second", &state.brain_updates_per_sim_second, 0.1f, 60.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
+                if (ImGui::SliderFloat("Eater brain update per sim second", &state.brain_updates_per_sim_second, 0.1f, 60.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_brain_updates_per_sim_second(state.brain_updates_per_sim_second);
                 }
                 show_hover_text("How many times eater AI brains tick per simulated second.");
             }
 
             if (ImGui::CollapsingHeader("Sizes & costs", ImGuiTreeNodeFlags_DefaultOpen)) {
-                if (ImGui::SliderFloat("Minimum circle area", &state.minimum_area, 0.1f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
+                if (ImGui::SliderFloat("Minimum eater area", &state.minimum_area, 0.1f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_minimum_area(state.minimum_area);
                 }
                 show_hover_text("Smallest allowed size before circles are considered too tiny to exist.");
@@ -499,7 +499,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
 
             if (ImGui::CollapsingHeader("Movement & boosting", ImGuiTreeNodeFlags_DefaultOpen)) {
                 bool movement_changed = false;
-                movement_changed |= ImGui::SliderFloat("Circle density", &state.circle_density, 0.01f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+                movement_changed |= ImGui::SliderFloat("Object density", &state.circle_density, 0.01f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
                 show_hover_text("Mass density for all circles; heavier circles resist movement more.");
                 ImGui::Separator();
                 movement_changed |= ImGui::SliderFloat("Forward impulse", &state.linear_impulse, 0.01f, 50.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
