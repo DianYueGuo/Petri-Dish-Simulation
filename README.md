@@ -1,6 +1,8 @@
 # Petri Dish Simulation
 An interactive 2D petri dish where autonomous "eater" cells chase down pellets, grow, split, and mutate. Each eater is driven by a small neural graph (NEAT) and runs on top of SFML rendering, Box2D physics, and an ImGui control panel that lets you spawn entities, tune mutation knobs, and watch the ecosystem adapt in real time.
 
+![Game preview](game_preview.png)
+
 ## What's inside
 - SFML 3 for rendering/audio and ImGui overlays for live controls.
 - Box2D v3 physics for the dish boundary, collisions, and sensors.
