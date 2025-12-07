@@ -3,6 +3,8 @@
 
 #include "drawable_circle.hpp"
 
+class EaterCircle;
+
 class EatableCircle : public DrawableCircle {
 public:
     EatableCircle(const b2WorldId &worldId, float position_x = 0.0f, float position_y = 0.0f, float radius = 1.0f, float density = 1.0f, bool toxic = false, float angle = 0.0f, bool boost_particle = false);
