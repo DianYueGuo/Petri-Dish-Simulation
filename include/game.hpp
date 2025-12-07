@@ -178,7 +178,7 @@ private:
     b2Vec2 random_point_in_petri() const;
     void sprinkle_with_rate(float rate, AddType type, float dt);
     void sprinkle_entities(float dt);
-    void update_eaters(const b2WorldId& worldId);
+    void update_eaters(const b2WorldId& worldId, float dt);
     void run_brain_updates(const b2WorldId& worldId, float timeStep);
     void cull_consumed();
     void remove_stopped_boost_particles();

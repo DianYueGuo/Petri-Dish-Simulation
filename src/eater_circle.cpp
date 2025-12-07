@@ -145,27 +145,6 @@ void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game, float
         this->divide(worldId, game);
     }
 
-    // Inactivity based on zero linear velocity.
-    inactivity_timer += std::max(0.0f, dt);
-    b2Vec2 velocity = getLinearVelocity();
-    constexpr float vel_epsilon = 1e-3f;
-    if (std::fabs(velocity.x) > vel_epsilon || std::fabs(velocity.y) > vel_epsilon) {
-        inactivity_timer = 0.0f;
-    } else {
-        float timeout = game.get_inactivity_timeout();
-        if (timeout <= 0.0f) {
-            if (!is_eaten()) {
-                poisoned = true;
-                this->be_eaten();
-            }
-            inactivity_timer = 0.0f;
-        } else if (inactivity_timer >= timeout && !is_eaten()) {
-            poisoned = true;
-            this->be_eaten();
-            inactivity_timer = 0.0f;
-        }
-    }
-
     if (game.get_live_mutation_enabled() && neat_innovations && neat_last_innov_id) {
         brain.mutate(
             neat_innovations,
@@ -187,6 +166,31 @@ void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game, float
         memory_state[i] = std::clamp(brain_outputs[7 + i], 0.0f, 1.0f);
     }
 
+}
+
+void EaterCircle::update_inactivity(float dt, float timeout) {
+    if (dt <= 0.0f) return;
+    inactivity_timer += dt;
+    b2Vec2 velocity = getLinearVelocity();
+    constexpr float vel_epsilon = 1e-3f;
+    const bool is_moving = (std::fabs(velocity.x) > vel_epsilon) || (std::fabs(velocity.y) > vel_epsilon);
+    if (is_moving) {
+        inactivity_timer = 0.0f;
+        return;
+    }
+    if (timeout <= 0.0f) {
+        if (!is_eaten()) {
+            poisoned = true;
+            this->be_eaten();
+        }
+        inactivity_timer = 0.0f;
+        return;
+    }
+    if (inactivity_timer >= timeout && !is_eaten()) {
+        poisoned = true;
+        this->be_eaten();
+        inactivity_timer = 0.0f;
+    }
 }
 
 void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {

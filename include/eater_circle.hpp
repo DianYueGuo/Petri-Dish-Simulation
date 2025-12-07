@@ -37,6 +37,7 @@ public:
     const neat::Genome& get_brain() const { return brain; }
 
     void process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal);
+    void update_inactivity(float dt, float timeout);
 
     void move_randomly(const b2WorldId &worldId, Game &game);
     void move_intelligently(const b2WorldId &worldId, Game &game, float dt);

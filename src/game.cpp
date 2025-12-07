@@ -68,7 +68,7 @@ void Game::process_game_logic() {
 
     brain_time_accumulator += timeStep;
     sprinkle_entities(timeStep);
-    update_eaters(worldId);
+    update_eaters(worldId, timeStep);
     run_brain_updates(worldId, timeStep);
     cull_consumed();
     remove_stopped_boost_particles();
@@ -659,10 +659,11 @@ void Game::sprinkle_entities(float dt) {
     sprinkle_with_rate(sprinkle_rate_division, AddType::DivisionEatable, dt);
 }
 
-void Game::update_eaters(const b2WorldId& worldId) {
+void Game::update_eaters(const b2WorldId& worldId, float dt) {
     for (size_t i = 0; i < circles.size(); ++i) {
         if (auto* eater_circle = dynamic_cast<EaterCircle*>(circles[i].get())) {
             eater_circle->process_eating(worldId, *this, poison_death_probability, poison_death_probability_normal);
+            eater_circle->update_inactivity(dt, inactivity_timeout);
         }
     }
 }
