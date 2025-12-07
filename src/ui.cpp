@@ -352,6 +352,17 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
     ImGui::SeparatorText("Cursor & Tools");
     render_cursor_controls(game, state);
 
+    ImGui::SeparatorText("Simulation control");
+    bool paused = game.is_paused();
+    if (ImGui::Checkbox("Pause simulation", &paused)) {
+        game.set_paused(paused);
+    }
+    show_hover_text("Stop simulation updates so you can inspect selected eater info.");
+    if (ImGui::SliderFloat("Simulation speed", &state.time_scale, 0.01f, 8.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
+        game.set_time_scale(state.time_scale);
+    }
+    show_hover_text("Multiplies the physics time step; lower values slow everything down.");
+
     ImGui::SeparatorText("World");
     if (ImGui::SliderFloat("Dish radius (m)", &state.petri_radius, 1.0f, 100.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
         game.set_petri_radius(state.petri_radius);
@@ -457,17 +468,6 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
 
         if (ImGui::BeginTabItem("Simulation")) {
             if (ImGui::CollapsingHeader("Simulation control", ImGuiTreeNodeFlags_DefaultOpen)) {
-                bool paused = game.is_paused();
-                if (ImGui::Checkbox("Pause simulation", &paused)) {
-                    game.set_paused(paused);
-                }
-                show_hover_text("Stop simulation updates so you can inspect selected eater info.");
-
-                if (ImGui::SliderFloat("Simulation speed", &state.time_scale, 0.01f, 8.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
-                    game.set_time_scale(state.time_scale);
-                }
-                show_hover_text("Multiplies the physics time step; lower values slow everything down.");
-
                 if (ImGui::SliderFloat("AI updates per sim second", &state.brain_updates_per_sim_second, 0.1f, 60.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_brain_updates_per_sim_second(state.brain_updates_per_sim_second);
                 }
