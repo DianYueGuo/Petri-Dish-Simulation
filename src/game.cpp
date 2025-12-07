@@ -316,6 +316,24 @@ const EaterCircle* Game::get_selected_eater() const {
     return dynamic_cast<EaterCircle*>(circles[*selected_index].get());
 }
 
+const EaterCircle* Game::get_oldest_largest_eater() const {
+    const EaterCircle* best = nullptr;
+    float best_age = -1.0f;
+    float best_area = -1.0f;
+    for (const auto& c : circles) {
+        if (auto* eater = dynamic_cast<const EaterCircle*>(c.get())) {
+            float age = std::max(0.0f, sim_time_accum - eater->get_creation_time());
+            float area = eater->getArea();
+            if (age > best_age || (std::abs(age - best_age) < 1e-6f && area > best_area)) {
+                best = eater;
+                best_age = age;
+                best_area = area;
+            }
+        }
+    }
+    return best;
+}
+
 int Game::get_selected_generation() const {
     if (!selected_index || *selected_index >= circles.size()) {
         return -1;
