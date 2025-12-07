@@ -24,7 +24,8 @@ public:
     enum class AddType {
         Eater,
         Eatable,
-        ToxicEatable
+        ToxicEatable,
+        DivisionEatable
     };
 
     Game();
@@ -124,11 +125,15 @@ public:
     float get_average_eater_area() const { return average_eater_area; }
     void set_sprinkle_rate_eatable(float r) { sprinkle_rate_eatable = r; }
     void set_sprinkle_rate_toxic(float r) { sprinkle_rate_toxic = r; }
+    void set_sprinkle_rate_division(float r) { sprinkle_rate_division = r; }
     float get_sprinkle_rate_eater() const { return sprinkle_rate_eater; }
     float get_sprinkle_rate_eatable() const { return sprinkle_rate_eatable; }
     float get_sprinkle_rate_toxic() const { return sprinkle_rate_toxic; }
+    float get_sprinkle_rate_division() const { return sprinkle_rate_division; }
     void set_eater_cloud_area_percentage(float percentage) { eater_cloud_area_percentage = percentage; }
     float get_eater_cloud_area_percentage() const { return eater_cloud_area_percentage; }
+    void set_division_pellet_divide_probability(float p) { division_pellet_divide_probability = std::clamp(p, 0.0f, 1.0f); }
+    float get_division_pellet_divide_probability() const { return division_pellet_divide_probability; }
     void update_max_generation_from_circle(const EatableCircle* circle);
     void recompute_max_generation();
     void set_show_true_color(bool value) { show_true_color = value; }
@@ -178,7 +183,7 @@ private:
     void cull_consumed();
     void remove_stopped_boost_particles();
     std::unique_ptr<EaterCircle> create_eater_at(const b2Vec2& pos);
-    std::unique_ptr<EatableCircle> create_eatable_at(const b2Vec2& pos, bool toxic) const;
+    std::unique_ptr<EatableCircle> create_eatable_at(const b2Vec2& pos, bool toxic, bool division_boost = false) const;
     void apply_impulse_magnitudes_to_circles();
     void apply_damping_to_circles();
     void handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseButtonPressed& e);
@@ -215,7 +220,9 @@ private:
     float average_eater_area = 5.0f;
     float sprinkle_rate_eatable = 50.0f;
     float sprinkle_rate_toxic = 1.5f;
+    float sprinkle_rate_division = 0.0f;
     float eater_cloud_area_percentage = 70.0f;
+    float division_pellet_divide_probability = 1.0f;
     float add_node_probability = 0.1f;
     float remove_node_probability = 0.05f;
     float add_connection_probability = 0.1f;

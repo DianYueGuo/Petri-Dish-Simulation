@@ -137,7 +137,10 @@ void Game::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseBu
                     break;
                 case AddType::Eatable:
                 case AddType::ToxicEatable:
-                    circles.push_back(create_eatable_at({pos.x, pos.y}, add_type == AddType::ToxicEatable));
+                case AddType::DivisionEatable:
+                    circles.push_back(create_eatable_at({pos.x, pos.y}, add_type == AddType::ToxicEatable, add_type == AddType::DivisionEatable));
+                    break;
+                default:
                     break;
             }
         };
@@ -204,6 +207,7 @@ void Game::handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMov
                     break;
                 case AddType::Eatable:
                 case AddType::ToxicEatable:
+                case AddType::DivisionEatable:
                     circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, add_type == AddType::ToxicEatable));
                     last_add_world_pos = worldPos;
                     break;
@@ -586,6 +590,9 @@ void Game::sprinkle_with_rate(float rate, AddType type, float dt) {
             case AddType::ToxicEatable:
                 circles.push_back(create_eatable_at(pos, true));
                 break;
+            case AddType::DivisionEatable:
+                circles.push_back(create_eatable_at(pos, false, true));
+                break;
         }
     };
 
@@ -636,9 +643,9 @@ std::unique_ptr<EaterCircle> Game::create_eater_at(const b2Vec2& pos) {
     return circle;
 }
 
-std::unique_ptr<EatableCircle> Game::create_eatable_at(const b2Vec2& pos, bool toxic) const {
+std::unique_ptr<EatableCircle> Game::create_eatable_at(const b2Vec2& pos, bool toxic, bool division_boost) const {
     float radius = radius_from_area(add_eatable_area);
-    auto circle = std::make_unique<EatableCircle>(worldId, pos.x, pos.y, radius, circle_density, toxic, 0.0f);
+    auto circle = std::make_unique<EatableCircle>(worldId, pos.x, pos.y, radius, circle_density, toxic, division_boost, 0.0f);
     circle->set_impulse_magnitudes(linear_impulse_magnitude, angular_impulse_magnitude);
     circle->set_linear_damping(linear_damping, worldId);
     circle->set_angular_damping(angular_damping, worldId);
@@ -649,6 +656,7 @@ void Game::sprinkle_entities(float dt) {
     sprinkle_with_rate(sprinkle_rate_eater, AddType::Eater, dt);
     sprinkle_with_rate(sprinkle_rate_eatable, AddType::Eatable, dt);
     sprinkle_with_rate(sprinkle_rate_toxic, AddType::ToxicEatable, dt);
+    sprinkle_with_rate(sprinkle_rate_division, AddType::DivisionEatable, dt);
 }
 
 void Game::update_eaters(const b2WorldId& worldId) {

@@ -91,6 +91,11 @@ void EaterCircle::process_eating(const b2WorldId &worldId, float poison_death_pr
                         }
                         eatable->be_eaten();
                         eatable->set_eaten_by(this);
+                        if (eatable->is_division_boost()) {
+                            float div_roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+                            // Need access to Game for probability; pass through move_intelligently caller
+                            // so we simply mark division here is not safe; handled in move_intelligently.
+                        }
                     }
                 }
 
@@ -173,6 +178,18 @@ void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game, float
     // Memory outputs are distinct: outputs 7-10.
     for (int i = 0; i < 4; ++i) {
         memory_state[i] = std::clamp(brain_outputs[7 + i], 0.0f, 1.0f);
+    }
+
+    // Process any pending division boosts from touching circles consumed this tick.
+    for (auto* touching_circle : touching_circles) {
+        if (auto* eatable = dynamic_cast<EatableCircle*>(touching_circle)) {
+            if (eatable->is_eaten() && eatable->is_division_boost()) {
+                float div_roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+                if (div_roll <= game.get_division_pellet_divide_probability()) {
+                    this->divide(worldId, game);
+                }
+            }
+        }
     }
 }
 

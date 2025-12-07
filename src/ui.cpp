@@ -20,6 +20,7 @@ struct UiState {
     float poison_death_probability = 0.0f;
     float poison_death_probability_normal = 0.0f;
     float eater_cloud_area_percentage = 0.0f;
+    float division_pellet_divide_probability = 1.0f;
     float add_node_probability = 0.0f;
     float remove_node_probability = 0.0f;
     float add_connection_probability = 0.0f;
@@ -53,6 +54,7 @@ struct UiState {
     float sprinkle_rate_eater = 0.0f;
     float sprinkle_rate_eatable = 50.0f;
     float sprinkle_rate_toxic = 0.0f;
+    float sprinkle_rate_division = 0.0f;
     bool initialized = false;
     bool follow_selected = false;
     bool follow_oldest = false;
@@ -161,6 +163,10 @@ void render_cursor_controls(Game& game, UiState& state) {
         if (ImGui::RadioButton("Toxic pellet", state.add_type == static_cast<int>(Game::AddType::ToxicEatable))) {
             state.add_type = static_cast<int>(Game::AddType::ToxicEatable);
         }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Division pellet", state.add_type == static_cast<int>(Game::AddType::DivisionEatable))) {
+            state.add_type = static_cast<int>(Game::AddType::DivisionEatable);
+        }
         show_hover_text("Choose what to place when clicking in Add mode.");
         game.set_add_type(static_cast<Game::AddType>(state.add_type));
 
@@ -187,6 +193,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.poison_death_probability = game.get_poison_death_probability();
         state.poison_death_probability_normal = game.get_poison_death_probability_normal();
         state.eater_cloud_area_percentage = game.get_eater_cloud_area_percentage();
+        state.division_pellet_divide_probability = game.get_division_pellet_divide_probability();
         state.add_node_probability = game.get_add_node_probability();
         state.remove_node_probability = game.get_remove_node_probability();
         state.add_connection_probability = game.get_add_connection_probability();
@@ -221,6 +228,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.sprinkle_rate_eater = game.get_sprinkle_rate_eater();
         state.sprinkle_rate_eatable = game.get_sprinkle_rate_eatable();
         state.sprinkle_rate_toxic = game.get_sprinkle_rate_toxic();
+        state.sprinkle_rate_division = game.get_sprinkle_rate_division();
         state.follow_selected = game.get_follow_selected();
         state.follow_oldest = game.get_follow_oldest_largest();
         state.follow_oldest_smallest = game.get_follow_oldest_smallest();
@@ -389,6 +397,9 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             ImGui::SliderFloat("Poison cloud area %", &state.eater_cloud_area_percentage, 0.0f, 100.0f, "%.0f");
             show_hover_text("Percent of an eater's area that returns as pellets when it dies to poison.");
             game.set_eater_cloud_area_percentage(state.eater_cloud_area_percentage);
+            ImGui::SliderFloat("Division pellet divide prob", &state.division_pellet_divide_probability, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Probability an eater divides after eating a blue division pellet.");
+            game.set_division_pellet_divide_probability(state.division_pellet_divide_probability);
 
             ImGui::SeparatorText("NEAT mutate parameters");
             ImGui::Checkbox("Allow recurrent connections", &state.mutate_allow_recurrent);
@@ -493,9 +504,12 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             show_hover_text("Automatic feed rate for non-toxic food pellets.");
             ImGui::SliderFloat("Toxic spawn rate (per s)", &state.sprinkle_rate_toxic, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Automatic spawn rate for poisonous pellets.");
+            ImGui::SliderFloat("Division pellet spawn rate (per s)", &state.sprinkle_rate_division, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
+            show_hover_text("Automatic spawn rate for division-triggering blue pellets.");
             game.set_sprinkle_rate_eater(state.sprinkle_rate_eater);
             game.set_sprinkle_rate_eatable(state.sprinkle_rate_eatable);
             game.set_sprinkle_rate_toxic(state.sprinkle_rate_toxic);
+            game.set_sprinkle_rate_division(state.sprinkle_rate_division);
             ImGui::EndTabItem();
         }
 
