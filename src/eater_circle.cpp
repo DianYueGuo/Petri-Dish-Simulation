@@ -199,7 +199,8 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
         const auto eater_signal_color = get_color_rgb(); // use true signal, not smoothed display
         boost_circle_ptr->set_color_rgb(eater_signal_color[0], eater_signal_color[1], eater_signal_color[2]);
         boost_circle_ptr->smooth_display_color(1.0f);
-        boost_circle_ptr->set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
+        float frac = game.get_boost_particle_impulse_fraction();
+        boost_circle_ptr->set_impulse_magnitudes(game.get_linear_impulse_magnitude() * frac, game.get_angular_impulse_magnitude() * frac);
         boost_circle_ptr->set_linear_damping(game.get_linear_damping(), worldId);
         boost_circle_ptr->set_angular_damping(game.get_angular_damping(), worldId);
         game.add_circle(std::move(boost_circle));

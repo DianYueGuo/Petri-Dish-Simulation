@@ -36,6 +36,7 @@ struct UiState {
     int mutation_rounds = 0;
     bool show_true_color = false;
     float inactivity_timeout = 0.0f;
+    float boost_particle_impulse_fraction = 0.2f;
     float circle_density = 0.0f;
     float linear_impulse = 0.0f;
     float angular_impulse = 0.0f;
@@ -122,6 +123,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.mutation_rounds = game.get_mutation_rounds();
         state.show_true_color = game.get_show_true_color();
         state.inactivity_timeout = game.get_inactivity_timeout();
+        state.boost_particle_impulse_fraction = game.get_boost_particle_impulse_fraction();
         state.circle_density = game.get_circle_density();
         state.linear_impulse = game.get_linear_impulse_magnitude();
         state.angular_impulse = game.get_angular_impulse_magnitude();
@@ -288,6 +290,9 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
             show_hover_text("Area an eater spends to dash forward; 0 means no pellet is left behind. Finer range.");
             game.set_boost_area(state.boost_area);
+            ImGui::SliderFloat("Boost pellet impulse fraction", &state.boost_particle_impulse_fraction, 0.0f, 1.0f, "%.2f");
+            show_hover_text("Fraction of the eater's impulse given to the spawned boost pellet.");
+            game.set_boost_particle_impulse_fraction(state.boost_particle_impulse_fraction);
 
             ImGui::SliderFloat("Poison cloud area %", &state.eater_cloud_area_percentage, 0.0f, 100.0f, "%.0f");
             show_hover_text("Percent of an eater's area that returns as pellets when it dies to poison.");

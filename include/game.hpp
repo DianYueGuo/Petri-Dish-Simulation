@@ -92,6 +92,8 @@ public:
     float get_linear_impulse_magnitude() const { return linear_impulse_magnitude; }
     void set_angular_impulse_magnitude(float m);
     float get_angular_impulse_magnitude() const { return angular_impulse_magnitude; }
+    void set_boost_particle_impulse_fraction(float f) { boost_particle_impulse_fraction = std::clamp(f, 0.0f, 1.0f); }
+    float get_boost_particle_impulse_fraction() const { return boost_particle_impulse_fraction; }
     void set_linear_damping(float d);
     float get_linear_damping() const { return linear_damping; }
     void set_angular_damping(float d);
@@ -207,6 +209,7 @@ private:
     float angular_damping = 0.5f;
     std::optional<std::size_t> selected_index;
     bool paused = false;
+    float boost_particle_impulse_fraction = 0.2f;
 };
 
 #endif
