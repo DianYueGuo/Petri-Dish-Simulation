@@ -175,7 +175,7 @@ private:
     float boost_area = 0.003f;
     float poison_death_probability = 1.0f;
     float poison_death_probability_normal = 0.01f;
-    float petri_radius = 100.0f;
+    float petri_radius = 50.0f;
     float sprinkle_rate_eater = 5.0f;
     float average_eater_area = 5.0f;
     float sprinkle_rate_eatable = 0.3f;
