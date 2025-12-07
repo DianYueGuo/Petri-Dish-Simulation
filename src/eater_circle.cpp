@@ -7,8 +7,112 @@
 #include <cstdlib>
 
 namespace {
+constexpr float PI = 3.14159f;
+constexpr float TWO_PI = PI * 2.0f;
+constexpr int SENSOR_COUNT = 8;
+constexpr float SECTOR_WIDTH = PI / 4.0f;
+constexpr float SECTOR_HALF = SECTOR_WIDTH * 0.5f;
+
+using SectorSegment = std::pair<float, float>;
+using SectorSegments = std::array<std::vector<SectorSegment>, SENSOR_COUNT>;
+using SensorColors = std::array<std::array<float, 3>, SENSOR_COUNT>;
+using SensorWeights = std::array<float, SENSOR_COUNT>;
+
 float neat_activation(float x) {
     return 1.0f / (1.0f + std::exp(-x));
+}
+
+float normalize_angle(float angle) {
+    angle = std::fmod(angle, TWO_PI);
+    if (angle > PI) {
+        angle -= TWO_PI;
+    } else if (angle < -PI) {
+        angle += TWO_PI;
+    }
+    return angle;
+}
+
+std::vector<SectorSegment> split_interval(float start, float end) {
+    std::vector<SectorSegment> segments;
+    start = normalize_angle(start);
+    end = normalize_angle(end);
+    if (end < start) {
+        segments.emplace_back(start, PI);
+        segments.emplace_back(-PI, end);
+    } else {
+        segments.emplace_back(start, end);
+    }
+    return segments;
+}
+
+float overlap_length(const SectorSegment& a, const SectorSegment& b) {
+    float start = std::max(a.first, b.first);
+    float end = std::min(a.second, b.second);
+    return std::max(0.0f, end - start);
+}
+
+SectorSegments build_sector_segments() {
+    SectorSegments sector_segments{};
+    for (int i = 0; i < SENSOR_COUNT; ++i) {
+        float s_start = -SECTOR_HALF + i * SECTOR_WIDTH;
+        float s_end = s_start + SECTOR_WIDTH;
+        sector_segments[i] = split_interval(s_start, s_end);
+    }
+    return sector_segments;
+}
+
+float compute_half_span(float distance, float other_radius) {
+    if (distance <= other_radius) {
+        return PI;
+    }
+    float ratio = std::clamp(other_radius / distance, -1.0f, 1.0f);
+    return std::asin(ratio);
+}
+
+std::vector<SectorSegment> build_span_segments(float relative_angle, float half_span) {
+    float span_start = relative_angle - half_span;
+    float span_end = relative_angle + half_span;
+    return split_interval(span_start, span_end);
+}
+
+void accumulate_coincident_circle(const DrawableCircle& drawable, float weight, SensorColors& summed_colors, SensorWeights& weights) {
+    const auto color = drawable.get_color_rgb();
+    float per_sector_w = weight * (SECTOR_WIDTH / (2.0f * PI));
+    for (int sector = 0; sector < SENSOR_COUNT; ++sector) {
+        summed_colors[sector][0] += color[0] * per_sector_w;
+        summed_colors[sector][1] += color[1] * per_sector_w;
+        summed_colors[sector][2] += color[2] * per_sector_w;
+        weights[sector] += per_sector_w;
+    }
+}
+
+void accumulate_offset_circle(const DrawableCircle& drawable,
+                              float area,
+                              const std::vector<SectorSegment>& span_segments,
+                              const SectorSegments& sector_segments,
+                              SensorColors& summed_colors,
+                              SensorWeights& weights) {
+    std::array<float, SENSOR_COUNT> overlap_angles{};
+    for (int i = 0; i < SENSOR_COUNT; ++i) {
+        float total_overlap = 0.0f;
+        for (const auto& ss : sector_segments[i]) {
+            for (const auto& sp : span_segments) {
+                total_overlap += overlap_length(ss, sp);
+            }
+        }
+        overlap_angles[i] = total_overlap;
+    }
+
+    const auto color = drawable.get_color_rgb();
+    for (int sector = 0; sector < SENSOR_COUNT; ++sector) {
+        float ang = overlap_angles[sector];
+        if (ang <= 0.0f) continue;
+        float w_sector = area * (ang / (2.0f * PI));
+        summed_colors[sector][0] += color[0] * w_sector;
+        summed_colors[sector][1] += color[1] * w_sector;
+        summed_colors[sector][2] += color[2] * w_sector;
+        weights[sector] += w_sector;
+    }
 }
 } // namespace
 
@@ -40,17 +144,13 @@ EaterCircle::EaterCircle(const b2WorldId &worldId,
         init_remove_node_probability,
         init_add_connection_probability,
         init_remove_connection_probability);
-    update_brain_inputs_from_touching();
-    brain.loadInputs(brain_inputs.data());
-    brain.runNetwork(neat_activation);
-    brain.getOutputs(brain_outputs.data());
-    update_color_from_brain();
+    run_brain_cycle_from_touching();
     smooth_display_color(1.0f); // start display at brain-driven color immediately
 }
 
 float calculate_overlap_area(float r1, float r2, float distance) {
     if (distance >= r1 + r2) return 0.0f;
-    if (distance <= fabs(r1 - r2)) return 3.14159f * fmin(r1, r2) * fmin(r1, r2);
+    if (distance <= fabs(r1 - r2)) return PI * fmin(r1, r2) * fmin(r1, r2);
 
     float r_sq1 = r1 * r1;
     float r_sq2 = r2 * r2;
@@ -69,46 +169,66 @@ float calculate_overlap_area(float r1, float r2, float distance) {
 void EaterCircle::process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal) {
     poisoned = false;
     for (auto* touching_circle : touching_circles) {
-        if (touching_circle->getRadius() < this->getRadius()) {
-            float touching_area = touching_circle->getArea();
-            float overlap_threshold = touching_area * 0.8f;
-
-            float distance = b2Distance(this->getPosition(), touching_circle->getPosition());
-            float overlap_area = calculate_overlap_area(this->getRadius(), touching_circle->getRadius(), distance);
-
-            if (overlap_area >= overlap_threshold) {
-                if (auto* eatable = dynamic_cast<EatableCircle*>(touching_circle)) {
-                    float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-                    if (eatable->is_toxic()) {
-                        if (roll < poison_death_probability_toxic) {
-                            poisoned = true;
-                        }
-                        eatable->be_eaten();
-                        eatable->set_eaten_by(this);
-                    } else {
-                        if (roll < poison_death_probability_normal) {
-                            poisoned = true;
-                        }
-                        eatable->be_eaten();
-                        eatable->set_eaten_by(this);
-                        if (eatable->is_division_boost()) {
-                            float div_roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-                            if (div_roll <= game.get_division_pellet_divide_probability()) {
-                                this->divide(worldId, game);
-                            }
-                        }
-                    }
-                }
-
-                float new_area = this->getArea() + touching_area;
-                this->setArea(new_area, worldId);
-            }
+        if (!can_eat_circle(*touching_circle)) {
+            continue;
         }
+
+        auto* eatable = dynamic_cast<EatableCircle*>(touching_circle);
+        if (!eatable) {
+            continue;
+        }
+
+        if (!has_overlap_to_eat(*touching_circle)) {
+            continue;
+        }
+
+        float touching_area = eatable->getArea();
+        consume_touching_circle(worldId, game, *eatable, touching_area, poison_death_probability_toxic, poison_death_probability_normal);
     }
 
     if (poisoned) {
         this->be_eaten();
     }
+}
+
+bool EaterCircle::can_eat_circle(const CirclePhysics& circle) const {
+    return circle.getRadius() < this->getRadius();
+}
+
+bool EaterCircle::has_overlap_to_eat(const CirclePhysics& circle) const {
+    float touching_area = circle.getArea();
+    float overlap_threshold = touching_area * 0.8f;
+
+    float distance = b2Distance(this->getPosition(), circle.getPosition());
+    float overlap_area = calculate_overlap_area(this->getRadius(), circle.getRadius(), distance);
+
+    return overlap_area >= overlap_threshold;
+}
+
+void EaterCircle::consume_touching_circle(const b2WorldId &worldId, Game& game, EatableCircle& eatable, float touching_area, float poison_death_probability_toxic, float poison_death_probability_normal) {
+    float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    if (eatable.is_toxic()) {
+        if (roll < poison_death_probability_toxic) {
+            poisoned = true;
+        }
+        eatable.be_eaten();
+        eatable.set_eaten_by(this);
+    } else {
+        if (roll < poison_death_probability_normal) {
+            poisoned = true;
+        }
+        eatable.be_eaten();
+        eatable.set_eaten_by(this);
+        if (eatable.is_division_boost()) {
+            float div_roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+            if (div_roll <= game.get_division_pellet_divide_probability()) {
+                this->divide(worldId, game);
+            }
+        }
+    }
+
+    float new_area = this->getArea() + touching_area;
+    this->setArea(new_area, worldId);
 }
 
 void EaterCircle::move_randomly(const b2WorldId &worldId, Game &game) {
@@ -125,12 +245,16 @@ void EaterCircle::move_randomly(const b2WorldId &worldId, Game &game) {
         this->apply_right_turn_impulse();
 }
 
-void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game, float dt) {
+void EaterCircle::run_brain_cycle_from_touching() {
     update_brain_inputs_from_touching();
     brain.loadInputs(brain_inputs.data());
     brain.runNetwork(neat_activation);
     brain.getOutputs(brain_outputs.data());
     update_color_from_brain();
+}
+
+void EaterCircle::move_intelligently(const b2WorldId &worldId, Game &game, float dt) {
+    run_brain_cycle_from_touching();
 
     if (brain_outputs[0] >= 0.5f) {
         this->boost_forward(worldId, game);
@@ -209,7 +333,7 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
         this->setArea(new_area, worldId);
         this->apply_forward_impulse();
 
-        float boost_radius = sqrt(boost_cost / 3.14159f);
+        float boost_radius = sqrt(boost_cost / PI);
         b2Vec2 pos = this->getPosition();
         float angle = this->getAngle();
         b2Vec2 direction = {cos(angle), sin(angle)};
@@ -236,7 +360,7 @@ void EaterCircle::boost_forward(const b2WorldId &worldId, Game& game) {
         boost_circle_ptr->set_angular_damping(game.get_angular_damping(), worldId);
         game.add_circle(std::move(boost_circle));
         if (boost_circle_ptr) {
-            boost_circle_ptr->setAngle(angle + 3.14159f, worldId);
+            boost_circle_ptr->setAngle(angle + PI, worldId);
             boost_circle_ptr->apply_forward_impulse();
         }
     }
@@ -287,7 +411,7 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
         return;
     }
 
-    const float new_radius = std::sqrt(divided_area / 3.14159f);
+    const float new_radius = std::sqrt(divided_area / PI);
 
     neat::Genome parent_brain_copy = brain;
 
@@ -312,7 +436,7 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
         child_position.y,
         new_radius,
         game.get_circle_density(),
-        angle + 3.14159f,
+        angle + PI,
         next_generation,
         game.get_init_mutation_rounds(),
         game.get_init_add_node_probability(),
@@ -325,16 +449,7 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
         &game);
     EaterCircle* new_circle_ptr = new_circle.get();
     if (new_circle_ptr) {
-        new_circle_ptr->brain = parent_brain_copy;
-        new_circle_ptr->set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
-        new_circle_ptr->set_linear_damping(game.get_linear_damping(), worldId);
-        new_circle_ptr->set_angular_damping(game.get_angular_damping(), worldId);
-        new_circle_ptr->setAngle(angle + 3.14159f, worldId);
-        new_circle_ptr->apply_forward_impulse();
-        new_circle_ptr->update_color_from_brain();
-        // Keep the original creation age so lineage age persists across divisions.
-        new_circle_ptr->set_creation_time(get_creation_time());
-        new_circle_ptr->set_last_division_time(game.get_sim_time());
+        configure_child_after_division(*new_circle_ptr, worldId, game, angle, parent_brain_copy);
     }
 
     this->set_generation(next_generation);
@@ -349,6 +464,26 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
 
     this->apply_forward_impulse();
 
+    mutate_lineage(game, new_circle_ptr);
+
+    update_color_from_brain();
+    game.add_circle(std::move(new_circle));
+}
+
+void EaterCircle::configure_child_after_division(EaterCircle& child, const b2WorldId& worldId, Game& game, float angle, const neat::Genome& parent_brain_copy) {
+    child.brain = parent_brain_copy;
+    child.set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
+    child.set_linear_damping(game.get_linear_damping(), worldId);
+    child.set_angular_damping(game.get_angular_damping(), worldId);
+    child.setAngle(angle + PI, worldId);
+    child.apply_forward_impulse();
+    child.update_color_from_brain();
+    // Keep the original creation age so lineage age persists across divisions.
+    child.set_creation_time(get_creation_time());
+    child.set_last_division_time(game.get_sim_time());
+}
+
+void EaterCircle::mutate_lineage(Game& game, EaterCircle* child) {
     const int mutation_rounds = std::max(0, game.get_mutation_rounds());
     float weight_thresh = game.get_mutate_weight_thresh();
     float weight_full = game.get_mutate_weight_full_change_thresh();
@@ -372,10 +507,10 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
                 game.get_add_node_probability(),
                 add_node_iters);
         }
-        if (new_circle_ptr && new_circle_ptr->neat_innovations && new_circle_ptr->neat_last_innov_id) {
-            new_circle_ptr->brain.mutate(
-                new_circle_ptr->neat_innovations,
-                new_circle_ptr->neat_last_innov_id,
+        if (child && child->neat_innovations && child->neat_last_innov_id) {
+            child->brain.mutate(
+                child->neat_innovations,
+                child->neat_last_innov_id,
                 allow_recurrent,
                 weight_thresh,
                 weight_full,
@@ -387,9 +522,6 @@ void EaterCircle::divide(const b2WorldId &worldId, Game& game) {
                 add_node_iters);
         }
     }
-
-    update_color_from_brain();
-    game.add_circle(std::move(new_circle));
 }
 
 void EaterCircle::update_color_from_brain() {
@@ -402,49 +534,13 @@ void EaterCircle::update_color_from_brain() {
 }
 
 void EaterCircle::update_brain_inputs_from_touching() {
-    constexpr float PI = 3.14159f;
-    constexpr int SENSOR_COUNT = 8;
-    constexpr float SECTOR_WIDTH = PI / 4.0f; // 45 degrees
-    constexpr float SECTOR_HALF = SECTOR_WIDTH * 0.5f;
-
-    std::array<std::array<float, 3>, SENSOR_COUNT> summed_colors{};
-    std::array<float, SENSOR_COUNT> weights{};
+    SensorColors summed_colors{};
+    SensorWeights weights{};
 
     if (!touching_circles.empty()) {
         const b2Vec2 self_pos = this->getPosition();
         const float heading = this->getAngle();
-
-        auto normalize_angle = [](float angle) {
-            constexpr float TWO_PI = PI * 2.0f;
-            angle = std::fmod(angle, TWO_PI);
-            if (angle > PI) {
-                angle -= TWO_PI;
-            } else if (angle < -PI) {
-                angle += TWO_PI;
-            }
-            return angle;
-        };
-
-        // Split an angular interval that may wrap into one or two non-wrapping segments in [-PI, PI].
-        auto split_interval = [&](float start, float end) {
-            std::vector<std::pair<float, float>> segments;
-            start = normalize_angle(start);
-            end = normalize_angle(end);
-            if (end < start) {
-                // Wrapped past PI -> split
-                segments.emplace_back(start, PI);
-                segments.emplace_back(-PI, end);
-            } else {
-                segments.emplace_back(start, end);
-            }
-            return segments;
-        };
-
-        auto overlap_length = [](const std::pair<float, float>& a, const std::pair<float, float>& b) {
-            float start = std::max(a.first, b.first);
-            float end = std::min(a.second, b.second);
-            return std::max(0.0f, end - start);
-        };
+        const auto sector_segments = build_sector_segments();
 
         for (auto* circle : touching_circles) {
             auto* drawable = dynamic_cast<DrawableCircle*>(circle);
@@ -455,94 +551,50 @@ void EaterCircle::update_brain_inputs_from_touching() {
             const b2Vec2 other_pos = circle->getPosition();
             const float dx = other_pos.x - self_pos.x;
             const float dy = other_pos.y - self_pos.y;
+            const float area = std::max(circle->getArea(), 0.0f);
 
             if (dx == 0.0f && dy == 0.0f) {
-                // Coincident centers: distribute by sector angular size.
-                const auto color = drawable->get_color_rgb();
-                float w = std::max(circle->getArea(), 0.0f);
-                float per_sector_w = w * (SECTOR_WIDTH / (2.0f * PI));
-                for (int sector = 0; sector < SENSOR_COUNT; ++sector) {
-                    summed_colors[sector][0] += color[0] * per_sector_w;
-                    summed_colors[sector][1] += color[1] * per_sector_w;
-                    summed_colors[sector][2] += color[2] * per_sector_w;
-                    weights[sector] += per_sector_w;
-                }
+                accumulate_coincident_circle(*drawable, area, summed_colors, weights);
                 continue;
             }
 
-            float relative_angle = std::atan2(dy, dx) - heading;
-            relative_angle = normalize_angle(relative_angle);
-
-            const auto color = drawable->get_color_rgb();
-            float area = std::max(circle->getArea(), 0.0f);
+            float relative_angle = normalize_angle(std::atan2(dy, dx) - heading);
             float distance = std::sqrt(dx * dx + dy * dy);
             float other_r = circle->getRadius();
+            float half_span = compute_half_span(distance, other_r);
 
-            float half_span = PI; // default covers everything if overlapping deeply
-            if (distance > other_r) {
-                float ratio = std::clamp(other_r / distance, -1.0f, 1.0f);
-                half_span = std::asin(ratio);
-            }
-
-            float span_start = relative_angle - half_span;
-            float span_end = relative_angle + half_span;
-            auto span_segments = split_interval(span_start, span_end);
-
-            // Build sector segments once per circle check
-            std::array<std::vector<std::pair<float, float>>, SENSOR_COUNT> sector_segments;
-            for (int i = 0; i < SENSOR_COUNT; ++i) {
-                float s_start = -SECTOR_HALF + i * SECTOR_WIDTH;
-                float s_end = s_start + SECTOR_WIDTH;
-                sector_segments[i] = split_interval(s_start, s_end);
-            }
-
-            std::array<float, SENSOR_COUNT> overlap_angles{};
-            for (int i = 0; i < SENSOR_COUNT; ++i) {
-                float total_overlap = 0.0f;
-                for (const auto& ss : sector_segments[i]) {
-                    for (const auto& sp : span_segments) {
-                        total_overlap += overlap_length(ss, sp);
-                    }
-                }
-                overlap_angles[i] = total_overlap;
-            }
-
-            for (int sector = 0; sector < SENSOR_COUNT; ++sector) {
-                float ang = overlap_angles[sector];
-                if (ang <= 0.0f) continue;
-                float w_sector = area * (ang / (2.0f * PI));
-                summed_colors[sector][0] += color[0] * w_sector;
-                summed_colors[sector][1] += color[1] * w_sector;
-                summed_colors[sector][2] += color[2] * w_sector;
-                weights[sector] += w_sector;
-            }
+            auto span_segments = build_span_segments(relative_angle, half_span);
+            accumulate_offset_circle(*drawable, area, span_segments, sector_segments, summed_colors, weights);
         }
     }
 
-    auto set_inputs_for_sector = [&](int base_index, const std::array<float, 3>& color_sum, float weight) {
+    apply_sensor_inputs(summed_colors, weights);
+    write_size_and_memory_inputs();
+}
+
+void EaterCircle::apply_sensor_inputs(const std::array<std::array<float, 3>, 8>& summed_colors, const std::array<float, 8>& weights) {
+    // Order sensors clockwise starting from front: front, front-right, right, back-right, back, back-left, left, front-left.
+    for (int i = 0; i < SENSOR_COUNT; ++i) {
+        int base_index = i * 3;
+        float weight = weights[i];
         if (weight > 0.0f) {
             float inv = 1.0f / weight;
-            brain_inputs[base_index]     = color_sum[0] * inv;
-            brain_inputs[base_index + 1] = color_sum[1] * inv;
-            brain_inputs[base_index + 2] = color_sum[2] * inv;
+            brain_inputs[base_index]     = summed_colors[i][0] * inv;
+            brain_inputs[base_index + 1] = summed_colors[i][1] * inv;
+            brain_inputs[base_index + 2] = summed_colors[i][2] * inv;
         } else {
             brain_inputs[base_index]     = 0.0f;
             brain_inputs[base_index + 1] = 0.0f;
             brain_inputs[base_index + 2] = 0.0f;
         }
-    };
-
-    // Order sensors clockwise starting from front: front, front-right, right, back-right, back, back-left, left, front-left.
-    for (int i = 0; i < SENSOR_COUNT; ++i) {
-        set_inputs_for_sector(i * 3, summed_colors[i], weights[i]);
     }
+}
 
-    // Size input at the end: normalized area to [0,1]
+void EaterCircle::write_size_and_memory_inputs() {
     float area = this->getArea();
     float normalized = area / (area + 25.0f); // gentler saturation for larger sizes
     brain_inputs[24] = normalized;
 
-    // Memory inputs (indices 25-28)
     for (int i = 0; i < 4; ++i) {
         brain_inputs[25 + i] = memory_state[i];
     }

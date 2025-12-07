@@ -56,8 +56,16 @@ protected:
 
 private:
     void initialize_brain(int mutation_rounds, float add_node_p, float remove_node_p, float add_connection_p, float remove_connection_p);
+    void run_brain_cycle_from_touching();
     void update_brain_inputs_from_touching();
+    void apply_sensor_inputs(const std::array<std::array<float, 3>, 8>& summed_colors, const std::array<float, 8>& weights);
+    void write_size_and_memory_inputs();
     void update_color_from_brain();
+    bool can_eat_circle(const CirclePhysics& circle) const;
+    bool has_overlap_to_eat(const CirclePhysics& circle) const;
+    void consume_touching_circle(const b2WorldId &worldId, Game& game, EatableCircle& eatable, float touching_area, float poison_death_probability_toxic, float poison_death_probability_normal);
+    void configure_child_after_division(EaterCircle& child, const b2WorldId& worldId, Game& game, float angle, const neat::Genome& parent_brain_copy);
+    void mutate_lineage(Game& game, EaterCircle* child);
 
     neat::Genome brain;
     std::array<float, 29> brain_inputs{};
