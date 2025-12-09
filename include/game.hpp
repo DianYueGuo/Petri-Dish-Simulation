@@ -111,10 +111,10 @@ private:
     };
     struct MovementSettings {
         float circle_density = 1.0f;
-        float linear_impulse_magnitude = 1.0f;
-        float angular_impulse_magnitude = 1.0f;
-        float linear_damping = 0.5f;
-        float angular_damping = 0.5f;
+        float linear_impulse_magnitude = 0.5f;
+        float angular_impulse_magnitude = 0.5f;
+        float linear_damping = 1.0f;
+        float angular_damping = 1.0f;
         float boost_particle_impulse_fraction = 0.003f;
         float boost_particle_linear_damping = 3.0f;
     };
