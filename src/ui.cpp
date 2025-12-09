@@ -358,7 +358,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         game.set_paused(paused);
     }
     show_hover_text("Stop simulation updates so you can inspect selected creature info.");
-    if (ImGui::SliderFloat("Simulation speed", &state.time_scale, 0.01f, 8.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
+    if (ImGui::SliderFloat("Simulation speed", &state.time_scale, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
         game.set_time_scale(state.time_scale);
     }
     show_hover_text("Multiplies the physics time step; lower values slow everything down.");
