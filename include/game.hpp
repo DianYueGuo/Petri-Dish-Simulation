@@ -75,9 +75,9 @@ private:
         int max_food_pellets = 200;
         int max_toxic_pellets = 50;
         int max_division_pellets = 50;
-        float food_density = 0.005f;
-        float toxic_density = 0.0005f;
-        float division_density = 0.0005f;
+        float food_density = 0.05f;
+        float toxic_density = 0.005f;
+        float division_density = 0.005f;
         float cleanup_rate_food = 0.0f;
         float cleanup_rate_toxic = 0.0f;
         float cleanup_rate_division = 0.0f;
