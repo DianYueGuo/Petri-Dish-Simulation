@@ -19,6 +19,14 @@ inline float random_unit() {
 inline float radius_from_area(float area) {
     return std::sqrt(std::max(area, 0.0f) / PI);
 }
+
+inline std::unique_ptr<EatableCircle> create_eatable_for_add_type(const Spawner& spawner,
+                                                                  const b2Vec2& pos,
+                                                                  Game::AddType type) {
+    bool toxic = type == Game::AddType::ToxicPellet;
+    bool division_pellet = type == Game::AddType::DivisionPellet;
+    return spawner.create_eatable_at(pos, toxic, division_pellet);
+}
 } // namespace
 
 Spawner::Spawner(Game& game_ref) : game(game_ref) {}
@@ -34,10 +42,7 @@ void Spawner::spawn_selected_type_at(const sf::Vector2f& worldPos) {
         case Game::AddType::FoodPellet:
         case Game::AddType::ToxicPellet:
         case Game::AddType::DivisionPellet:
-            game.add_circle(create_eatable_at(
-                {worldPos.x, worldPos.y},
-                game.get_add_type() == Game::AddType::ToxicPellet,
-                game.get_add_type() == Game::AddType::DivisionPellet));
+            game.add_circle(create_eatable_for_add_type(*this, {worldPos.x, worldPos.y}, game.get_add_type()));
             break;
         default:
             break;
@@ -78,10 +83,7 @@ void Spawner::continue_add_drag(const sf::Vector2f& worldPos) {
             case Game::AddType::FoodPellet:
             case Game::AddType::ToxicPellet:
             case Game::AddType::DivisionPellet:
-                game.add_circle(create_eatable_at(
-                    {worldPos.x, worldPos.y},
-                    game.get_add_type() == Game::AddType::ToxicPellet,
-                    game.get_add_type() == Game::AddType::DivisionPellet));
+                game.add_circle(create_eatable_for_add_type(*this, {worldPos.x, worldPos.y}, game.get_add_type()));
                 last_add_world_pos = worldPos;
                 break;
         }
@@ -211,13 +213,9 @@ void Spawner::sprinkle_with_rate(float rate, int type_value, float dt) {
                 }
                 break;
             case Game::AddType::FoodPellet:
-                game.add_circle(create_eatable_at(pos, false));
-                break;
             case Game::AddType::ToxicPellet:
-                game.add_circle(create_eatable_at(pos, true));
-                break;
             case Game::AddType::DivisionPellet:
-                game.add_circle(create_eatable_at(pos, false, true));
+                game.add_circle(create_eatable_for_add_type(*this, pos, type));
                 break;
         }
     };
