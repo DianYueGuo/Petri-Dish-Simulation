@@ -35,13 +35,6 @@ public:
 
     void set_follow_selected(bool v);
     bool get_follow_selected() const;
-    void set_follow_oldest_largest(bool v);
-    bool get_follow_oldest_largest() const;
-    void set_follow_oldest_smallest(bool v);
-    bool get_follow_oldest_smallest() const;
-    void set_follow_oldest_middle(bool v);
-    bool get_follow_oldest_middle() const;
-
     Snapshot capture_snapshot() const;
     void revalidate_selection(const EatableCircle* previously_selected);
     void set_selection_to_creature(const CreatureCircle* creature);
@@ -53,9 +46,6 @@ private:
     float* sim_time;
     std::optional<std::size_t> selected_index;
     bool follow_selected = false;
-    bool follow_oldest_largest = false;
-    bool follow_oldest_smallest = false;
-    bool follow_oldest_middle = false;
 };
 
 #endif

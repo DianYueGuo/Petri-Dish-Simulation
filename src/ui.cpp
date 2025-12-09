@@ -118,7 +118,8 @@ struct UiState {
     SpawningSettings spawning;
     CleanupSettings cleanup;
     bool show_true_color = false;
-    int follow_mode = 0; // 0:none, 1:selected, 2:oldest largest, 3:oldest smallest, 4:oldest median
+    bool follow_selected = false;
+    int selection_mode = 0;
     bool initialized = false;
 };
 
@@ -377,17 +378,8 @@ void initialize_state(UiState& state, Game& game) {
     state.spawning.food_density = game.get_food_pellet_density();
     state.spawning.toxic_density = game.get_toxic_pellet_density();
     state.spawning.division_density = game.get_division_pellet_density();
-    if (game.get_follow_selected()) {
-        state.follow_mode = 1;
-    } else if (game.get_follow_oldest_largest()) {
-        state.follow_mode = 2;
-    } else if (game.get_follow_oldest_smallest()) {
-        state.follow_mode = 3;
-    } else if (game.get_follow_oldest_middle()) {
-        state.follow_mode = 4;
-    } else {
-        state.follow_mode = 0;
-    }
+    state.follow_selected = game.get_follow_selected();
+    state.selection_mode = static_cast<int>(game.get_selection_mode());
     state.initialized = true;
 }
 
@@ -491,32 +483,35 @@ void render_overview_tab(Game& game, UiState& state) {
     }
 
     if (ImGui::CollapsingHeader("Follow targets & selection", ImGuiTreeNodeFlags_DefaultOpen)) {
-        int follow_mode = state.follow_mode;
-        const char* follow_labels[] = {
-            "None",
-            "Selected creature",
-            "Oldest (largest if tie)",
-            "Oldest (smallest if tie)",
-            "Oldest (median size)"
+        bool follow_selected = state.follow_selected;
+        if (ImGui::Checkbox("Follow selected creature", &follow_selected)) {
+            state.follow_selected = follow_selected;
+            game.set_follow_selected(follow_selected);
+        }
+        show_hover_text("Lock the camera on the creature you currently have selected.");
+
+        ImGui::Text("Selection mode:");
+        show_hover_text("Auto-updates the selected creature until you switch back to Manual.");
+        int selection_mode = state.selection_mode;
+        const char* selection_labels[] = {
+            "Manual selection",
+            "Oldest (largest)",
+            "Oldest (median)",
+            "Oldest (smallest)"
         };
-        if (ImGui::BeginTable("FollowModes", 1)) {
-            for (int i = 0; i < 5; ++i) {
-                ImGui::TableNextRow();
-                ImGui::TableNextColumn();
-                if (ImGui::RadioButton(follow_labels[i], follow_mode == i)) {
-                    follow_mode = i;
-                }
+        for (int i = 0; i < 4; ++i) {
+            if (i > 0) {
+                ImGui::SameLine();
             }
-            ImGui::EndTable();
+            if (ImGui::RadioButton(selection_labels[i], selection_mode == i)) {
+                selection_mode = i;
+            }
         }
-        if (follow_mode != state.follow_mode) {
-            state.follow_mode = follow_mode;
-            game.set_follow_selected(follow_mode == 1);
-            game.set_follow_oldest_largest(follow_mode == 2);
-            game.set_follow_oldest_smallest(follow_mode == 3);
-            game.set_follow_oldest_middle(follow_mode == 4);
+        if (selection_mode != state.selection_mode) {
+            state.selection_mode = selection_mode;
+            game.set_selection_mode(static_cast<Game::SelectionMode>(selection_mode));
         }
-        show_hover_text("Choose one follow target; modes are mutually exclusive.");
+
         if (const auto* followed = game.get_follow_target_creature()) {
             ImGui::Separator();
             ImGui::Text("Followed creature");

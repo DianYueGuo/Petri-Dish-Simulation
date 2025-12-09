@@ -124,16 +124,7 @@ const CreatureCircle* SelectionManager::get_oldest_middle_creature() const {
 
 const CreatureCircle* SelectionManager::get_follow_target_creature() const {
     if (follow_selected) {
-        if (const auto* sel = get_selected_creature()) return sel;
-    }
-    if (follow_oldest_largest) {
-        if (const auto* e = get_oldest_largest_creature()) return e;
-    }
-    if (follow_oldest_smallest) {
-        if (const auto* e = get_oldest_smallest_creature()) return e;
-    }
-    if (follow_oldest_middle) {
-        if (const auto* e = get_oldest_middle_creature()) return e;
+        return get_selected_creature();
     }
     return nullptr;
 }
@@ -158,54 +149,10 @@ void SelectionManager::update_follow_view(sf::View& view) const {
 
 void SelectionManager::set_follow_selected(bool v) {
     follow_selected = v;
-    if (v) {
-        follow_oldest_largest = false;
-        follow_oldest_smallest = false;
-        follow_oldest_middle = false;
-    }
 }
 
 bool SelectionManager::get_follow_selected() const {
     return follow_selected;
-}
-
-void SelectionManager::set_follow_oldest_largest(bool v) {
-    follow_oldest_largest = v;
-    if (v) {
-        follow_selected = false;
-        follow_oldest_smallest = false;
-        follow_oldest_middle = false;
-    }
-}
-
-bool SelectionManager::get_follow_oldest_largest() const {
-    return follow_oldest_largest;
-}
-
-void SelectionManager::set_follow_oldest_smallest(bool v) {
-    follow_oldest_smallest = v;
-    if (v) {
-        follow_selected = false;
-        follow_oldest_largest = false;
-        follow_oldest_middle = false;
-    }
-}
-
-bool SelectionManager::get_follow_oldest_smallest() const {
-    return follow_oldest_smallest;
-}
-
-void SelectionManager::set_follow_oldest_middle(bool v) {
-    follow_oldest_middle = v;
-    if (v) {
-        follow_selected = false;
-        follow_oldest_largest = false;
-        follow_oldest_smallest = false;
-    }
-}
-
-bool SelectionManager::get_follow_oldest_middle() const {
-    return follow_oldest_middle;
 }
 
 SelectionManager::Snapshot SelectionManager::capture_snapshot() const {

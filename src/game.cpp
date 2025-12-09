@@ -97,6 +97,7 @@ void Game::process_game_logic() {
         remove_outside_petri();
     }
     update_max_ages();
+    apply_selection_mode();
 }
 
 void Game::draw(sf::RenderWindow& window) const {
@@ -300,32 +301,34 @@ bool Game::get_follow_selected() const {
     return selection.get_follow_selected();
 }
 
-void Game::set_follow_oldest_largest(bool v) {
-    selection.set_follow_oldest_largest(v);
+void Game::set_selection_mode(SelectionMode mode) {
+    selection_mode = mode;
+    apply_selection_mode();
 }
 
-bool Game::get_follow_oldest_largest() const {
-    return selection.get_follow_oldest_largest();
-}
-
-void Game::set_follow_oldest_smallest(bool v) {
-    selection.set_follow_oldest_smallest(v);
-}
-
-bool Game::get_follow_oldest_smallest() const {
-    return selection.get_follow_oldest_smallest();
-}
-
-void Game::set_follow_oldest_middle(bool v) {
-    selection.set_follow_oldest_middle(v);
-}
-
-bool Game::get_follow_oldest_middle() const {
-    return selection.get_follow_oldest_middle();
+Game::SelectionMode Game::get_selection_mode() const {
+    return selection_mode;
 }
 
 void Game::update_follow_view(sf::View& view) const {
     selection.update_follow_view(view);
+}
+
+void Game::apply_selection_mode() {
+    switch (selection_mode) {
+        case SelectionMode::OldestLargest:
+            selection.set_selection_to_creature(selection.get_oldest_largest_creature());
+            break;
+        case SelectionMode::OldestMedian:
+            selection.set_selection_to_creature(selection.get_oldest_middle_creature());
+            break;
+        case SelectionMode::OldestSmallest:
+            selection.set_selection_to_creature(selection.get_oldest_smallest_creature());
+            break;
+        case SelectionMode::Manual:
+        default:
+            break;
+    }
 }
 
 void Game::update_max_generation_from_circle(const EatableCircle* circle) {

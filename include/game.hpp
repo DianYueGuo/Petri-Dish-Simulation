@@ -29,6 +29,12 @@ public:
         ToxicPellet,
         DivisionPellet
     };
+    enum class SelectionMode {
+        Manual = 0,
+        OldestLargest,
+        OldestMedian,
+        OldestSmallest
+    };
 private:
     struct SimulationTiming {
         float time_scale = 1.0f;
@@ -277,12 +283,8 @@ public:
     float get_longest_life_since_division() const { return age.max_age_since_division; }
     void set_follow_selected(bool v);
     bool get_follow_selected() const;
-    void set_follow_oldest_largest(bool v);
-    bool get_follow_oldest_largest() const;
-    void set_follow_oldest_smallest(bool v);
-    bool get_follow_oldest_smallest() const;
-    void set_follow_oldest_middle(bool v);
-    bool get_follow_oldest_middle() const;
+    void set_selection_mode(SelectionMode mode);
+    SelectionMode get_selection_mode() const;
     void accumulate_real_time(float dt);
     void frame_rendered();
     void update_follow_view(sf::View& view) const;
@@ -326,6 +328,7 @@ private:
     void refresh_generation_and_age();
     RemovalResult evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
     void update_actual_sim_speed();
+    void apply_selection_mode();
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
@@ -334,6 +337,7 @@ private:
     BrainSettings brain;
     CreatureSettings creature;
     CursorState cursor;
+    SelectionMode selection_mode = SelectionMode::Manual;
     DishSettings dish;
     PelletSettings pellets;
     MutationSettings mutation;
