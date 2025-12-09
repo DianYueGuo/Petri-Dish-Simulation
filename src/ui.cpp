@@ -374,7 +374,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
     show_hover_text("Multiplies the physics time step; lower values slow everything down.");
     const float actual_sim_speed = game.get_actual_sim_speed();
     if (!paused && !sim_speed_active && actual_sim_speed > 0.0f) {
-        constexpr float slowdown_threshold = 0.9f; // If we fall 10% short, keep the slider honest.
+        constexpr float slowdown_threshold = 1.0f; // If we fall 10% short, keep the slider honest.
         const float requested_speed = state.time_scale_requested;
         if (actual_sim_speed < requested_speed * slowdown_threshold) {
             state.time_scale_display = std::clamp(actual_sim_speed, 0.01f, 1000.0f);
