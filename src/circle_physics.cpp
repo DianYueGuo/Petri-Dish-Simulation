@@ -172,7 +172,7 @@ void CirclePhysics::apply_forward_force() const {
     b2Body_ApplyForceToCenter(bodyId, force, true);
 };
 
-void CirclePhysics::stop_applying_force() const {
+void CirclePhysics::apply_zero_force() const {
     b2Vec2 force = {0.0f, 0.0f};
     b2Body_ApplyForceToCenter(bodyId, force, true);
 };
@@ -185,7 +185,7 @@ void CirclePhysics::apply_right_turn_torque() const {
     b2Body_ApplyTorque(bodyId, 50.0f, true);
 };
 
-void CirclePhysics::stop_applying_torque() const {
+void CirclePhysics::apply_zero_torque() const {
     b2Body_ApplyTorque(bodyId, 0.0f, true);
 };
 

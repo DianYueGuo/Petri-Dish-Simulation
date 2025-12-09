@@ -17,7 +17,7 @@ class Spawner {
 public:
     explicit Spawner(Game& game);
 
-    void try_add_circle_at(const sf::Vector2f& worldPos);
+    void spawn_selected_type_at(const sf::Vector2f& worldPos);
     void begin_add_drag_if_applicable(const sf::Vector2f& worldPos);
     void continue_add_drag(const sf::Vector2f& worldPos);
     void reset_add_drag_state();

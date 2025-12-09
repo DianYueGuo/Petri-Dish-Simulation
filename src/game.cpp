@@ -178,7 +178,7 @@ void Game::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseBu
         sf::Vector2f worldPos = pixel_to_world(window, e.position);
 
         if (cursor_mode == CursorMode::Add) {
-            spawner.try_add_circle_at(worldPos);
+            spawner.spawn_selected_type_at(worldPos);
             spawner.begin_add_drag_if_applicable(worldPos);
         } else if (cursor_mode == CursorMode::Select) {
             select_circle_at_world({worldPos.x, worldPos.y});

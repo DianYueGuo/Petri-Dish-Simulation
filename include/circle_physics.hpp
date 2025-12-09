@@ -43,10 +43,10 @@ public:
     void grow_by_area(float delta_area, const b2WorldId& worldId);
 
     void apply_forward_force() const;
-    void stop_applying_force() const;
+    void apply_zero_force() const;
     void apply_left_turn_torque() const;
     void apply_right_turn_torque() const;
-    void stop_applying_torque() const;
+    void apply_zero_torque() const;
 
     void apply_forward_impulse() const;
     void apply_left_turn_impulse() const;

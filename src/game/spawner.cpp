@@ -23,7 +23,7 @@ inline float radius_from_area(float area) {
 
 Spawner::Spawner(Game& game_ref) : game(game_ref) {}
 
-void Spawner::try_add_circle_at(const sf::Vector2f& worldPos) {
+void Spawner::spawn_selected_type_at(const sf::Vector2f& worldPos) {
     switch (game.get_add_type()) {
         case Game::AddType::Creature:
             if (auto circle = create_creature_at({worldPos.x, worldPos.y})) {
