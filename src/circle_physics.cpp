@@ -232,14 +232,21 @@ void CirclePhysics::for_each_touching(const std::function<void(const CirclePhysi
 }
 
 void CirclePhysics::setRadius(float new_radius, const b2WorldId &worldId) {
+    (void)worldId;
+    if (new_radius <= 0.0f) return;
     if (!b2Body_IsValid(bodyId)) return;
 
-    BodyState state = captureBodyState();
-    state.radius = new_radius;
-    recreateBodyWithState(worldId, state);
+    b2ShapeId shapeId;
+    b2Body_GetShapes(bodyId, &shapeId, 1);
+    if (!b2Shape_IsValid(shapeId)) return;
+
+    b2Circle circle = b2Shape_GetCircle(shapeId);
+    circle.radius = new_radius;
+    b2Shape_SetCircle(shapeId, &circle);
 }
 
 void CirclePhysics::setArea(float area, const b2WorldId &worldId) {
+    (void)worldId;
     if (area <= 0.0f) {
         return;
     }
@@ -248,27 +255,30 @@ void CirclePhysics::setArea(float area, const b2WorldId &worldId) {
 }
 
 void CirclePhysics::setPosition(const b2Vec2& new_position, const b2WorldId &worldId) {
+    (void)worldId;
     if (!b2Body_IsValid(bodyId)) return;
 
-    BodyState state = captureBodyState();
-    state.position = new_position;
-    recreateBodyWithState(worldId, state);
+    b2Rot currentRot = b2Body_GetRotation(bodyId);
+    b2Body_SetTransform(bodyId, new_position, currentRot);
 }
 
 void CirclePhysics::setAngle(float new_angle, const b2WorldId &worldId) {
+    (void)worldId;
     if (!b2Body_IsValid(bodyId)) return;
 
-    BodyState state = captureBodyState();
-    state.rotation = b2MakeRot(new_angle);
-    recreateBodyWithState(worldId, state);
+    b2Vec2 currentPos = b2Body_GetPosition(bodyId);
+    b2Body_SetTransform(bodyId, currentPos, b2MakeRot(new_angle));
 }
 
 void CirclePhysics::set_density(float new_density, const b2WorldId& worldId) {
+    (void)worldId;
     density = std::max(new_density, 0.0f);
     if (!b2Body_IsValid(bodyId)) return;
 
-    BodyState state = captureBodyState();
-    recreateBodyWithState(worldId, state);
+    b2ShapeId shapeId;
+    b2Body_GetShapes(bodyId, &shapeId, 1);
+    if (!b2Shape_IsValid(shapeId)) return;
+    b2Shape_SetDensity(shapeId, density, true);
 }
 
 void CirclePhysics::set_impulse_magnitudes(float linear, float angular) {
@@ -277,17 +287,17 @@ void CirclePhysics::set_impulse_magnitudes(float linear, float angular) {
 }
 
 void CirclePhysics::set_linear_damping(float damping, const b2WorldId& worldId) {
+    (void)worldId;
     linearDamping = std::max(damping, 0.0f);
     if (!b2Body_IsValid(bodyId)) return;
 
-    BodyState state = captureBodyState();
-    recreateBodyWithState(worldId, state);
+    b2Body_SetLinearDamping(bodyId, linearDamping);
 }
 
 void CirclePhysics::set_angular_damping(float damping, const b2WorldId& worldId) {
+    (void)worldId;
     angularDamping = std::max(damping, 0.0f);
     if (!b2Body_IsValid(bodyId)) return;
 
-    BodyState state = captureBodyState();
-    recreateBodyWithState(worldId, state);
+    b2Body_SetAngularDamping(bodyId, angularDamping);
 }
