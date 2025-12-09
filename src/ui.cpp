@@ -366,7 +366,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         game.set_paused(paused);
     }
     show_hover_text("Stop simulation updates so you can inspect selected creature info.");
-    if (ImGui::SliderFloat("Simulation speed", &state.time_scale_display, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
+    if (ImGui::SliderFloat("Simulation speed", &state.time_scale_display, 0.01f, 1000.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
         state.time_scale_requested = state.time_scale_display;
         game.set_time_scale(state.time_scale_requested);
     }
@@ -377,7 +377,7 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         constexpr float slowdown_threshold = 0.9f; // If we fall 10% short, keep the slider honest.
         const float requested_speed = state.time_scale_requested;
         if (actual_sim_speed < requested_speed * slowdown_threshold) {
-            state.time_scale_display = std::clamp(actual_sim_speed, 0.001f, 1000.0f);
+            state.time_scale_display = std::clamp(actual_sim_speed, 0.01f, 1000.0f);
         } else {
             state.time_scale_display = requested_speed;
         }
