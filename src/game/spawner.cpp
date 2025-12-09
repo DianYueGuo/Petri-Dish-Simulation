@@ -81,7 +81,7 @@ void Spawner::continue_add_drag(const sf::Vector2f& worldPos) {
                 game.add_circle(create_eatable_at(
                     {worldPos.x, worldPos.y},
                     game.get_add_type() == Game::AddType::ToxicPellet,
-                    true));
+                    game.get_add_type() == Game::AddType::DivisionPellet));
                 last_add_world_pos = worldPos;
                 break;
         }
