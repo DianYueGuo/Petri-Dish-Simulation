@@ -455,11 +455,7 @@ void render_preset_buttons(Game& game, UiState& state) {
     }
 }
 
-void render_overview_tab(Game& game, UiState& state) {
-    if (!ImGui::BeginTabItem("Overview")) {
-        return;
-    }
-
+void render_overview_content(Game& game, UiState& state) {
     if (ImGui::CollapsingHeader("Status", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Text("Object count: %zu", game.get_circle_count());
         show_hover_text("How many circles currently exist inside the dish.");
@@ -539,8 +535,13 @@ void render_overview_tab(Game& game, UiState& state) {
             ImGui::Text("No creature selected");
         }
     }
+}
 
-    ImGui::EndTabItem();
+void render_overview_window(Game& game, UiState& state) {
+    if (ImGui::Begin("Overview")) {
+        render_overview_content(game, state);
+    }
+    ImGui::End();
 }
 
 void render_simulation_tab(Game& game, UiState& state) {
@@ -768,6 +769,8 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
     static UiState state;
     initialize_state(state, game);
 
+    render_overview_window(game, state);
+
     ImGui::Begin("Simulation Controls");
 
     render_view_controls(window, view, game, state);
@@ -787,7 +790,6 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
     ImGui::Separator();
 
     if (ImGui::BeginTabBar("ControlsTabs")) {
-        render_overview_tab(game, state);
         render_simulation_tab(game, state);
         render_mutation_tab(game, state);
         render_spawning_tab(game, state);
