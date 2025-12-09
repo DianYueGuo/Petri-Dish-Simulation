@@ -106,8 +106,8 @@ private:
         float init_remove_node_probability = 0.02f;
         float init_add_connection_probability = 0.15f;
         float init_remove_connection_probability = 0.02f;
-        int init_mutation_rounds = 10;
-        int mutation_rounds = 4;
+        int init_mutation_rounds = 1;
+        int mutation_rounds = 1;
     };
     struct MovementSettings {
         float circle_density = 1.0f;
