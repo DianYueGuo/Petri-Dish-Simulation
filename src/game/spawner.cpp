@@ -31,10 +31,13 @@ void Spawner::spawn_selected_type_at(const sf::Vector2f& worldPos) {
                 game.circles.push_back(std::move(circle));
             }
             break;
-        case Game::AddType::Eatable:
-        case Game::AddType::ToxicEatable:
-        case Game::AddType::DivisionEatable:
-            game.circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, game.get_add_type() == Game::AddType::ToxicEatable, game.get_add_type() == Game::AddType::DivisionEatable));
+        case Game::AddType::FoodPellet:
+        case Game::AddType::ToxicPellet:
+        case Game::AddType::DivisionPellet:
+            game.circles.push_back(create_eatable_at(
+                {worldPos.x, worldPos.y},
+                game.get_add_type() == Game::AddType::ToxicPellet,
+                game.get_add_type() == Game::AddType::DivisionPellet));
             break;
         default:
             break;
@@ -72,10 +75,13 @@ void Spawner::continue_add_drag(const sf::Vector2f& worldPos) {
         switch (game.get_add_type()) {
             case Game::AddType::Creature:
                 break;
-            case Game::AddType::Eatable:
-            case Game::AddType::ToxicEatable:
-            case Game::AddType::DivisionEatable:
-                game.circles.push_back(create_eatable_at({worldPos.x, worldPos.y}, game.get_add_type() == Game::AddType::ToxicEatable, true));
+            case Game::AddType::FoodPellet:
+            case Game::AddType::ToxicPellet:
+            case Game::AddType::DivisionPellet:
+                game.circles.push_back(create_eatable_at(
+                    {worldPos.x, worldPos.y},
+                    game.get_add_type() == Game::AddType::ToxicPellet,
+                    true));
                 last_add_world_pos = worldPos;
                 break;
         }
@@ -92,9 +98,9 @@ void Spawner::reset_add_drag_state() {
 
 void Spawner::sprinkle_entities(float dt) {
     ensure_minimum_creatures();
-    sprinkle_with_rate(game.get_sprinkle_rate_eatable(), static_cast<int>(Game::AddType::Eatable), dt);
-    sprinkle_with_rate(game.get_sprinkle_rate_toxic(), static_cast<int>(Game::AddType::ToxicEatable), dt);
-    sprinkle_with_rate(game.get_sprinkle_rate_division(), static_cast<int>(Game::AddType::DivisionEatable), dt);
+    sprinkle_with_rate(game.get_sprinkle_rate_eatable(), static_cast<int>(Game::AddType::FoodPellet), dt);
+    sprinkle_with_rate(game.get_sprinkle_rate_toxic(), static_cast<int>(Game::AddType::ToxicPellet), dt);
+    sprinkle_with_rate(game.get_sprinkle_rate_division(), static_cast<int>(Game::AddType::DivisionPellet), dt);
 }
 
 void Spawner::ensure_minimum_creatures() {
@@ -149,9 +155,9 @@ std::unique_ptr<CreatureCircle> Spawner::create_creature_at(const b2Vec2& pos) {
     return circle;
 }
 
-std::unique_ptr<EatableCircle> Spawner::create_eatable_at(const b2Vec2& pos, bool toxic, bool division_boost) const {
+std::unique_ptr<EatableCircle> Spawner::create_eatable_at(const b2Vec2& pos, bool toxic, bool division_pellet) const {
     float radius = radius_from_area(game.get_add_eatable_area());
-    auto circle = std::make_unique<EatableCircle>(game.worldId, pos.x, pos.y, radius, game.get_circle_density(), toxic, division_boost, 0.0f);
+    auto circle = std::make_unique<EatableCircle>(game.worldId, pos.x, pos.y, radius, game.get_circle_density(), toxic, division_pellet, 0.0f);
     circle->set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
     circle->set_linear_damping(game.get_linear_damping(), game.worldId);
     circle->set_angular_damping(game.get_angular_damping(), game.worldId);
@@ -204,13 +210,13 @@ void Spawner::sprinkle_with_rate(float rate, int type_value, float dt) {
                     game.circles.push_back(std::move(creature));
                 }
                 break;
-            case Game::AddType::Eatable:
+            case Game::AddType::FoodPellet:
                 game.circles.push_back(create_eatable_at(pos, false));
                 break;
-            case Game::AddType::ToxicEatable:
+            case Game::AddType::ToxicPellet:
                 game.circles.push_back(create_eatable_at(pos, true));
                 break;
-            case Game::AddType::DivisionEatable:
+            case Game::AddType::DivisionPellet:
                 game.circles.push_back(create_eatable_at(pos, false, true));
                 break;
         }

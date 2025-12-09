@@ -132,7 +132,7 @@ CreatureCircle::CreatureCircle(const b2WorldId &worldId,
                          std::vector<std::vector<int>>* innov_ids,
                          int* last_innov_id,
                          Game* owner) :
-    EatableCircle(worldId, position_x, position_y, radius, density, /*toxic=*/false, /*division_boost=*/false, angle, /*boost_particle=*/false),
+    EatableCircle(worldId, position_x, position_y, radius, density, /*toxic=*/false, /*division_pellet=*/false, angle, /*boost_particle=*/false),
     brain(base_brain ? *base_brain : neat::Genome(29, 11, 0, 0.5f, innov_ids, last_innov_id)) {
     set_kind(CircleKind::Creature);
     neat_innovations = innov_ids;
@@ -217,7 +217,7 @@ void CreatureCircle::consume_touching_circle(const b2WorldId &worldId, Game& gam
         }
         eatable.be_eaten();
         eatable.set_eaten_by(this);
-        if (eatable.is_division_boost()) {
+        if (eatable.is_division_pellet()) {
             float div_roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
             if (div_roll <= game.get_division_pellet_divide_probability()) {
                 this->divide(worldId, game);
@@ -345,7 +345,7 @@ void CreatureCircle::boost_forward(const b2WorldId &worldId, Game& game) {
             boost_radius,
             game.get_circle_density(),
             /*toxic=*/false,
-            /*division_boost=*/false,
+            /*division_pellet=*/false,
             /*angle=*/0.0f,
             /*boost_particle=*/true);
         EatableCircle* boost_circle_ptr = boost_circle.get();

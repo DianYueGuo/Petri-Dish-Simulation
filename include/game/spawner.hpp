@@ -26,7 +26,7 @@ public:
     void ensure_minimum_creatures();
     b2Vec2 random_point_in_petri() const;
     std::unique_ptr<CreatureCircle> create_creature_at(const b2Vec2& pos);
-    std::unique_ptr<EatableCircle> create_eatable_at(const b2Vec2& pos, bool toxic, bool division_boost = false) const;
+    std::unique_ptr<EatableCircle> create_eatable_at(const b2Vec2& pos, bool toxic, bool division_pellet = false) const;
     void spawn_eatable_cloud(const CreatureCircle& creature, std::vector<std::unique_ptr<EatableCircle>>& out);
 
 private:

@@ -517,7 +517,7 @@ void Game::remove_random_percentage(float percentage) {
     erase_indices_descending(indices);
 }
 
-void Game::remove_percentage_pellets(float percentage, bool toxic, bool division_boost) {
+void Game::remove_percentage_pellets(float percentage, bool toxic, bool division_pellet) {
     if (circles.empty() || percentage <= 0.0f) {
         return;
     }
@@ -528,7 +528,7 @@ void Game::remove_percentage_pellets(float percentage, bool toxic, bool division
         if (auto* e = dynamic_cast<EatableCircle*>(circles[i].get())) {
             if (e->is_boost_particle()) continue;
             if (e->get_kind() == CircleKind::Creature) continue;
-            if (e->is_toxic() == toxic && e->is_division_boost() == division_boost) {
+            if (e->is_toxic() == toxic && e->is_division_pellet() == division_pellet) {
                 indices.push_back(i);
             }
         }
@@ -549,7 +549,7 @@ void Game::remove_percentage_pellets(float percentage, bool toxic, bool division
     erase_indices_descending(indices);
 }
 
-std::size_t Game::count_pellets(bool toxic, bool division_boost) const {
+std::size_t Game::count_pellets(bool toxic, bool division_pellet) const {
     std::size_t count = 0;
     for (const auto& c : circles) {
         if (auto* e = dynamic_cast<const EatableCircle*>(c.get())) {
@@ -559,7 +559,7 @@ std::size_t Game::count_pellets(bool toxic, bool division_boost) const {
             b2Vec2 pos = e->getPosition();
             float dist = std::sqrt(pos.x * pos.x + pos.y * pos.y);
             if (dist + e->getRadius() > petri_radius) continue;
-            if (e->is_toxic() == toxic && e->is_division_boost() == division_boost) {
+            if (e->is_toxic() == toxic && e->is_division_pellet() == division_pellet) {
                 ++count;
             }
         }
@@ -599,9 +599,9 @@ void Game::adjust_cleanup_rates() {
         return std::clamp(rate, 0.0f, 100.0f);
     };
 
-    auto adjust_spawn = [&](bool toxic, bool division_boost, float density_target, float& sprinkle_rate_out, float& cleanup_rate_out) {
+    auto adjust_spawn = [&](bool toxic, bool division_pellet, float density_target, float& sprinkle_rate_out, float& cleanup_rate_out) {
         float desired = desired_count(density_target);
-        std::size_t count = count_pellets(toxic, division_boost);
+        std::size_t count = count_pellets(toxic, division_pellet);
         float diff = desired - static_cast<float>(count);
         if (diff > 0.0f) {
             // Need to add

@@ -13,7 +13,7 @@ public:
                   float radius = 1.0f,
                   float density = 1.0f,
                   bool toxic = false,
-                  bool division_boost = false,
+                  bool division_pellet = false,
                   float angle = 0.0f,
                   bool boost_particle = false);
     void be_eaten();
@@ -22,14 +22,14 @@ public:
     bool is_eaten() const;
     bool is_toxic() const { return toxic; }
     void set_toxic(bool value) { toxic = value; update_kind_from_flags(); }
-    bool is_division_boost() const { return division_boost; }
-    void set_division_boost(bool value) { division_boost = value; update_kind_from_flags(); }
+    bool is_division_pellet() const { return division_pellet; }
+    void set_division_pellet(bool value) { division_pellet = value; update_kind_from_flags(); }
     bool is_boost_particle() const { return boost_particle; }
 private:
     void update_kind_from_flags();
     bool eaten = false;
     bool toxic = false;
-    bool division_boost = false;
+    bool division_pellet = false;
     bool boost_particle = false;
     const CreatureCircle* eaten_by = nullptr;
 };

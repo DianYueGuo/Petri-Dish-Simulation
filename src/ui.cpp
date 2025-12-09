@@ -235,18 +235,18 @@ void render_cursor_controls(Game& game, UiState& state) {
             add_type_changed = true;
         }
         ImGui::SameLine();
-        if (ImGui::RadioButton("Food pellet", state.add_type == static_cast<int>(Game::AddType::Eatable))) {
-            state.add_type = static_cast<int>(Game::AddType::Eatable);
+        if (ImGui::RadioButton("Food pellet", state.add_type == static_cast<int>(Game::AddType::FoodPellet))) {
+            state.add_type = static_cast<int>(Game::AddType::FoodPellet);
             add_type_changed = true;
         }
         ImGui::SameLine();
-        if (ImGui::RadioButton("Toxic pellet", state.add_type == static_cast<int>(Game::AddType::ToxicEatable))) {
-            state.add_type = static_cast<int>(Game::AddType::ToxicEatable);
+        if (ImGui::RadioButton("Toxic pellet", state.add_type == static_cast<int>(Game::AddType::ToxicPellet))) {
+            state.add_type = static_cast<int>(Game::AddType::ToxicPellet);
             add_type_changed = true;
         }
         ImGui::SameLine();
-        if (ImGui::RadioButton("Division pellet", state.add_type == static_cast<int>(Game::AddType::DivisionEatable))) {
-            state.add_type = static_cast<int>(Game::AddType::DivisionEatable);
+        if (ImGui::RadioButton("Division pellet", state.add_type == static_cast<int>(Game::AddType::DivisionPellet))) {
+            state.add_type = static_cast<int>(Game::AddType::DivisionPellet);
             add_type_changed = true;
         }
         show_hover_text("Choose what to place when clicking in Add mode.");
@@ -514,14 +514,14 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
                 movement_changed |= ImGui::SliderFloat("Angular damping", &state.angular_damping, 0.0f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic);
                 show_hover_text("How quickly spinning slows down.");
                 ImGui::Separator();
-                if (ImGui::SliderFloat("Boost pellet impulse fraction", &state.boost_particle_impulse_fraction, 0.0f, 0.1f, "%.4f", ImGuiSliderFlags_Logarithmic)) {
+                if (ImGui::SliderFloat("Boost particle impulse fraction", &state.boost_particle_impulse_fraction, 0.0f, 0.1f, "%.4f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_boost_particle_impulse_fraction(state.boost_particle_impulse_fraction);
                 }
-                show_hover_text("Fraction of the creature's impulse given to the spawned boost pellet (fine range).");
-                if (ImGui::SliderFloat("Boost pellet linear damping", &state.boost_particle_linear_damping, 0.1f, 20.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
+                show_hover_text("Fraction of the creature's impulse given to the spawned boost particle (fine range).");
+                if (ImGui::SliderFloat("Boost particle linear damping", &state.boost_particle_linear_damping, 0.1f, 20.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_boost_particle_linear_damping(state.boost_particle_linear_damping);
                 }
-                show_hover_text("Linear damping applied to boost pellets only (broader range).");
+                show_hover_text("Linear damping applied to boost particles only (broader range).");
 
                 if (movement_changed) {
                     game.set_circle_density(state.circle_density);

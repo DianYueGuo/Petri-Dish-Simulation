@@ -25,9 +25,9 @@ public:
     };
     enum class AddType {
         Creature,
-        Eatable,
-        ToxicEatable,
-        DivisionEatable
+        FoodPellet,
+        ToxicPellet,
+        DivisionPellet
     };
 
     Game();
@@ -156,7 +156,7 @@ public:
     void add_circle(std::unique_ptr<EatableCircle> circle);
     std::size_t get_creature_count() const;
     void remove_random_percentage(float percentage);
-    void remove_percentage_pellets(float percentage, bool toxic, bool division_boost);
+    void remove_percentage_pellets(float percentage, bool toxic, bool division_pellet);
     void remove_outside_petri();
     void set_auto_remove_outside(bool enabled) { auto_remove_outside = enabled; }
     bool get_auto_remove_outside() const { return auto_remove_outside; }
@@ -210,7 +210,7 @@ private:
     void handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e);
     void update_max_ages();
     void adjust_cleanup_rates();
-    std::size_t count_pellets(bool toxic, bool division_boost) const;
+    std::size_t count_pellets(bool toxic, bool division_pellet) const;
     void erase_indices_descending(std::vector<std::size_t>& indices);
     void refresh_generation_and_age();
     RemovalResult evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
