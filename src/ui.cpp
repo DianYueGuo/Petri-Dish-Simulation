@@ -481,21 +481,21 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
             }
 
             if (ImGui::CollapsingHeader("Sizes & costs", ImGuiTreeNodeFlags_DefaultOpen)) {
-                if (ImGui::SliderFloat("Minimum eater area", &state.minimum_area, 0.1f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
+                if (ImGui::SliderFloat("Minimum eater area (m^2)", &state.minimum_area, 0.1f, 5.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_minimum_area(state.minimum_area);
                 }
                 show_hover_text("Smallest allowed size before circles are considered too tiny to exist.");
 
-                if (ImGui::SliderFloat("Eater spawn area", &state.average_eater_area, 0.1f, 20.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
+                if (ImGui::SliderFloat("Eater spawn area (m^2)", &state.average_eater_area, 0.1f, 20.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_average_eater_area(state.average_eater_area);
                 }
                 show_hover_text("Area given to newly created eater circles.");
 
-                if (ImGui::SliderFloat("Spawned food area", &state.eatable_area, 0.1f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
+                if (ImGui::SliderFloat("Food pellet area (m^2)", &state.eatable_area, 0.1f, 10.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_add_eatable_area(state.eatable_area);
                 }
                 show_hover_text("Area given to each food pellet you add or drag out.");
-                if (ImGui::SliderFloat("Boost cost (area)", &state.boost_area, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
+                if (ImGui::SliderFloat("Boost cost (m^2)", &state.boost_area, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
                     game.set_boost_area(state.boost_area);
                 }
                 show_hover_text("Area an eater spends to dash forward; 0 means no pellet is left behind. Finer range.");
