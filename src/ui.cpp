@@ -11,7 +11,8 @@ struct UiState {
     float eatable_area = 1.0f;
     float delete_percentage = 10.0f;
     float petri_radius = 0.0f;
-    float time_scale = 0.0f;
+    float time_scale_display = 0.0f;
+    float time_scale_requested = 0.0f;
     float brain_updates_per_sim_second = 0.0f;
     float minimum_area = 0.0f;
     float average_creature_area = 0.0f;
@@ -88,10 +89,16 @@ void set_and_apply(T& field, T value, Setter setter) {
     setter(value);
 }
 
+void set_time_scale(UiState& state, Game& game, float value) {
+    state.time_scale_display = value;
+    state.time_scale_requested = value;
+    game.set_time_scale(value);
+}
+
 void apply_preset(Preset preset, UiState& state, Game& game) {
     switch (preset) {
         case Preset::Default:
-            set_and_apply(state.time_scale, 1.0f, [&](float v) { game.set_time_scale(v); });
+            set_time_scale(state, game, 1.0f);
             set_and_apply(state.brain_updates_per_sim_second, 10.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
             set_and_apply(state.average_creature_area, 5.0f, [&](float v) { game.set_average_creature_area(v); });
             set_and_apply(state.boost_area, 0.05f, [&](float v) { game.set_boost_area(v); });
@@ -106,7 +113,7 @@ void apply_preset(Preset preset, UiState& state, Game& game) {
             set_and_apply(state.division_pellet_divide_probability, 0.4f, [&](float v) { game.set_division_pellet_divide_probability(v); });
             break;
         case Preset::Peaceful:
-            set_and_apply(state.time_scale, 1.0f, [&](float v) { game.set_time_scale(v); });
+            set_time_scale(state, game, 1.0f);
             set_and_apply(state.brain_updates_per_sim_second, 6.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
             set_and_apply(state.boost_area, 0.02f, [&](float v) { game.set_boost_area(v); });
             set_and_apply(state.boost_particle_impulse_fraction, 0.01f, [&](float v) { game.set_boost_particle_impulse_fraction(v); });
@@ -119,7 +126,7 @@ void apply_preset(Preset preset, UiState& state, Game& game) {
             set_and_apply(state.division_pellet_divide_probability, 0.25f, [&](float v) { game.set_division_pellet_divide_probability(v); });
             break;
         case Preset::ToxicHeavy:
-            set_and_apply(state.time_scale, 1.0f, [&](float v) { game.set_time_scale(v); });
+            set_time_scale(state, game, 1.0f);
             set_and_apply(state.brain_updates_per_sim_second, 12.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
             set_and_apply(state.boost_area, 0.08f, [&](float v) { game.set_boost_area(v); });
             set_and_apply(state.poison_death_probability, 0.7f, [&](float v) { game.set_poison_death_probability(v); });
@@ -132,7 +139,7 @@ void apply_preset(Preset preset, UiState& state, Game& game) {
             set_and_apply(state.division_pellet_divide_probability, 0.2f, [&](float v) { game.set_division_pellet_divide_probability(v); });
             break;
         case Preset::DivisionTest:
-            set_and_apply(state.time_scale, 1.0f, [&](float v) { game.set_time_scale(v); });
+            set_time_scale(state, game, 1.0f);
             set_and_apply(state.brain_updates_per_sim_second, 8.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
             set_and_apply(state.boost_area, 0.04f, [&](float v) { game.set_boost_area(v); });
             set_and_apply(state.minimum_creatures, 15, [&](int v) { game.set_minimum_creature_count(v); });
@@ -264,7 +271,8 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         state.add_type = static_cast<int>(game.get_add_type());
         state.eatable_area = game.get_add_eatable_area();
         state.petri_radius = game.get_petri_radius();
-        state.time_scale = game.get_time_scale();
+        state.time_scale_requested = game.get_time_scale();
+        state.time_scale_display = state.time_scale_requested;
         state.brain_updates_per_sim_second = game.get_brain_updates_per_sim_second();
         state.minimum_area = game.get_minimum_area();
         state.average_creature_area = game.get_average_creature_area();
@@ -358,10 +366,22 @@ void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
         game.set_paused(paused);
     }
     show_hover_text("Stop simulation updates so you can inspect selected creature info.");
-    if (ImGui::SliderFloat("Simulation speed", &state.time_scale, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
-        game.set_time_scale(state.time_scale);
+    if (ImGui::SliderFloat("Simulation speed", &state.time_scale_display, 0.001f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic)) {
+        state.time_scale_requested = state.time_scale_display;
+        game.set_time_scale(state.time_scale_requested);
     }
+    bool sim_speed_active = ImGui::IsItemActive();
     show_hover_text("Multiplies the physics time step; lower values slow everything down.");
+    const float actual_sim_speed = game.get_actual_sim_speed();
+    if (!paused && !sim_speed_active && actual_sim_speed > 0.0f) {
+        constexpr float slowdown_threshold = 0.9f; // If we fall 10% short, keep the slider honest.
+        const float requested_speed = state.time_scale_requested;
+        if (actual_sim_speed < requested_speed * slowdown_threshold) {
+            state.time_scale_display = std::clamp(actual_sim_speed, 0.001f, 1000.0f);
+        } else {
+            state.time_scale_display = requested_speed;
+        }
+    }
 
     ImGui::SeparatorText("Spawning region");
     if (ImGui::SliderFloat("Region radius (m)", &state.petri_radius, 1.0f, 100.0f, "%.2f", ImGuiSliderFlags_Logarithmic)) {
