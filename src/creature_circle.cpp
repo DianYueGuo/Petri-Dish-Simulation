@@ -254,17 +254,36 @@ void CreatureCircle::move_intelligently(const b2WorldId &worldId, Game &game, fl
     (void)dt;
     run_brain_cycle_from_touching();
 
-    if (brain_outputs[0] >= 0.5f) {
-        this->boost_forward(worldId, game);
-    }
-    if (brain_outputs[1] >= 0.5f) {
-        this->apply_left_turn_impulse();
-    }
-    if (brain_outputs[2] >= 0.5f) {
-        this->apply_right_turn_impulse();
-    }
-    if (brain_outputs[3] >= 0.5f) {
-        this->divide(worldId, game);
+    if (game.get_selected_creature() == this &&
+        owner_game && owner_game->is_selected_creature_possessed()
+    ) {
+        float probability = static_cast<float>(rand()) / RAND_MAX;
+        if (owner_game->get_left_key_down() && probability > 0.3f) {
+            this->apply_left_turn_impulse();
+        }
+        probability = static_cast<float>(rand()) / RAND_MAX;
+        if (owner_game->get_right_key_down() && probability > 0.3f) {
+            this->apply_right_turn_impulse();
+        }
+        if (owner_game->get_up_key_down()) {
+            this->boost_forward(worldId, game);
+        }
+        if (owner_game->get_space_key_down()) {
+            this->divide(worldId, game);
+        }
+    } else {
+        if (brain_outputs[0] >= 0.5f) {
+            this->boost_forward(worldId, game);
+        }
+        if (brain_outputs[1] >= 0.5f) {
+            this->apply_left_turn_impulse();
+        }
+        if (brain_outputs[2] >= 0.5f) {
+            this->apply_right_turn_impulse();
+        }
+        if (brain_outputs[3] >= 0.5f) {
+            this->divide(worldId, game);
+        }
     }
 
     if (game.get_live_mutation_enabled() && neat_innovations && neat_last_innov_id) {

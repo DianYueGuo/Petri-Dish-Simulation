@@ -166,6 +166,10 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
     if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
         handle_key_press(window, *keyPressed);
     }
+
+    if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
+        handle_key_release(*keyReleased);
+    }
 }
 
 sf::Vector2f Game::pixel_to_world(sf::RenderWindow& window, const sf::Vector2i& pixel) const {
@@ -258,11 +262,42 @@ void Game::handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPresse
         case sf::Keyboard::Scancode::E:
             view.zoom(zoom_step);
             break;
+        case sf::Keyboard::Scancode::Left:
+            possesing.left_key_down = true;
+            break;
+        case sf::Keyboard::Scancode::Right:
+            possesing.right_key_down = true;
+            break;
+        case sf::Keyboard::Scancode::Up:
+            possesing.up_key_down = true;
+            break;
+        case sf::Keyboard::Scancode::Space:
+            possesing.space_key_down = true;
+            break;
         default:
             break;
     }
 
     window.setView(view);
+}
+
+void Game::handle_key_release(const sf::Event::KeyReleased& e) {
+    switch (e.scancode) {
+        case sf::Keyboard::Scancode::Left:
+            possesing.left_key_down = false;
+            break;
+        case sf::Keyboard::Scancode::Right:
+            possesing.right_key_down = false;
+            break;
+        case sf::Keyboard::Scancode::Up:
+            possesing.up_key_down = false;
+            break;
+        case sf::Keyboard::Scancode::Space:
+            possesing.space_key_down = false;
+            break;
+        default:
+            break;
+    }
 }
 
 void Game::add_circle(std::unique_ptr<EatableCircle> circle) {

@@ -398,6 +398,12 @@ void render_view_controls(sf::RenderWindow& window, sf::View& view, Game& game, 
         game.set_show_true_color(state.show_true_color);
     }
     show_hover_text("Toggle between smoothed display color and raw brain output color.");
+
+    bool selected_creature_possessed = game.is_selected_creature_possessed();
+    if (ImGui::Checkbox("Possess selected creature", &selected_creature_possessed)) {
+        game.set_selected_creature_possessed(selected_creature_possessed);
+    }
+    show_hover_text("Control the selected creature with the keyboard (Left, Right, Up, and Space keys).");
 }
 
 void render_simulation_controls(Game& game, UiState& state) {

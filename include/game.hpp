@@ -143,6 +143,14 @@ private:
         float max_age_since_creation = 0.0f;
         float max_age_since_division = 0.0f;
     };
+    struct PossesingSelectedCreature {
+        bool possess_selected_creature = false;
+        bool left_key_down = false;
+        bool right_key_down = false;
+        bool up_key_down = false;
+        bool space_key_down = false;
+    };
+
 public:
 
     Game();
@@ -269,6 +277,12 @@ public:
     void recompute_max_generation();
     void set_show_true_color(bool value) { show_true_color = value; }
     bool get_show_true_color() const { return show_true_color; }
+    void set_selected_creature_possessed(bool possessed) { possesing.possess_selected_creature = possessed; }
+    bool is_selected_creature_possessed() const { return possesing.possess_selected_creature; }
+    bool get_left_key_down() const { return possesing.left_key_down; }
+    bool get_right_key_down() const { return possesing.right_key_down; }
+    bool get_up_key_down() const { return possesing.up_key_down; }
+    bool get_space_key_down() const { return possesing.space_key_down; }
     void add_circle(std::unique_ptr<EatableCircle> circle);
     std::size_t get_creature_count() const;
     void remove_random_percentage(float percentage);
@@ -323,6 +337,7 @@ private:
     void handle_mouse_release(const sf::Event::MouseButtonReleased& e);
     void handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e);
     void handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e);
+    void handle_key_release(const sf::Event::KeyReleased& e);
     void update_max_ages();
     void adjust_cleanup_rates();
     std::size_t count_pellets(bool toxic, bool division_pellet) const;
@@ -351,6 +366,7 @@ private:
     ViewDragState view_drag;
     SelectionManager selection;
     Spawner spawner;
+    PossesingSelectedCreature possesing;
     bool show_true_color = false;
     bool paused = false;
 };
