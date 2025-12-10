@@ -74,8 +74,21 @@ void Game::process_game_logic_with_speed() {
     update_actual_sim_speed();
     // real_time_accum should be updated by caller using frame delta; leave as is here.
 
+    sf::Clock clock; // starts the clock
+    float begin_sim_time = timing.sim_time_accum;
+
     while (timing.sim_time_accum + timeStep < timing.desired_sim_time_accum) {
         process_game_logic();
+
+        if (clock.getElapsedTime() > sf::seconds(timeStep)) {
+            timing.desired_sim_time_accum -= timeStep * timing.time_scale;
+            timing.desired_sim_time_accum += timing.sim_time_accum - begin_sim_time;
+
+            timing.last_sim_dt = timing.sim_time_accum - begin_sim_time;
+            update_actual_sim_speed();
+
+            break;
+        }
     }
 }
 
