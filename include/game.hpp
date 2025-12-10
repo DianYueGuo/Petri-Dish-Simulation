@@ -40,6 +40,7 @@ private:
         float time_scale = 1.0f;
         float sim_time_accum = 0.0f;
         float real_time_accum = 0.0f;
+        float desired_sim_time_accum = 0.0f;
         float last_real_dt = 0.0f;
         float last_sim_dt = 0.0f;
         float actual_sim_speed_inst = 0.0f;
@@ -146,6 +147,7 @@ public:
 
     Game();
     ~Game();
+    void process_game_logic_with_speed();
     void process_game_logic();
     void draw(sf::RenderWindow& window) const;
     void process_input_events(sf::RenderWindow& window, const std::optional<sf::Event>& event);

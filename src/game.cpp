@@ -59,20 +59,31 @@ void process_touch_events(const b2WorldId& worldId) {
     }
 }
 
-void Game::process_game_logic() {
+void Game::process_game_logic_with_speed() {
     if (paused) {
         timing.last_sim_dt = 0.0f;
         update_actual_sim_speed();
         return;
     }
 
-    float timeStep = (1.0f / 60.0f) * timing.time_scale;
+    float timeStep = (1.0f / 60.0f);
+
+    timing.desired_sim_time_accum += timeStep * timing.time_scale;
+
+    timing.last_sim_dt = timeStep * timing.time_scale;
+    update_actual_sim_speed();
+    // real_time_accum should be updated by caller using frame delta; leave as is here.
+
+    while (timing.sim_time_accum + timeStep < timing.desired_sim_time_accum) {
+        process_game_logic();
+    }
+}
+
+void Game::process_game_logic() {
+    float timeStep = (1.0f / 60.0f);
     int subStepCount = 4;
     b2World_Step(worldId, timeStep, subStepCount);
     timing.sim_time_accum += timeStep;
-    timing.last_sim_dt = timeStep;
-    update_actual_sim_speed();
-    // real_time_accum should be updated by caller using frame delta; leave as is here.
 
     process_touch_events(worldId);
 

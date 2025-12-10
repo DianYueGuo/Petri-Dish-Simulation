@@ -38,7 +38,7 @@ int main() {
         float dt = deltaClock.restart().asSeconds();
         game.accumulate_real_time(dt);
 
-        game.process_game_logic();
+        game.process_game_logic_with_speed();
 
         handle_events(window, view, game);
 
