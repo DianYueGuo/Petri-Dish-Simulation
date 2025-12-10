@@ -272,16 +272,20 @@ void CreatureCircle::move_intelligently(const b2WorldId &worldId, Game &game, fl
             this->divide(worldId, game);
         }
     } else {
-        if (brain_outputs[0] >= 0.5f) {
+        float probability = static_cast<float>(rand()) / RAND_MAX;
+        if (brain_outputs[0] >= probability) {
             this->boost_forward(worldId, game);
         }
-        if (brain_outputs[1] >= 0.5f) {
+        probability = static_cast<float>(rand()) / RAND_MAX;
+        if (brain_outputs[1] >= probability) {
             this->apply_left_turn_impulse();
         }
-        if (brain_outputs[2] >= 0.5f) {
+        probability = static_cast<float>(rand()) / RAND_MAX;
+        if (brain_outputs[2] >= probability) {
             this->apply_right_turn_impulse();
         }
-        if (brain_outputs[3] >= 0.5f) {
+        probability = static_cast<float>(rand()) / RAND_MAX;
+        if (brain_outputs[3] >= probability) {
             this->divide(worldId, game);
         }
     }
