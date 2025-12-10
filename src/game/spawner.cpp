@@ -131,7 +131,7 @@ std::unique_ptr<CreatureCircle> Spawner::create_creature_at(const b2Vec2& pos) {
     float varied_area = base_area;
     float radius = radius_from_area(varied_area);
     float angle = random_unit() * 2.0f * PI;
-    const neat::Genome* base_brain = game.get_max_generation_brain();
+    const neat::Genome* base_brain = nullptr;
     auto circle = std::make_unique<CreatureCircle>(
         game.worldId,
         pos.x,
