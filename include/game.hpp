@@ -87,17 +87,17 @@ private:
         std::size_t division_count_cached = 0;
     };
     struct MutationSettings {
-        float add_node_probability = 0.03f;
+        float add_node_probability = 0.01f;
         float remove_node_probability = 0.05f;
-        float add_connection_probability = 0.05f;
+        float add_connection_probability = 0.02f;
         float remove_connection_probability = 0.05f;
         float tick_add_node_probability = 0.0f;
         float tick_remove_node_probability = 0.0f;
         float tick_add_connection_probability = 0.0f;
         float tick_remove_connection_probability = 0.0f;
         bool live_mutation_enabled = false;
-        float mutate_weight_thresh = 0.1f;
-        float mutate_weight_full_change_thresh = 0.05f;
+        float mutate_weight_thresh = 0.08f;
+        float mutate_weight_full_change_thresh = 0.03f;
         float mutate_weight_factor = 1.2f;
         int mutate_add_connection_iterations = 20;
         float mutate_reactivate_connection_thresh = 0.25f;
