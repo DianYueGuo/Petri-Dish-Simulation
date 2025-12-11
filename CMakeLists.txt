@@ -123,6 +123,23 @@ if(ENABLE_WARNINGS)
     endif()
 endif()
 
+# --- Static analysis: clang-tidy (Debug only, optional) ---
+option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis in Debug builds" ON)
+
+if(ENABLE_CLANG_TIDY)
+    find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+
+    if(CLANG_TIDY_EXE)
+        message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+        # Apply clang-tidy only to Debug config (generator expression).
+        set(CMAKE_CXX_CLANG_TIDY
+            "${CLANG_TIDY_EXE};-extra-arg=-std=c++20;-checks=clang-analyzer-*,bugprone-*,-bugprone-too-small-loop-variable,performance-*"
+        )
+    else()
+        message(WARNING "ENABLE_CLANG_TIDY=ON, but clang-tidy was not found.")
+    endif()
+endif()
+
 set_target_properties(
     ${APP_TARGET}
     PROPERTIES
@@ -144,6 +161,30 @@ add_custom_target(
     USES_TERMINAL
     COMMENT "Build and run ${APP_BUNDLE_NAME}"
 )
+
+# --- Static analysis: cppcheck (manual target) ---
+find_program(CPPCHECK_EXE NAMES cppcheck)
+
+if(CPPCHECK_EXE)
+    message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
+    add_custom_target(
+        cppcheck
+        COMMAND
+            ${CPPCHECK_EXE}
+            --enable=warning,performance,portability,style
+            --inconclusive
+            --std=c++20
+            --language=c++
+            --inline-suppr
+            -I ${CMAKE_SOURCE_DIR}/include
+            ${CMAKE_SOURCE_DIR}/src
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running cppcheck static analysis"
+        VERBATIM
+    )
+else()
+    message(STATUS "cppcheck not found; 'cppcheck' target will not be available.")
+endif()
 
 install(
     TARGETS ${APP_TARGET}
