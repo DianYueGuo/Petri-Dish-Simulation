@@ -168,6 +168,22 @@ find_program(CPPCHECK_EXE NAMES cppcheck)
 if(CPPCHECK_EXE)
     message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
     add_custom_target(
+        cppcheck_deps
+        COMMAND
+            ${CPPCHECK_EXE}
+            --enable=warning,performance,portability,style
+            --inconclusive
+            --std=c++20
+            --language=c++
+            --inline-suppr
+            --check-level=exhaustive
+            -I ${CMAKE_SOURCE_DIR}/include
+            ${CMAKE_BINARY_DIR}/_deps/neat-src
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running cppcheck on dependencies"
+        VERBATIM
+    )
+    add_custom_target(
         cppcheck
         COMMAND
             ${CPPCHECK_EXE}
