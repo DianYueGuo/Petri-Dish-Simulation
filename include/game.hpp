@@ -345,12 +345,16 @@ private:
     float compute_cleanup_rate(std::size_t count, float desired) const;
     SpawnRates calculate_spawn_rates(bool toxic, bool division_pellet, float density_target) const;
     void erase_indices_descending(std::vector<std::size_t>& indices);
+    std::vector<std::size_t> collect_pellet_indices(bool toxic, bool division_pellet) const;
+    std::size_t compute_target_removal_count(std::size_t available, float percentage) const;
     void refresh_generation_and_age();
     RemovalResult evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
     CullState collect_removal_state(const SelectionManager::Snapshot& selection_snapshot, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
     void compact_circles(const std::vector<char>& remove_mask);
     void update_actual_sim_speed();
     void apply_selection_mode();
+    bool is_circle_outside_dish(const EatableCircle& circle, float dish_radius) const;
+    bool handle_outside_removal(const std::unique_ptr<EatableCircle>& circle, const SelectionManager::Snapshot& snapshot, float dish_radius, bool& selected_removed, bool& removed_creature);
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;

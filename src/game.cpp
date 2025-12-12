@@ -649,6 +649,37 @@ void Game::erase_indices_descending(std::vector<std::size_t>& indices) {
     refresh_generation_and_age();
 }
 
+bool Game::is_circle_outside_dish(const EatableCircle& circle, float dish_radius) const {
+    float r = circle.getRadius();
+    if (r >= dish_radius) {
+        return true;
+    }
+    float max_center_dist = dish_radius - r;
+    b2Vec2 pos = circle.getPosition();
+    float dist2 = pos.x * pos.x + pos.y * pos.y;
+    return dist2 > max_center_dist * max_center_dist;
+}
+
+bool Game::handle_outside_removal(const std::unique_ptr<EatableCircle>& circle,
+                                  const SelectionManager::Snapshot& snapshot,
+                                  float dish_radius,
+                                  bool& selected_removed,
+                                  bool& removed_creature) {
+    float radius = circle->getRadius();
+    if (!is_circle_outside_dish(*circle, dish_radius)) {
+        return false;
+    }
+
+    if (snapshot.circle && circle.get() == snapshot.circle) {
+        selected_removed = true;
+    }
+    if (radius < dish_radius && circle->get_kind() == CircleKind::Creature) {
+        removed_creature = true;
+    }
+    adjust_pellet_count(circle.get(), -1);
+    return true;
+}
+
 void Game::remove_outside_petri() {
     if (circles.empty()) {
         return;
@@ -657,7 +688,6 @@ void Game::remove_outside_petri() {
     auto snapshot = selection.capture_snapshot();
 
     bool selected_removed = false;
-    bool removed_any = false;
     bool removed_creature = false;
     const float dish_radius = dish.radius;
     circles.erase(
@@ -665,29 +695,7 @@ void Game::remove_outside_petri() {
             circles.begin(),
             circles.end(),
             [&](const std::unique_ptr<EatableCircle>& circle) {
-                b2Vec2 pos = circle->getPosition();
-                float r = circle->getRadius();
-                if (r >= dish_radius) {
-                    if (snapshot.circle && circle.get() == snapshot.circle) {
-                        selected_removed = true;
-                    }
-                    adjust_pellet_count(circle.get(), -1);
-                    return true;
-                }
-                float max_center_dist = dish_radius - r;
-                float dist2 = pos.x * pos.x + pos.y * pos.y;
-                bool out = dist2 > max_center_dist * max_center_dist;
-                if (out && snapshot.circle && circle.get() == snapshot.circle) {
-                    selected_removed = true;
-                }
-                if (out) {
-                    adjust_pellet_count(circle.get(), -1);
-                    if (circle->get_kind() == CircleKind::Creature) {
-                        removed_creature = true;
-                    }
-                }
-                removed_any = removed_any || out;
-                return out;
+                return handle_outside_removal(circle, snapshot, dish_radius, selected_removed, removed_creature);
             }),
         circles.end());
 
@@ -699,15 +707,21 @@ void Game::remove_outside_petri() {
     refresh_generation_and_age();
 }
 
+std::size_t Game::compute_target_removal_count(std::size_t available, float percentage) const {
+    if (available == 0 || percentage <= 0.0f) {
+        return 0;
+    }
+    float clamped = std::clamp(percentage, 0.0f, 100.0f);
+    double ratio = static_cast<double>(clamped) / 100.0;
+    return static_cast<std::size_t>(std::round(static_cast<double>(available) * ratio));
+}
+
 void Game::remove_random_percentage(float percentage) {
-    if (circles.empty() || percentage <= 0.0f) {
+    if (circles.empty()) {
         return;
     }
 
-    float clamped = std::clamp(percentage, 0.0f, 100.0f);
-    double ratio = static_cast<double>(clamped) / 100.0;
-    double available = static_cast<double>(circles.size());
-    std::size_t target = static_cast<std::size_t>(std::round(available * ratio));
+    std::size_t target = compute_target_removal_count(circles.size(), percentage);
     if (target == 0) {
         return;
     }
@@ -722,11 +736,7 @@ void Game::remove_random_percentage(float percentage) {
     erase_indices_descending(indices);
 }
 
-void Game::remove_percentage_pellets(float percentage, bool toxic, bool division_pellet) {
-    if (circles.empty() || percentage <= 0.0f) {
-        return;
-    }
-
+std::vector<std::size_t> Game::collect_pellet_indices(bool toxic, bool division_pellet) const {
     std::vector<std::size_t> indices;
     indices.reserve(circles.size());
     for (std::size_t i = 0; i < circles.size(); ++i) {
@@ -738,14 +748,20 @@ void Game::remove_percentage_pellets(float percentage, bool toxic, bool division
             }
         }
     }
+    return indices;
+}
+
+void Game::remove_percentage_pellets(float percentage, bool toxic, bool division_pellet) {
+    if (circles.empty()) {
+        return;
+    }
+
+    std::vector<std::size_t> indices = collect_pellet_indices(toxic, division_pellet);
     if (indices.empty()) {
         return;
     }
 
-    float clamped = std::clamp(percentage, 0.0f, 100.0f);
-    double ratio = static_cast<double>(clamped) / 100.0;
-    double available = static_cast<double>(indices.size());
-    std::size_t target = static_cast<std::size_t>(std::round(available * ratio));
+    std::size_t target = compute_target_removal_count(indices.size(), percentage);
     if (target == 0) {
         return;
     }
