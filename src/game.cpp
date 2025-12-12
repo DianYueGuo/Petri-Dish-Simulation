@@ -47,6 +47,7 @@ Game::Game()
     b2WorldDef worldDef = b2DefaultWorldDef();
     worldDef.gravity = b2Vec2{0.0f, 0.0f};
     worldId = b2CreateWorld(&worldDef);
+    age.dirty = true;
 }
 
 Game::~Game() {
@@ -314,6 +315,21 @@ void Game::handle_key_release(const sf::Event::KeyReleased& e) {
 void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
     update_max_generation_from_circle(circle.get());
     adjust_pellet_count(circle.get(), 1);
+    if (!age.dirty && circle && circle->get_kind() == CircleKind::Creature) {
+        auto* creature_circle = static_cast<CreatureCircle*>(circle.get());
+        const float creation_time = creature_circle->get_creation_time();
+        const float division_time = creature_circle->get_last_division_time();
+        if (!age.has_creature) {
+            age.has_creature = true;
+            age.min_creation_time = creation_time;
+            age.min_division_time = division_time;
+        } else {
+            age.min_creation_time = std::min(age.min_creation_time, creation_time);
+            age.min_division_time = std::min(age.min_division_time, division_time);
+        }
+        age.max_age_since_creation = std::max(0.0f, timing.sim_time_accum - age.min_creation_time);
+        age.max_age_since_division = std::max(0.0f, timing.sim_time_accum - age.min_division_time);
+    }
     circles.push_back(std::move(circle));
 }
 
@@ -428,19 +444,42 @@ void Game::recompute_max_generation() {
 }
 
 void Game::update_max_ages() {
-    float creation_max = 0.0f;
-    float division_max = 0.0f;
-    for (const auto& circle : circles) {
-        if (circle && circle->get_kind() == CircleKind::Creature) {
-            const auto* creature_circle = static_cast<const CreatureCircle*>(circle.get());
-            float age_creation = std::max(0.0f, timing.sim_time_accum - creature_circle->get_creation_time());
-            float age_division = std::max(0.0f, timing.sim_time_accum - creature_circle->get_last_division_time());
-            if (age_creation > creation_max) creation_max = age_creation;
-            if (age_division > division_max) division_max = age_division;
+    if (age.dirty) {
+        float creation_min = std::numeric_limits<float>::max();
+        float division_min = std::numeric_limits<float>::max();
+        bool found = false;
+        for (const auto& circle : circles) {
+            if (circle && circle->get_kind() == CircleKind::Creature) {
+                const auto* creature_circle = static_cast<const CreatureCircle*>(circle.get());
+                creation_min = std::min(creation_min, creature_circle->get_creation_time());
+                division_min = std::min(division_min, creature_circle->get_last_division_time());
+                found = true;
+            }
         }
+        if (found) {
+            age.has_creature = true;
+            age.min_creation_time = creation_min;
+            age.min_division_time = division_min;
+        } else {
+            age.has_creature = false;
+            age.min_creation_time = 0.0f;
+            age.min_division_time = 0.0f;
+        }
+        age.dirty = false;
     }
-    age.max_age_since_creation = creation_max;
-    age.max_age_since_division = division_max;
+
+    if (!age.has_creature) {
+        age.max_age_since_creation = 0.0f;
+        age.max_age_since_division = 0.0f;
+        return;
+    }
+
+    age.max_age_since_creation = std::max(0.0f, timing.sim_time_accum - age.min_creation_time);
+    age.max_age_since_division = std::max(0.0f, timing.sim_time_accum - age.min_division_time);
+}
+
+void Game::mark_age_dirty() {
+    age.dirty = true;
 }
 
 void Game::set_selection_to_creature(const CreatureCircle* creature) {
@@ -505,6 +544,7 @@ void Game::cull_consumed() {
     auto selection_snapshot = selection.capture_snapshot();
     bool selected_was_removed = false;
     const CreatureCircle* selected_killer = nullptr;
+    bool removed_creature = false;
 
     std::vector<char> remove_mask(circles.size(), 0);
 
@@ -512,6 +552,9 @@ void Game::cull_consumed() {
         RemovalResult removal = evaluate_circle_removal(*circles[i], spawned_cloud);
         if (!removal.should_remove) {
             continue;
+        }
+        if (circles[i]->get_kind() == CircleKind::Creature) {
+            removed_creature = true;
         }
         if (selection_snapshot.circle && selection_snapshot.circle == circles[i].get()) {
             selected_was_removed = true;
@@ -533,6 +576,9 @@ void Game::cull_consumed() {
         }
         circles.resize(write);
     }
+    if (removed_creature) {
+        mark_age_dirty();
+    }
 
     selection.handle_selection_after_removal(selection_snapshot, selected_was_removed, selected_killer, selection_snapshot.position);
     refresh_generation_and_age();
@@ -552,14 +598,21 @@ void Game::erase_indices_descending(std::vector<std::size_t>& indices) {
     std::sort(indices.begin(), indices.end(), std::greater<std::size_t>());
     indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
 
+    bool removed_creature = false;
     for (std::size_t idx : indices) {
         if (idx < circles.size()) {
+            if (circles[idx]->get_kind() == CircleKind::Creature) {
+                removed_creature = true;
+            }
             adjust_pellet_count(circles[idx].get(), -1);
             circles.erase(circles.begin() + static_cast<std::ptrdiff_t>(idx));
         }
     }
 
     selection.revalidate_selection(snapshot.circle);
+    if (removed_creature) {
+        mark_age_dirty();
+    }
     refresh_generation_and_age();
 }
 
@@ -571,6 +624,8 @@ void Game::remove_outside_petri() {
     auto snapshot = selection.capture_snapshot();
 
     bool selected_removed = false;
+    bool removed_any = false;
+    bool removed_creature = false;
     const float dish_radius = dish.radius;
     circles.erase(
         std::remove_if(
@@ -594,12 +649,19 @@ void Game::remove_outside_petri() {
                 }
                 if (out) {
                     adjust_pellet_count(circle.get(), -1);
+                    if (circle->get_kind() == CircleKind::Creature) {
+                        removed_creature = true;
+                    }
                 }
+                removed_any = removed_any || out;
                 return out;
             }),
         circles.end());
 
     selection.handle_selection_after_removal(snapshot, selected_removed, nullptr, snapshot.position);
+    if (removed_creature) {
+        mark_age_dirty();
+    }
     refresh_generation_and_age();
 }
 

@@ -541,6 +541,9 @@ void CreatureCircle::divide(const b2WorldId &worldId, Game& game) {
     }
     owner_game = &game;
     set_last_division_time(game.get_sim_time());
+    if (owner_game) {
+        owner_game->mark_age_dirty();
+    }
 
     game.update_max_generation_from_circle(this);
     game.update_max_generation_from_circle(new_circle_ptr);

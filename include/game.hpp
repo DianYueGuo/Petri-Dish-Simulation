@@ -18,6 +18,7 @@ class CreatureCircle;
 
 class Game {
     friend class Spawner;
+    friend class CreatureCircle;
 public:
     enum class CursorMode {
         Add,
@@ -136,6 +137,10 @@ private:
     struct AgeStats {
         float max_age_since_creation = 0.0f;
         float max_age_since_division = 0.0f;
+        float min_creation_time = 0.0f;
+        float min_division_time = 0.0f;
+        bool has_creature = false;
+        bool dirty = true;
     };
     struct PossesingSelectedCreature {
         bool possess_selected_creature = false;
@@ -321,6 +326,7 @@ private:
     void handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e);
     void handle_key_release(const sf::Event::KeyReleased& e);
     void update_max_ages();
+    void mark_age_dirty();
     void adjust_cleanup_rates();
     std::size_t count_pellets(bool toxic, bool division_pellet) const;
     void erase_indices_descending(std::vector<std::size_t>& indices);
