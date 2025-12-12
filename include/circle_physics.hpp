@@ -85,6 +85,8 @@ public:
     void for_each_touching(const std::function<void(CirclePhysics&)>& fn);
     void for_each_touching(const std::function<void(const CirclePhysics&)>& fn) const;
 private:
+    void set_cached_radius(float r) { radius_cached = r; }
+
     struct BodyState {
         b2Vec2 position;
         b2Rot rotation;
@@ -107,6 +109,7 @@ private:
     float angularDamping;
     float linearImpulseMagnitude;
     float angularImpulseMagnitude;
+    float radius_cached = 1.0f;
     CircleKind kind;
 protected:
     std::unordered_set<CirclePhysics*> touching_circles;

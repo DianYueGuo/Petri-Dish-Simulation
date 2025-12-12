@@ -21,6 +21,7 @@ CirclePhysics::CirclePhysics(const b2WorldId &worldId, Config config) :
     initialState.angularVelocity = 0.0f;
     initialState.radius = config.radius;
 
+    set_cached_radius(config.radius);
     createBodyWithState(worldId, initialState);
 }
 
@@ -66,6 +67,8 @@ b2ShapeDef CirclePhysics::buildCircleShapeDef() const {
 }
 
 void CirclePhysics::createBodyWithState(const b2WorldId& worldId, const BodyState& state) {
+    set_cached_radius(state.radius);
+
     b2BodyDef bodyDef = buildBodyDef(state);
     bodyId = b2CreateBody(worldId, &bodyDef);
 
@@ -93,6 +96,7 @@ CirclePhysics::CirclePhysics(CirclePhysics&& other_circle_physics) noexcept :
     angularDamping(other_circle_physics.angularDamping),
     linearImpulseMagnitude(other_circle_physics.linearImpulseMagnitude),
     angularImpulseMagnitude(other_circle_physics.angularImpulseMagnitude),
+    radius_cached(other_circle_physics.radius_cached),
     kind(other_circle_physics.kind),
     touching_circles(std::move(other_circle_physics.touching_circles)) {
 
@@ -123,6 +127,7 @@ CirclePhysics& CirclePhysics::operator=(CirclePhysics&& other_circle_physics) no
     angularDamping = other_circle_physics.angularDamping;
     linearImpulseMagnitude = other_circle_physics.linearImpulseMagnitude;
     angularImpulseMagnitude = other_circle_physics.angularImpulseMagnitude;
+    radius_cached = other_circle_physics.radius_cached;
     kind = other_circle_physics.kind;
 
     b2ShapeId shapeId;
@@ -150,10 +155,7 @@ b2Vec2 CirclePhysics::getLinearVelocity() const {
 }
 
 float CirclePhysics::getRadius() const {
-    b2ShapeId shapeId;
-    b2Body_GetShapes(bodyId, &shapeId, 1);
-    b2Circle circle = b2Shape_GetCircle(shapeId);
-    return circle.radius;
+    return radius_cached;
 }
 
 float CirclePhysics::getArea() const {
@@ -239,6 +241,8 @@ void CirclePhysics::setRadius(float new_radius, const b2WorldId &worldId) {
     (void)worldId;
     if (new_radius <= 0.0f) return;
     if (!b2Body_IsValid(bodyId)) return;
+
+    set_cached_radius(new_radius);
 
     b2ShapeId shapeId;
     b2Body_GetShapes(bodyId, &shapeId, 1);
