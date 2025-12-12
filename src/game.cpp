@@ -557,49 +557,62 @@ Game::RemovalResult Game::evaluate_circle_removal(EatableCircle& circle, std::ve
     return result;
 }
 
-void Game::cull_consumed() {
-    std::vector<std::unique_ptr<EatableCircle>> spawned_cloud;
-    auto selection_snapshot = selection.capture_snapshot();
-    bool selected_was_removed = false;
-    const CreatureCircle* selected_killer = nullptr;
-    bool removed_creature = false;
-
-    std::vector<char> remove_mask(circles.size(), 0);
+Game::CullState Game::collect_removal_state(const SelectionManager::Snapshot& selection_snapshot, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud) {
+    CullState state;
+    state.remove_mask.assign(circles.size(), 0);
 
     for (std::size_t i = 0; i < circles.size(); ++i) {
         RemovalResult removal = evaluate_circle_removal(*circles[i], spawned_cloud);
         if (!removal.should_remove) {
             continue;
         }
+        state.removed_any = true;
         if (circles[i]->get_kind() == CircleKind::Creature) {
-            removed_creature = true;
+            state.removed_creature = true;
         }
         if (selection_snapshot.circle && selection_snapshot.circle == circles[i].get()) {
-            selected_was_removed = true;
-            selected_killer = removal.killer;
+            state.selected_was_removed = true;
+            state.selected_killer = removal.killer;
         }
         adjust_pellet_count(circles[i].get(), -1);
-        remove_mask[i] = 1;
+        state.remove_mask[i] = 1;
     }
 
-    if (!remove_mask.empty()) {
-        std::size_t write = 0;
-        for (std::size_t read = 0; read < circles.size(); ++read) {
-            if (!remove_mask[read]) {
-                if (write != read) {
-                    circles[write] = std::move(circles[read]);
-                }
-                ++write;
-            }
-        }
-        circles.resize(write);
+    return state;
+}
+
+void Game::compact_circles(const std::vector<char>& remove_mask) {
+    if (remove_mask.empty()) {
+        return;
     }
-    if (removed_creature) {
+
+    std::size_t write = 0;
+    for (std::size_t read = 0; read < circles.size(); ++read) {
+        if (!remove_mask[read]) {
+            if (write != read) {
+                circles[write] = std::move(circles[read]);
+            }
+            ++write;
+        }
+    }
+    circles.resize(write);
+}
+
+void Game::cull_consumed() {
+    std::vector<std::unique_ptr<EatableCircle>> spawned_cloud;
+    auto selection_snapshot = selection.capture_snapshot();
+
+    CullState state = collect_removal_state(selection_snapshot, spawned_cloud);
+
+    if (state.removed_any) {
+        compact_circles(state.remove_mask);
+    }
+    if (state.removed_creature) {
         mark_age_dirty();
         mark_selection_dirty();
     }
 
-    selection.handle_selection_after_removal(selection_snapshot, selected_was_removed, selected_killer, selection_snapshot.position);
+    selection.handle_selection_after_removal(selection_snapshot, state.selected_was_removed, state.selected_killer, selection_snapshot.position);
     refresh_generation_and_age();
 
     for (auto& c : spawned_cloud) {
@@ -805,44 +818,38 @@ std::size_t Game::get_division_pellet_count() const {
     return pellets.division_count_cached;
 }
 
-void Game::adjust_cleanup_rates() {
+float Game::desired_pellet_count(float density_target) const {
     constexpr float PI = 3.14159f;
     float area = PI * dish.radius * dish.radius;
     float pellet_area = std::max(creature.add_eatable_area, 1e-6f);
+    float desired_area = std::max(0.0f, density_target) * area;
+    return desired_area / pellet_area;
+}
 
-    auto desired_count = [&](float density_target) {
-        float desired_area = std::max(0.0f, density_target) * area;
-        return desired_area / pellet_area;
-    };
+float Game::compute_cleanup_rate(std::size_t count, float desired) const {
+    if (desired <= 0.0f) {
+        return count > 0 ? 100.0f : 0.0f;
+    }
+    float count_f = static_cast<float>(count);
+    if (count_f <= desired) return 0.0f;
+    float ratio = (count_f - desired) / desired;
+    float rate = ratio * 50.0f; // 50%/s when double the desired
+    return std::clamp(rate, 0.0f, 100.0f);
+}
 
-    auto compute_cleanup_rate = [&](std::size_t count, float desired) {
-        if (desired <= 0.0f) {
-            return count > 0 ? 100.0f : 0.0f;
-        }
-        float count_f = static_cast<float>(count);
-        if (count_f <= desired) return 0.0f;
-        float ratio = (count_f - desired) / desired;
-        float rate = ratio * 50.0f; // 50%/s when double the desired
-        return std::clamp(rate, 0.0f, 100.0f);
-    };
+Game::SpawnRates Game::calculate_spawn_rates(bool toxic, bool division_pellet, float density_target) const {
+    float desired = desired_pellet_count(density_target);
+    std::size_t count = get_cached_pellet_count(toxic, division_pellet);
+    float diff = desired - static_cast<float>(count);
+    float sprinkle_rate = (diff > 0.0f) ? std::min(diff * 0.5f, 200.0f) : 0.0f;
+    float cleanup_rate = compute_cleanup_rate(count, desired);
+    return {sprinkle_rate, cleanup_rate};
+}
 
-    struct SpawnRates {
-        float sprinkle = 0.0f;
-        float cleanup = 0.0f;
-    };
-
-    auto adjust_spawn = [&](bool toxic, bool division_pellet, float density_target) -> SpawnRates {
-        float desired = desired_count(density_target);
-        std::size_t count = get_cached_pellet_count(toxic, division_pellet);
-        float diff = desired - static_cast<float>(count);
-        float sprinkle_rate = (diff > 0.0f) ? std::min(diff * 0.5f, 200.0f) : 0.0f;
-        float cleanup_rate = compute_cleanup_rate(count, desired);
-        return {sprinkle_rate, cleanup_rate};
-    };
-
-    auto food_rates = adjust_spawn(false, false, pellets.food_density);
-    auto toxic_rates = adjust_spawn(true, false, pellets.toxic_density);
-    auto division_rates = adjust_spawn(false, true, pellets.division_density);
+void Game::adjust_cleanup_rates() {
+    auto food_rates = calculate_spawn_rates(false, false, pellets.food_density);
+    auto toxic_rates = calculate_spawn_rates(true, false, pellets.toxic_density);
+    auto division_rates = calculate_spawn_rates(false, true, pellets.division_density);
     pellets.sprinkle_rate_eatable = food_rates.sprinkle;
     pellets.cleanup_rate_food = food_rates.cleanup;
     pellets.sprinkle_rate_toxic = toxic_rates.sprinkle;

@@ -308,6 +308,17 @@ private:
         bool should_remove = false;
         const CreatureCircle* killer = nullptr;
     };
+    struct CullState {
+        std::vector<char> remove_mask;
+        bool removed_any = false;
+        bool removed_creature = false;
+        bool selected_was_removed = false;
+        const CreatureCircle* selected_killer = nullptr;
+    };
+    struct SpawnRates {
+        float sprinkle = 0.0f;
+        float cleanup = 0.0f;
+    };
 
     sf::Vector2f pixel_to_world(sf::RenderWindow& window, const sf::Vector2i& pixel) const;
     void start_view_drag(const sf::Event::MouseButtonPressed& e, bool is_right_button);
@@ -330,9 +341,14 @@ private:
     void mark_selection_dirty();
     void adjust_cleanup_rates();
     std::size_t count_pellets(bool toxic, bool division_pellet) const;
+    float desired_pellet_count(float density_target) const;
+    float compute_cleanup_rate(std::size_t count, float desired) const;
+    SpawnRates calculate_spawn_rates(bool toxic, bool division_pellet, float density_target) const;
     void erase_indices_descending(std::vector<std::size_t>& indices);
     void refresh_generation_and_age();
     RemovalResult evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
+    CullState collect_removal_state(const SelectionManager::Snapshot& selection_snapshot, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
+    void compact_circles(const std::vector<char>& remove_mask);
     void update_actual_sim_speed();
     void apply_selection_mode();
 
