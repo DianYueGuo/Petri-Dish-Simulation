@@ -88,13 +88,9 @@ private:
     };
     struct MutationSettings {
         float add_node_probability = 0.01f;
-        float remove_node_probability = 0.05f;
         float add_connection_probability = 0.02f;
-        float remove_connection_probability = 0.05f;
         float tick_add_node_probability = 0.0f;
-        float tick_remove_node_probability = 0.0f;
         float tick_add_connection_probability = 0.0f;
-        float tick_remove_connection_probability = 0.0f;
         bool live_mutation_enabled = false;
         float mutate_weight_thresh = 0.08f;
         float mutate_weight_full_change_thresh = 0.03f;
@@ -104,9 +100,7 @@ private:
         int mutate_add_node_iterations = 20;
         bool mutate_allow_recurrent = false;
         float init_add_node_probability = 0.0f;
-        float init_remove_node_probability = 0.02f;
         float init_add_connection_probability = 0.0f;
-        float init_remove_connection_probability = 0.02f;
         int init_mutation_rounds = 0;
         int mutation_rounds = 1;
     };
@@ -181,20 +175,12 @@ public:
     float get_circle_density() const { return movement.circle_density; }
     void set_add_node_probability(float p) { mutation.add_node_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_add_node_probability() const { return mutation.add_node_probability; }
-    void set_remove_node_probability(float p) { mutation.remove_node_probability = std::clamp(p, 0.0f, 1.0f); }
-    float get_remove_node_probability() const { return mutation.remove_node_probability; }
     void set_add_connection_probability(float p) { mutation.add_connection_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_add_connection_probability() const { return mutation.add_connection_probability; }
-    void set_remove_connection_probability(float p) { mutation.remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
-    float get_remove_connection_probability() const { return mutation.remove_connection_probability; }
     void set_tick_add_node_probability(float p) { mutation.tick_add_node_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_tick_add_node_probability() const { return mutation.tick_add_node_probability; }
-    void set_tick_remove_node_probability(float p) { mutation.tick_remove_node_probability = std::clamp(p, 0.0f, 1.0f); }
-    float get_tick_remove_node_probability() const { return mutation.tick_remove_node_probability; }
     void set_tick_add_connection_probability(float p) { mutation.tick_add_connection_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_tick_add_connection_probability() const { return mutation.tick_add_connection_probability; }
-    void set_tick_remove_connection_probability(float p) { mutation.tick_remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
-    float get_tick_remove_connection_probability() const { return mutation.tick_remove_connection_probability; }
     void set_live_mutation_enabled(bool enabled) { mutation.live_mutation_enabled = enabled; }
     bool get_live_mutation_enabled() const { return mutation.live_mutation_enabled; }
     void set_mutate_weight_thresh(float v) { mutation.mutate_weight_thresh = std::clamp(v, 0.0f, 1.0f); }
@@ -213,12 +199,8 @@ public:
     bool get_mutate_allow_recurrent() const { return mutation.mutate_allow_recurrent; }
     void set_init_add_node_probability(float p) { mutation.init_add_node_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_init_add_node_probability() const { return mutation.init_add_node_probability; }
-    void set_init_remove_node_probability(float p) { mutation.init_remove_node_probability = std::clamp(p, 0.0f, 1.0f); }
-    float get_init_remove_node_probability() const { return mutation.init_remove_node_probability; }
     void set_init_add_connection_probability(float p) { mutation.init_add_connection_probability = std::clamp(p, 0.0f, 1.0f); }
     float get_init_add_connection_probability() const { return mutation.init_add_connection_probability; }
-    void set_init_remove_connection_probability(float p) { mutation.init_remove_connection_probability = std::clamp(p, 0.0f, 1.0f); }
-    float get_init_remove_connection_probability() const { return mutation.init_remove_connection_probability; }
     void set_init_mutation_rounds(int rounds) { mutation.init_mutation_rounds = std::clamp(rounds, 0, 100); }
     int get_init_mutation_rounds() const { return mutation.init_mutation_rounds; }
     void set_mutation_rounds(int rounds) { mutation.mutation_rounds = std::clamp(rounds, 0, 50); }

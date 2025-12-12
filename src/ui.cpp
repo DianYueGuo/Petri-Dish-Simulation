@@ -61,25 +61,19 @@ struct MutationSettings {
 
 struct DivisionMutationSettings {
     float add_node_probability = 0.0f;
-    float remove_node_probability = 0.0f;
     float add_connection_probability = 0.0f;
-    float remove_connection_probability = 0.0f;
     int mutation_rounds = 0;
 };
 
 struct LiveMutationSettings {
     bool enabled = false;
     float tick_add_node_probability = 0.0f;
-    float tick_remove_node_probability = 0.0f;
     float tick_add_connection_probability = 0.0f;
-    float tick_remove_connection_probability = 0.0f;
 };
 
 struct InitMutationSettings {
     float add_node_probability = 0.0f;
-    float remove_node_probability = 0.0f;
     float add_connection_probability = 0.0f;
-    float remove_connection_probability = 0.0f;
     int mutation_rounds = 0;
 };
 
@@ -337,18 +331,12 @@ void initialize_state(UiState& state, Game& game) {
     state.death.creature_cloud_area_percentage = game.get_creature_cloud_area_percentage();
     state.death.division_pellet_divide_probability = game.get_division_pellet_divide_probability();
     state.division_mutation.add_node_probability = game.get_add_node_probability();
-    state.division_mutation.remove_node_probability = game.get_remove_node_probability();
     state.division_mutation.add_connection_probability = game.get_add_connection_probability();
-    state.division_mutation.remove_connection_probability = game.get_remove_connection_probability();
     state.live_mutation.tick_add_node_probability = game.get_tick_add_node_probability();
-    state.live_mutation.tick_remove_node_probability = game.get_tick_remove_node_probability();
     state.live_mutation.tick_add_connection_probability = game.get_tick_add_connection_probability();
-    state.live_mutation.tick_remove_connection_probability = game.get_tick_remove_connection_probability();
     state.live_mutation.enabled = game.get_live_mutation_enabled();
     state.init_mutation.add_node_probability = game.get_init_add_node_probability();
-    state.init_mutation.remove_node_probability = game.get_init_remove_node_probability();
     state.init_mutation.add_connection_probability = game.get_init_add_connection_probability();
-    state.init_mutation.remove_connection_probability = game.get_init_remove_connection_probability();
     state.init_mutation.mutation_rounds = game.get_init_mutation_rounds();
     state.division_mutation.mutation_rounds = game.get_mutation_rounds();
     state.mutation.weight_thresh = game.get_mutate_weight_thresh();

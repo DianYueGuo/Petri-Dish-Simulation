@@ -170,9 +170,7 @@ CreatureCircle::CreatureCircle(const b2WorldId &worldId,
                          int generation,
                          int init_mutation_rounds,
                          float init_add_node_probability,
-                         float init_remove_node_probability,
                          float init_add_connection_probability,
-                         float init_remove_connection_probability,
                          const neat::Genome* base_brain,
                          std::vector<std::vector<int>>* innov_ids,
                          int* last_innov_id,
@@ -187,9 +185,7 @@ CreatureCircle::CreatureCircle(const b2WorldId &worldId,
     initialize_brain(
         init_mutation_rounds,
         init_add_node_probability,
-        init_remove_node_probability,
-        init_add_connection_probability,
-        init_remove_connection_probability);
+        init_add_connection_probability);
     run_brain_cycle_from_touching();
     smooth_display_color(1.0f); // start display at brain-driven color immediately
 }
@@ -430,7 +426,7 @@ void CreatureCircle::boost_forward(const b2WorldId &worldId, Game& game) {
     }
 }
 
-void CreatureCircle::initialize_brain(int mutation_rounds, float add_node_p, float /*remove_node_p*/, float add_connection_p, float /*remove_connection_p*/) {
+void CreatureCircle::initialize_brain(int mutation_rounds, float add_node_p, float add_connection_p) {
     // Mutate repeatedly to seed a non-trivial brain topology.
     int rounds = std::max(0, mutation_rounds);
     for (int i = 0; i < rounds; ++i) {
@@ -504,9 +500,7 @@ void CreatureCircle::divide(const b2WorldId &worldId, Game& game) {
         next_generation,
         game.get_init_mutation_rounds(),
         game.get_init_add_node_probability(),
-        game.get_init_remove_node_probability(),
         game.get_init_add_connection_probability(),
-        game.get_init_remove_connection_probability(),
         &brain,
         game.get_neat_innovations(),
         game.get_neat_last_innovation_id(),
