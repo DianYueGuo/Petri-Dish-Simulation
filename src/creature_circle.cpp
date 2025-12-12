@@ -89,9 +89,9 @@ float triangle_circle_intersection_area(const b2Vec2& a, const b2Vec2& b, float 
         float t;
         b2Vec2 p;
     };
-    std::vector<ParamPoint> pts;
-    pts.reserve(4);
-    pts.push_back({0.0f, a});
+    std::array<ParamPoint, 4> pts{};
+    int count = 0;
+    pts[count++] = {0.0f, a};
 
     // Solve for intersections of segment ab with the circle.
     b2Vec2 d{b.x - a.x, b.y - a.y};
@@ -106,20 +106,22 @@ float triangle_circle_intersection_area(const b2Vec2& a, const b2Vec2& b, float 
         float t2 = (-B + sqrt_disc) * inv_denom;
         if (t1 > t2) std::swap(t1, t2);
         if (t1 > EPS && t1 < 1.0f - EPS) {
-            pts.push_back({t1, b2Vec2{a.x + d.x * t1, a.y + d.y * t1}});
+            pts[count++] = {t1, b2Vec2{a.x + d.x * t1, a.y + d.y * t1}};
         }
         if (t2 > EPS && t2 < 1.0f - EPS && std::fabs(t2 - t1) > EPS) {
-            pts.push_back({t2, b2Vec2{a.x + d.x * t2, a.y + d.y * t2}});
+            if (count < static_cast<int>(pts.size())) {
+                pts[count++] = {t2, b2Vec2{a.x + d.x * t2, a.y + d.y * t2}};
+            }
         }
     }
 
-    pts.push_back({1.0f, b});
-    std::sort(pts.begin(), pts.end(), [&](const ParamPoint& p1, const ParamPoint& p2) {
+    pts[count++] = {1.0f, b};
+    std::sort(pts.begin(), pts.begin() + count, [&](const ParamPoint& p1, const ParamPoint& p2) {
         return p1.t < p2.t;
     });
 
     float area = 0.0f;
-    for (size_t i = 0; i + 1 < pts.size(); ++i) {
+    for (int i = 0; i + 1 < count; ++i) {
         const b2Vec2& p = pts[i].p;
         const b2Vec2& q = pts[i + 1].p;
         b2Vec2 mid{0.5f * (p.x + q.x), 0.5f * (p.y + q.y)};
