@@ -506,18 +506,32 @@ void Game::cull_consumed() {
     bool selected_was_removed = false;
     const CreatureCircle* selected_killer = nullptr;
 
-    for (auto it = circles.begin(); it != circles.end(); ) {
-        RemovalResult removal = evaluate_circle_removal(**it, spawned_cloud);
-        if (removal.should_remove) {
-            if (selection_snapshot.circle && selection_snapshot.circle == it->get()) {
-                selected_was_removed = true;
-                selected_killer = removal.killer;
-            }
-            adjust_pellet_count(it->get(), -1);
-            it = circles.erase(it);
-        } else {
-            ++it;
+    std::vector<char> remove_mask(circles.size(), 0);
+
+    for (std::size_t i = 0; i < circles.size(); ++i) {
+        RemovalResult removal = evaluate_circle_removal(*circles[i], spawned_cloud);
+        if (!removal.should_remove) {
+            continue;
         }
+        if (selection_snapshot.circle && selection_snapshot.circle == circles[i].get()) {
+            selected_was_removed = true;
+            selected_killer = removal.killer;
+        }
+        adjust_pellet_count(circles[i].get(), -1);
+        remove_mask[i] = 1;
+    }
+
+    if (!remove_mask.empty()) {
+        std::size_t write = 0;
+        for (std::size_t read = 0; read < circles.size(); ++read) {
+            if (!remove_mask[read]) {
+                if (write != read) {
+                    circles[write] = std::move(circles[read]);
+                }
+                ++write;
+            }
+        }
+        circles.resize(write);
     }
 
     selection.handle_selection_after_removal(selection_snapshot, selected_was_removed, selected_killer, selection_snapshot.position);
