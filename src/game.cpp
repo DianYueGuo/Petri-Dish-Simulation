@@ -18,7 +18,10 @@ void handle_sensor_begin_touch(const b2SensorBeginTouchEvent& beginTouch) {
     }
     if (auto* sensor = circle_from_shape(beginTouch.sensorShapeId)) {
         if (auto* visitor = circle_from_shape(beginTouch.visitorShapeId)) {
-            sensor->add_touching_circle(visitor);
+            if (sensor != visitor) {
+                sensor->add_touching_circle(visitor);
+                visitor->add_touching_circle(sensor);
+            }
         }
     }
 }
@@ -29,7 +32,10 @@ void handle_sensor_end_touch(const b2SensorEndTouchEvent& endTouch) {
     }
     if (auto* sensor = circle_from_shape(endTouch.sensorShapeId)) {
         if (auto* visitor = circle_from_shape(endTouch.visitorShapeId)) {
-            sensor->remove_touching_circle(visitor);
+            if (sensor != visitor) {
+                sensor->remove_touching_circle(visitor);
+                visitor->remove_touching_circle(sensor);
+            }
         }
     }
 }
