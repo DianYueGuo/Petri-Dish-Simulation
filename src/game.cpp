@@ -330,6 +330,9 @@ void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
         age.max_age_since_creation = std::max(0.0f, timing.sim_time_accum - age.min_creation_time);
         age.max_age_since_division = std::max(0.0f, timing.sim_time_accum - age.min_division_time);
     }
+    if (circle && circle->get_kind() == CircleKind::Creature) {
+        mark_selection_dirty();
+    }
     circles.push_back(std::move(circle));
 }
 
@@ -389,6 +392,7 @@ bool Game::get_follow_selected() const {
 
 void Game::set_selection_mode(SelectionMode mode) {
     selection_mode = mode;
+    selection_dirty = true;
     apply_selection_mode();
 }
 
@@ -401,6 +405,14 @@ void Game::update_follow_view(sf::View& view) const {
 }
 
 void Game::apply_selection_mode() {
+    if (selection_mode == SelectionMode::Manual) {
+        return;
+    }
+
+    if (!selection_dirty) {
+        return;
+    }
+
     switch (selection_mode) {
         case SelectionMode::OldestLargest:
             selection.set_selection_to_creature(selection.get_oldest_largest_creature());
@@ -415,6 +427,8 @@ void Game::apply_selection_mode() {
         default:
             break;
     }
+
+    selection_dirty = false;
 }
 
 void Game::update_max_generation_from_circle(const EatableCircle* circle) {
@@ -480,6 +494,10 @@ void Game::update_max_ages() {
 
 void Game::mark_age_dirty() {
     age.dirty = true;
+}
+
+void Game::mark_selection_dirty() {
+    selection_dirty = true;
 }
 
 void Game::set_selection_to_creature(const CreatureCircle* creature) {
@@ -578,6 +596,7 @@ void Game::cull_consumed() {
     }
     if (removed_creature) {
         mark_age_dirty();
+        mark_selection_dirty();
     }
 
     selection.handle_selection_after_removal(selection_snapshot, selected_was_removed, selected_killer, selection_snapshot.position);
@@ -612,6 +631,7 @@ void Game::erase_indices_descending(std::vector<std::size_t>& indices) {
     selection.revalidate_selection(snapshot.circle);
     if (removed_creature) {
         mark_age_dirty();
+        mark_selection_dirty();
     }
     refresh_generation_and_age();
 }
@@ -661,6 +681,7 @@ void Game::remove_outside_petri() {
     selection.handle_selection_after_removal(snapshot, selected_removed, nullptr, snapshot.position);
     if (removed_creature) {
         mark_age_dirty();
+        mark_selection_dirty();
     }
     refresh_generation_and_age();
 }

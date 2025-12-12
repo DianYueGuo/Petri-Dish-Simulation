@@ -327,6 +327,7 @@ private:
     void handle_key_release(const sf::Event::KeyReleased& e);
     void update_max_ages();
     void mark_age_dirty();
+    void mark_selection_dirty();
     void adjust_cleanup_rates();
     std::size_t count_pellets(bool toxic, bool division_pellet) const;
     void erase_indices_descending(std::vector<std::size_t>& indices);
@@ -343,6 +344,7 @@ private:
     CreatureSettings creature;
     CursorState cursor;
     SelectionMode selection_mode = SelectionMode::Manual;
+    bool selection_dirty = true;
     DishSettings dish;
     PelletSettings pellets;
     MutationSettings mutation;
