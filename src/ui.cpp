@@ -137,65 +137,27 @@ void set_and_apply(T& field, T value, Setter setter) {
     setter(value);
 }
 
-void set_time_scale(UiState& state, Game& game, float value) {
-    state.time_scale.display = value;
-    state.time_scale.requested = value;
-    game.set_time_scale(value);
-}
-
 void apply_preset(Preset preset, UiState& state, Game& game) {
     switch (preset) {
         case Preset::Default:
-            set_time_scale(state, game, 1.0f);
-            set_and_apply(state.brain.updates_per_sim_second, 10.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
-            set_and_apply(state.creature.average_area, 5.0f, [&](float v) { game.set_average_creature_area(v); });
-            set_and_apply(state.creature.boost_area, 0.05f, [&](float v) { game.set_boost_area(v); });
-            set_and_apply(state.movement.boost_particle_impulse_fraction, 0.02f, [&](float v) { game.set_boost_particle_impulse_fraction(v); });
-            set_and_apply(state.movement.boost_particle_linear_damping, 2.0f, [&](float v) { game.set_boost_particle_linear_damping(v); });
-            set_and_apply(state.death.poison_death_probability, 0.3f, [&](float v) { game.set_poison_death_probability(v); });
-            set_and_apply(state.death.poison_death_probability_normal, 0.2f, [&](float v) { game.set_poison_death_probability_normal(v); });
-            set_and_apply(state.spawning.minimum_creatures, 12, [&](int v) { game.set_minimum_creature_count(v); });
             set_and_apply(state.spawning.food_density, 0.02f, [&](float v) { game.set_food_pellet_density(v); });
             set_and_apply(state.spawning.toxic_density, 0.005f, [&](float v) { game.set_toxic_pellet_density(v); });
             set_and_apply(state.spawning.division_density, 0.003f, [&](float v) { game.set_division_pellet_density(v); });
-            set_and_apply(state.death.division_pellet_divide_probability, 0.4f, [&](float v) { game.set_division_pellet_divide_probability(v); });
             break;
         case Preset::Peaceful:
-            set_time_scale(state, game, 1.0f);
-            set_and_apply(state.brain.updates_per_sim_second, 6.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
-            set_and_apply(state.creature.boost_area, 0.02f, [&](float v) { game.set_boost_area(v); });
-            set_and_apply(state.movement.boost_particle_impulse_fraction, 0.01f, [&](float v) { game.set_boost_particle_impulse_fraction(v); });
-            set_and_apply(state.death.poison_death_probability, 0.05f, [&](float v) { game.set_poison_death_probability(v); });
-            set_and_apply(state.death.poison_death_probability_normal, 0.02f, [&](float v) { game.set_poison_death_probability_normal(v); });
-            set_and_apply(state.spawning.minimum_creatures, 8, [&](int v) { game.set_minimum_creature_count(v); });
             set_and_apply(state.spawning.food_density, 0.03f, [&](float v) { game.set_food_pellet_density(v); });
             set_and_apply(state.spawning.toxic_density, 0.0f, [&](float v) { game.set_toxic_pellet_density(v); });
             set_and_apply(state.spawning.division_density, 0.001f, [&](float v) { game.set_division_pellet_density(v); });
-            set_and_apply(state.death.division_pellet_divide_probability, 0.25f, [&](float v) { game.set_division_pellet_divide_probability(v); });
             break;
         case Preset::ToxicHeavy:
-            set_time_scale(state, game, 1.0f);
-            set_and_apply(state.brain.updates_per_sim_second, 12.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
-            set_and_apply(state.creature.boost_area, 0.08f, [&](float v) { game.set_boost_area(v); });
-            set_and_apply(state.death.poison_death_probability, 0.7f, [&](float v) { game.set_poison_death_probability(v); });
-            set_and_apply(state.death.poison_death_probability_normal, 0.5f, [&](float v) { game.set_poison_death_probability_normal(v); });
-            set_and_apply(state.death.creature_cloud_area_percentage, 60.0f, [&](float v) { game.set_creature_cloud_area_percentage(v); });
-            set_and_apply(state.spawning.minimum_creatures, 18, [&](int v) { game.set_minimum_creature_count(v); });
             set_and_apply(state.spawning.food_density, 0.01f, [&](float v) { game.set_food_pellet_density(v); });
             set_and_apply(state.spawning.toxic_density, 0.015f, [&](float v) { game.set_toxic_pellet_density(v); });
             set_and_apply(state.spawning.division_density, 0.0f, [&](float v) { game.set_division_pellet_density(v); });
-            set_and_apply(state.death.division_pellet_divide_probability, 0.2f, [&](float v) { game.set_division_pellet_divide_probability(v); });
             break;
         case Preset::DivisionTest:
-            set_time_scale(state, game, 1.0f);
-            set_and_apply(state.brain.updates_per_sim_second, 8.0f, [&](float v) { game.set_brain_updates_per_sim_second(v); });
-            set_and_apply(state.creature.boost_area, 0.04f, [&](float v) { game.set_boost_area(v); });
-            set_and_apply(state.spawning.minimum_creatures, 15, [&](int v) { game.set_minimum_creature_count(v); });
             set_and_apply(state.spawning.food_density, 0.01f, [&](float v) { game.set_food_pellet_density(v); });
             set_and_apply(state.spawning.toxic_density, 0.002f, [&](float v) { game.set_toxic_pellet_density(v); });
             set_and_apply(state.spawning.division_density, 0.02f, [&](float v) { game.set_division_pellet_density(v); });
-            set_and_apply(state.death.division_pellet_divide_probability, 0.9f, [&](float v) { game.set_division_pellet_divide_probability(v); });
-            set_and_apply(state.division_mutation.mutation_rounds, 5, [&](int v) { game.set_mutation_rounds(v); });
             break;
     }
 }
