@@ -30,6 +30,7 @@ public:
     void spawn_eatable_cloud(const CreatureCircle& creature, std::vector<std::unique_ptr<EatableCircle>>& out);
 
 private:
+    bool pellet_cap_reached(int add_type_value) const;
     void sprinkle_with_rate(float rate, int type, float dt);
 
     Game& game;

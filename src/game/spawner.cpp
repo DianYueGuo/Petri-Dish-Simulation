@@ -31,6 +31,20 @@ inline std::unique_ptr<EatableCircle> create_eatable_for_add_type(const Spawner&
 
 Spawner::Spawner(Game& game_ref) : game(game_ref) {}
 
+bool Spawner::pellet_cap_reached(int add_type_value) const {
+    Game::AddType type = static_cast<Game::AddType>(add_type_value);
+    switch (type) {
+        case Game::AddType::FoodPellet:
+            return game.get_food_pellet_count() >= static_cast<std::size_t>(game.get_max_food_pellets());
+        case Game::AddType::ToxicPellet:
+            return game.get_toxic_pellet_count() >= static_cast<std::size_t>(game.get_max_toxic_pellets());
+        case Game::AddType::DivisionPellet:
+            return game.get_division_pellet_count() >= static_cast<std::size_t>(game.get_max_division_pellets());
+        default:
+            return false;
+    }
+}
+
 void Spawner::spawn_selected_type_at(const sf::Vector2f& worldPos) {
     switch (game.get_add_type()) {
         case Game::AddType::Creature:
@@ -42,6 +56,9 @@ void Spawner::spawn_selected_type_at(const sf::Vector2f& worldPos) {
         case Game::AddType::FoodPellet:
         case Game::AddType::ToxicPellet:
         case Game::AddType::DivisionPellet:
+            if (pellet_cap_reached(static_cast<int>(game.get_add_type()))) {
+                break;
+            }
             game.add_circle(create_eatable_for_add_type(*this, {worldPos.x, worldPos.y}, game.get_add_type()));
             break;
         default:
@@ -83,7 +100,9 @@ void Spawner::continue_add_drag(const sf::Vector2f& worldPos) {
             case Game::AddType::FoodPellet:
             case Game::AddType::ToxicPellet:
             case Game::AddType::DivisionPellet:
-                game.add_circle(create_eatable_for_add_type(*this, {worldPos.x, worldPos.y}, game.get_add_type()));
+                if (!pellet_cap_reached(static_cast<int>(game.get_add_type()))) {
+                    game.add_circle(create_eatable_for_add_type(*this, {worldPos.x, worldPos.y}, game.get_add_type()));
+                }
                 last_add_world_pos = worldPos;
                 break;
         }
@@ -203,7 +222,10 @@ void Spawner::sprinkle_with_rate(float rate, int type, float dt) {
     int guaranteed = static_cast<int>(expected);
     float remainder = expected - static_cast<float>(guaranteed);
 
-    auto spawn_once = [&]() {
+    auto spawn_once = [&]() -> bool {
+        if (pellet_cap_reached(static_cast<int>(add_type))) {
+            return false;
+        }
         b2Vec2 pos = random_point_in_petri();
         switch (add_type) {
             case Game::AddType::Creature:
@@ -218,14 +240,17 @@ void Spawner::sprinkle_with_rate(float rate, int type, float dt) {
                 game.add_circle(create_eatable_for_add_type(*this, pos, add_type));
                 break;
         }
+        return true;
     };
 
     for (int i = 0; i < guaranteed; ++i) {
-        spawn_once();
+        if (!spawn_once()) {
+            break;
+        }
     }
 
     float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
     if (roll < remainder) {
-        spawn_once();
+        (void)spawn_once();
     }
 }

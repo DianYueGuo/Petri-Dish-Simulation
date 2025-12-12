@@ -177,6 +177,9 @@ void CreatureCircle::process_eating(const b2WorldId &worldId, Game& game, float 
         if (!eatable) {
             return;
         }
+        if (eatable->is_eaten()) {
+            return;
+        }
         if (!has_overlap_to_eat(touching_circle)) {
             return;
         }
@@ -324,10 +327,7 @@ void CreatureCircle::update_inactivity(float dt, float timeout) {
         return;
     }
     if (timeout <= 0.0f) {
-        if (!is_eaten()) {
-            poisoned = true;
-            this->be_eaten();
-        }
+        // Inactivity timeout disabled.
         inactivity_timer = 0.0f;
         return;
     }

@@ -93,6 +93,7 @@ CirclePhysics::CirclePhysics(CirclePhysics&& other_circle_physics) noexcept :
     angularDamping(other_circle_physics.angularDamping),
     linearImpulseMagnitude(other_circle_physics.linearImpulseMagnitude),
     angularImpulseMagnitude(other_circle_physics.angularImpulseMagnitude),
+    kind(other_circle_physics.kind),
     touching_circles(std::move(other_circle_physics.touching_circles)) {
 
     b2ShapeId shapeId;
@@ -100,6 +101,7 @@ CirclePhysics::CirclePhysics(CirclePhysics&& other_circle_physics) noexcept :
     b2Shape_SetUserData(shapeId, this);
 
     other_circle_physics.bodyId = b2BodyId{};
+    other_circle_physics.kind = CircleKind::Unknown;
 
     for (auto* touching_circle : touching_circles) {
         touching_circle->remove_touching_circle(&other_circle_physics);
@@ -121,12 +123,14 @@ CirclePhysics& CirclePhysics::operator=(CirclePhysics&& other_circle_physics) no
     angularDamping = other_circle_physics.angularDamping;
     linearImpulseMagnitude = other_circle_physics.linearImpulseMagnitude;
     angularImpulseMagnitude = other_circle_physics.angularImpulseMagnitude;
+    kind = other_circle_physics.kind;
 
     b2ShapeId shapeId;
     b2Body_GetShapes(bodyId, &shapeId, 1);
     b2Shape_SetUserData(shapeId, this);
 
     other_circle_physics.bodyId = b2BodyId{};
+    other_circle_physics.kind = CircleKind::Unknown;
 
     touching_circles = std::move(other_circle_physics.touching_circles);
     for (auto* touching_circle : touching_circles) {
