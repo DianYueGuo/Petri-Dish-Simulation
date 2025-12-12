@@ -192,12 +192,12 @@ void Spawner::spawn_eatable_cloud(const CreatureCircle& creature, std::vector<st
     }
 }
 
-void Spawner::sprinkle_with_rate(float rate, int type_value, float dt) {
+void Spawner::sprinkle_with_rate(float rate, int type, float dt) {
     if (rate <= 0.0f || dt <= 0.0f || game.get_petri_radius() <= 0.0f) {
         return;
     }
 
-    Game::AddType type = static_cast<Game::AddType>(type_value);
+    Game::AddType add_type = static_cast<Game::AddType>(type);
 
     float expected = rate * dt;
     int guaranteed = static_cast<int>(expected);
@@ -205,7 +205,7 @@ void Spawner::sprinkle_with_rate(float rate, int type_value, float dt) {
 
     auto spawn_once = [&]() {
         b2Vec2 pos = random_point_in_petri();
-        switch (type) {
+        switch (add_type) {
             case Game::AddType::Creature:
                 if (auto creature = create_creature_at(pos)) {
                     game.update_max_generation_from_circle(creature.get());
@@ -215,7 +215,7 @@ void Spawner::sprinkle_with_rate(float rate, int type_value, float dt) {
             case Game::AddType::FoodPellet:
             case Game::AddType::ToxicPellet:
             case Game::AddType::DivisionPellet:
-                game.add_circle(create_eatable_for_add_type(*this, pos, type));
+                game.add_circle(create_eatable_for_add_type(*this, pos, add_type));
                 break;
         }
     };

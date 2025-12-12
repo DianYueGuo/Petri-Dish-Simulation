@@ -392,10 +392,10 @@ void Game::apply_selection_mode() {
 
 void Game::update_max_generation_from_circle(const EatableCircle* circle) {
     if (circle && circle->get_kind() == CircleKind::Creature) {
-        auto* creature = static_cast<const CreatureCircle*>(circle);
-        if (creature->get_generation() > generation.max_generation) {
-            generation.max_generation = creature->get_generation();
-            generation.brain = creature->get_brain();
+        const auto* creature_circle = static_cast<const CreatureCircle*>(circle);
+        if (creature_circle->get_generation() > generation.max_generation) {
+            generation.max_generation = creature_circle->get_generation();
+            generation.brain = creature_circle->get_brain();
         }
     }
 }
@@ -405,10 +405,10 @@ void Game::recompute_max_generation() {
     std::optional<neat::Genome> new_brain;
     for (const auto& circle : circles) {
         if (circle && circle->get_kind() == CircleKind::Creature) {
-            auto* creature = static_cast<const CreatureCircle*>(circle.get());
-            if (creature->get_generation() >= new_max) {
-                new_max = creature->get_generation();
-                new_brain = creature->get_brain();
+            const auto* creature_circle = static_cast<const CreatureCircle*>(circle.get());
+            if (creature_circle->get_generation() >= new_max) {
+                new_max = creature_circle->get_generation();
+                new_brain = creature_circle->get_brain();
             }
         }
     }
@@ -421,9 +421,9 @@ void Game::update_max_ages() {
     float division_max = 0.0f;
     for (const auto& circle : circles) {
         if (circle && circle->get_kind() == CircleKind::Creature) {
-            auto* creature = static_cast<const CreatureCircle*>(circle.get());
-            float age_creation = std::max(0.0f, timing.sim_time_accum - creature->get_creation_time());
-            float age_division = std::max(0.0f, timing.sim_time_accum - creature->get_last_division_time());
+            const auto* creature_circle = static_cast<const CreatureCircle*>(circle.get());
+            float age_creation = std::max(0.0f, timing.sim_time_accum - creature_circle->get_creation_time());
+            float age_division = std::max(0.0f, timing.sim_time_accum - creature_circle->get_last_division_time());
             if (age_creation > creation_max) creation_max = age_creation;
             if (age_division > division_max) division_max = age_division;
         }
@@ -474,14 +474,14 @@ void Game::refresh_generation_and_age() {
 Game::RemovalResult Game::evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud) {
     RemovalResult result{};
     if (circle.get_kind() == CircleKind::Creature) {
-        auto* creature = static_cast<CreatureCircle*>(&circle);
-        if (creature->is_poisoned()) {
-            spawner.spawn_eatable_cloud(*creature, spawned_cloud);
+        const auto* creature_circle = static_cast<const CreatureCircle*>(&circle);
+        if (creature_circle->is_poisoned()) {
+            spawner.spawn_eatable_cloud(*creature_circle, spawned_cloud);
             result.should_remove = true;
-            result.killer = creature->get_eaten_by();
-        } else if (creature->is_eaten()) {
+            result.killer = creature_circle->get_eaten_by();
+        } else if (creature_circle->is_eaten()) {
             result.should_remove = true;
-            result.killer = creature->get_eaten_by();
+            result.killer = creature_circle->get_eaten_by();
         }
     } else if (circle.is_eaten()) {
         result.should_remove = true;
@@ -597,7 +597,7 @@ void Game::remove_percentage_pellets(float percentage, bool toxic, bool division
     std::vector<std::size_t> indices;
     indices.reserve(circles.size());
     for (std::size_t i = 0; i < circles.size(); ++i) {
-        if (auto* e = dynamic_cast<EatableCircle*>(circles[i].get())) {
+        if (auto* e = dynamic_cast<const EatableCircle*>(circles[i].get())) {
             if (e->is_boost_particle()) continue;
             if (e->get_kind() == CircleKind::Creature) continue;
             if (e->is_toxic() == toxic && e->is_division_pellet() == division_pellet) {

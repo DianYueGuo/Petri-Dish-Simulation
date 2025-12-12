@@ -7,7 +7,7 @@ class CreatureCircle;
 
 class EatableCircle : public DrawableCircle {
 public:
-    EatableCircle(const b2WorldId &worldId,
+    explicit EatableCircle(const b2WorldId &worldId,
                   float position_x = 0.0f,
                   float position_y = 0.0f,
                   float radius = 1.0f,

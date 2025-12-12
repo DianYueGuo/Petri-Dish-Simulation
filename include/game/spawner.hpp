@@ -15,7 +15,7 @@ class Game;
 // Responsible for creating circles and spawning logic.
 class Spawner {
 public:
-    explicit Spawner(Game& game);
+    explicit Spawner(Game& game_ref);
 
     void spawn_selected_type_at(const sf::Vector2f& worldPos);
     void begin_add_drag_if_applicable(const sf::Vector2f& worldPos);

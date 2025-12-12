@@ -332,7 +332,7 @@ private:
     void apply_impulse_magnitudes_to_circles();
     void apply_damping_to_circles();
     void adjust_pellet_count(const EatableCircle* circle, int delta);
-    std::size_t get_cached_pellet_count(bool toxic, bool division) const;
+    std::size_t get_cached_pellet_count(bool toxic, bool division_pellet) const;
     void handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseButtonPressed& e);
     void handle_mouse_release(const sf::Event::MouseButtonReleased& e);
     void handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e);

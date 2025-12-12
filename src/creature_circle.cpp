@@ -76,7 +76,7 @@ std::vector<SectorSegment> build_span_segments(float relative_angle, float half_
 }
 
 void accumulate_coincident_circle(const DrawableCircle& drawable, float weight, SensorColors& summed_colors, SensorWeights& weights) {
-    const auto color = drawable.get_color_rgb();
+    const auto& color = drawable.get_color_rgb();
     float per_sector_w = weight * (SECTOR_WIDTH / (2.0f * PI));
     for (int sector = 0; sector < SENSOR_COUNT; ++sector) {
         summed_colors[sector][0] += color[0] * per_sector_w;
@@ -103,7 +103,7 @@ void accumulate_offset_circle(const DrawableCircle& drawable,
         overlap_angles[i] = total_overlap;
     }
 
-    const auto color = drawable.get_color_rgb();
+    const auto& color = drawable.get_color_rgb();
     for (int sector = 0; sector < SENSOR_COUNT; ++sector) {
         float ang = overlap_angles[sector];
         if (ang <= 0.0f) continue;
@@ -489,7 +489,7 @@ void CreatureCircle::divide(const b2WorldId &worldId, Game& game) {
     game.add_circle(std::move(new_circle));
 }
 
-void CreatureCircle::configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, Game& game, float angle, const neat::Genome& parent_brain_copy) {
+void CreatureCircle::configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const Game& game, float angle, const neat::Genome& parent_brain_copy) const {
     child.brain = parent_brain_copy;
     child.set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
     child.set_linear_damping(game.get_linear_damping(), worldId);
@@ -502,7 +502,7 @@ void CreatureCircle::configure_child_after_division(CreatureCircle& child, const
     child.set_last_division_time(game.get_sim_time());
 }
 
-void CreatureCircle::mutate_lineage(Game& game, CreatureCircle* child) {
+void CreatureCircle::mutate_lineage(const Game& game, CreatureCircle* child) {
     const int mutation_rounds = std::max(0, game.get_mutation_rounds());
     float weight_thresh = game.get_mutate_weight_thresh();
     float weight_full = game.get_mutate_weight_full_change_thresh();

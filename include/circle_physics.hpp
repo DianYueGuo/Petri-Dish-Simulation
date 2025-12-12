@@ -17,7 +17,7 @@ enum class CircleKind {
 
 class CirclePhysics {
 public:
-    CirclePhysics(const b2WorldId &worldId,
+    explicit CirclePhysics(const b2WorldId &worldId,
                   float position_x = 0.0f,
                   float position_y = 0.0f,
                   float radius = 1.0f,

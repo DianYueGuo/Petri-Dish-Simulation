@@ -13,7 +13,7 @@ class Game;
 
 class CreatureCircle : public EatableCircle {
 public:
-    CreatureCircle(const b2WorldId &worldId,
+    explicit CreatureCircle(const b2WorldId &worldId,
                 float position_x = 0.0f,
                 float position_y = 0.0f,
                 float radius = 1.0f,
@@ -64,8 +64,8 @@ private:
     bool can_eat_circle(const CirclePhysics& circle) const;
     bool has_overlap_to_eat(const CirclePhysics& circle) const;
     void consume_touching_circle(const b2WorldId &worldId, Game& game, EatableCircle& eatable, float touching_area, float poison_death_probability_toxic, float poison_death_probability_normal);
-    void configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, Game& game, float angle, const neat::Genome& parent_brain_copy);
-    void mutate_lineage(Game& game, CreatureCircle* child);
+    void configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const Game& game, float angle, const neat::Genome& parent_brain_copy) const;
+    void mutate_lineage(const Game& game, CreatureCircle* child);
 
     neat::Genome brain;
     std::array<float, 29> brain_inputs{};

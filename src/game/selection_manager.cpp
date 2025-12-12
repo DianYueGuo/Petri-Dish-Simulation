@@ -7,8 +7,8 @@
 #include "creature_circle.hpp"
 #include "eatable_circle.hpp"
 
-SelectionManager::SelectionManager(std::vector<std::unique_ptr<EatableCircle>>& circles_ref, float& sim_time_accum_ref)
-    : circles(&circles_ref), sim_time(&sim_time_accum_ref) {}
+SelectionManager::SelectionManager(std::vector<std::unique_ptr<EatableCircle>>& circles, float& sim_time_accum)
+    : circles(&circles), sim_time(&sim_time_accum) {}
 
 void SelectionManager::clear() {
     selected_index.reset();
@@ -38,9 +38,9 @@ const neat::Genome* SelectionManager::get_selected_brain() const {
     if (!circles || !selected_index || *selected_index >= circles->size()) {
         return nullptr;
     }
-    auto* base = (*circles)[*selected_index].get();
+    const auto* base = (*circles)[*selected_index].get();
     if (base && base->get_kind() == CircleKind::Creature) {
-        auto* creature = static_cast<CreatureCircle*>(base);
+        const auto* creature = static_cast<const CreatureCircle*>(base);
         return &creature->get_brain();
     }
     return nullptr;
@@ -50,9 +50,9 @@ const CreatureCircle* SelectionManager::get_selected_creature() const {
     if (!circles || !selected_index || *selected_index >= circles->size()) {
         return nullptr;
     }
-    auto* base = (*circles)[*selected_index].get();
+    const auto* base = (*circles)[*selected_index].get();
     if (base && base->get_kind() == CircleKind::Creature) {
-        return static_cast<CreatureCircle*>(base);
+        return static_cast<const CreatureCircle*>(base);
     }
     return nullptr;
 }
@@ -118,7 +118,7 @@ const CreatureCircle* SelectionManager::get_oldest_middle_creature() const {
         }
     }
     if (candidates.empty()) return nullptr;
-    std::sort(candidates.begin(), candidates.end(), [](auto& a, auto& b) { return a.first < b.first; });
+    std::sort(candidates.begin(), candidates.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
     return candidates[candidates.size() / 2].second;
 }
 
@@ -133,9 +133,9 @@ int SelectionManager::get_selected_generation() const {
     if (!circles || !selected_index || *selected_index >= circles->size()) {
         return -1;
     }
-    auto* base = (*circles)[*selected_index].get();
+    const auto* base = (*circles)[*selected_index].get();
     if (base && base->get_kind() == CircleKind::Creature) {
-        return static_cast<CreatureCircle*>(base)->get_generation();
+        return static_cast<const CreatureCircle*>(base)->get_generation();
     }
     return -1;
 }

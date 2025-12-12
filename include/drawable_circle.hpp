@@ -9,7 +9,7 @@
 
 class DrawableCircle : public CirclePhysics {
 public:
-    DrawableCircle(const b2WorldId &worldId,
+    explicit DrawableCircle(const b2WorldId &worldId,
                    float position_x = 0.0f,
                    float position_y = 0.0f,
                    float radius = 1.0f,
@@ -19,8 +19,8 @@ public:
 
     void draw(sf::RenderWindow& window) const;
     void set_color_rgb(float r, float g, float b);
-    std::array<float, 3> get_color_rgb() const { return color_rgb; }
-    std::array<float, 3> get_display_color_rgb() const { return display_color_rgb; }
+    const std::array<float, 3>& get_color_rgb() const { return color_rgb; }
+    const std::array<float, 3>& get_display_color_rgb() const { return display_color_rgb; }
     void smooth_display_color(float factor);
     void set_use_smoothed_display(bool enabled) { use_smoothed_display = enabled; }
     void set_display_mode(bool smoothed) { use_smoothed_display = smoothed; }
