@@ -190,9 +190,14 @@ void accumulate_touching_circle(const CirclePhysics& circle,
     const float other_r2 = other_r * other_r;
     const auto& color = drawable.get_color_rgb();
 
+    const auto clamp_sector_index = [](int idx) {
+        return std::clamp(idx, 0, SENSOR_COUNT - 1);
+    };
+
     auto accumulate_sector = [&](int sector) {
+        const int clamped_sector = clamp_sector_index(sector);
         float area_in_sector = 0.0f;
-        const auto& segs = sector_segments[sector];
+        const auto& segs = sector_segments[clamped_sector];
         for (int idx = 0; idx < segs.count; ++idx) {
             const auto& seg = segs.segments[idx];
             area_in_sector += circle_wedge_overlap_area(rel_local, other_r, seg.first, seg.second);
@@ -202,10 +207,10 @@ void accumulate_touching_circle(const CirclePhysics& circle,
             return;
         }
 
-        summed_colors[sector][0] += color[0] * area_in_sector;
-        summed_colors[sector][1] += color[1] * area_in_sector;
-        summed_colors[sector][2] += color[2] * area_in_sector;
-        weights[sector] += area_in_sector;
+        summed_colors[clamped_sector][0] += color[0] * area_in_sector;
+        summed_colors[clamped_sector][1] += color[1] * area_in_sector;
+        summed_colors[clamped_sector][2] += color[2] * area_in_sector;
+        weights[clamped_sector] += area_in_sector;
     };
 
     if (dist2 <= other_r2) {
@@ -223,10 +228,9 @@ void accumulate_touching_circle(const CirclePhysics& circle,
     float start = normalize_angle_positive(center_angle - half_span - pad);
     float end = normalize_angle_positive(center_angle + half_span + pad);
 
-    auto angle_to_index = [](float angle) {
+    auto angle_to_index = [&](float angle) {
         int idx = static_cast<int>(std::floor(angle / SECTOR_WIDTH));
-        if (idx >= SENSOR_COUNT) idx = 0;
-        return idx;
+        return clamp_sector_index(idx);
     };
 
     int start_idx = angle_to_index(start);
