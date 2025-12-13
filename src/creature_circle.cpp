@@ -799,7 +799,7 @@ void CreatureCircle::apply_sensor_inputs(const std::array<std::array<float, 3>, 
 
 void CreatureCircle::write_size_and_memory_inputs() {
     float area = this->getArea();
-    float normalized = area / (area + 25.0f); // gentler saturation for larger sizes
+    float normalized = area / (area + 10.0f); // gentler saturation for larger sizes
     brain_inputs[SIZE_INPUT_INDEX] = normalized;
 
     for (int i = 0; i < MEMORY_SLOTS; ++i) {
