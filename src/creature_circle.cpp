@@ -551,6 +551,68 @@ void CreatureCircle::boost_forward(const b2WorldId &worldId, Game& game) {
     }
 }
 
+namespace {
+b2Vec2 compute_lateral_boost_position(const CreatureCircle& creature, float boost_radius, bool to_right) {
+    b2Vec2 pos = creature.getPosition();
+    float angle = creature.getAngle();
+    b2Vec2 direction = {cos(angle), sin(angle)};
+    b2Vec2 right_dir = {direction.y, -direction.x};
+    float forward_offset = creature.getRadius() + boost_radius;
+    float lateral_offset = creature.getRadius() * 0.5f * (to_right ? 1.0f : -1.0f);
+
+    return {
+        pos.x - direction.x * forward_offset + right_dir.x * lateral_offset,
+        pos.y - direction.y * forward_offset + right_dir.y * lateral_offset
+    };
+}
+} // namespace
+
+void CreatureCircle::boost_eccentric_forward_right(const b2WorldId &worldId, Game& game) {
+    float current_area = this->getArea();
+    float boost_cost = std::max(game.get_boost_area(), 0.0f);
+    float new_area = current_area - boost_cost;
+
+    float boost_radius = (boost_cost > 0.0f) ? sqrt(boost_cost / PI) : 0.0f;
+    if (boost_cost <= 0.0f) {
+        b2Vec2 boost_position = compute_lateral_boost_position(*this, boost_radius, /*to_right=*/true);
+        this->apply_forward_impulse_at_point(boost_position);
+        inactivity_timer = 0.0f;
+        return;
+    }
+
+    if (new_area > minimum_area) {
+        this->setArea(new_area, worldId);
+        float angle = this->getAngle();
+        b2Vec2 boost_position = compute_lateral_boost_position(*this, boost_radius, /*to_right=*/true);
+        this->apply_forward_impulse_at_point(boost_position);
+
+        spawn_boost_particle(worldId, game, *this, boost_radius, angle, boost_position);
+    }
+}
+
+void CreatureCircle::boost_eccentric_forward_left(const b2WorldId &worldId, Game& game) {
+    float current_area = this->getArea();
+    float boost_cost = std::max(game.get_boost_area(), 0.0f);
+    float new_area = current_area - boost_cost;
+
+    float boost_radius = (boost_cost > 0.0f) ? sqrt(boost_cost / PI) : 0.0f;
+    if (boost_cost <= 0.0f) {
+        b2Vec2 boost_position = compute_lateral_boost_position(*this, boost_radius, /*to_right=*/false);
+        this->apply_forward_impulse_at_point(boost_position);
+        inactivity_timer = 0.0f;
+        return;
+    }
+
+    if (new_area > minimum_area) {
+        this->setArea(new_area, worldId);
+        float angle = this->getAngle();
+        b2Vec2 boost_position = compute_lateral_boost_position(*this, boost_radius, /*to_right=*/false);
+        this->apply_forward_impulse_at_point(boost_position);
+
+        spawn_boost_particle(worldId, game, *this, boost_radius, angle, boost_position);
+    }
+}
+
 void CreatureCircle::initialize_brain(int mutation_rounds, float add_node_p, float add_connection_p) {
     // Mutate repeatedly to seed a non-trivial brain topology.
     int rounds = std::max(0, mutation_rounds);

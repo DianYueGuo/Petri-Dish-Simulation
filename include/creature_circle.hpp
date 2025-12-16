@@ -44,6 +44,8 @@ public:
     void move_intelligently(const b2WorldId &worldId, Game &game, float dt);
 
     void boost_forward(const b2WorldId &worldId, Game& game);
+    void boost_eccentric_forward_right(const b2WorldId &worldId, Game& game);
+    void boost_eccentric_forward_left(const b2WorldId &worldId, Game& game);
     void divide(const b2WorldId &worldId, Game& game);
 
     bool is_poisoned() const { return poisoned; }

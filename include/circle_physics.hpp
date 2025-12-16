@@ -65,6 +65,7 @@ public:
     void apply_zero_torque() const;
 
     void apply_forward_impulse() const;
+    void apply_forward_impulse_at_point(const b2Vec2& world_point) const;
     void apply_left_turn_impulse() const;
     void apply_right_turn_impulse() const;
 

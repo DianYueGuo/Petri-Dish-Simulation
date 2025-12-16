@@ -201,6 +201,12 @@ void CirclePhysics::apply_forward_impulse() const {
     b2Body_ApplyLinearImpulse(bodyId, impulse, b2Body_GetPosition(bodyId), true);
 };
 
+void CirclePhysics::apply_forward_impulse_at_point(const b2Vec2& world_point) const {
+    b2Rot rotation = b2Body_GetRotation(bodyId);
+    b2Vec2 impulse = {linearImpulseMagnitude * rotation.c, linearImpulseMagnitude * rotation.s};
+    b2Body_ApplyLinearImpulse(bodyId, impulse, world_point, true);
+};
+
 void CirclePhysics::apply_left_turn_impulse() const {
     b2Body_ApplyAngularImpulse(bodyId, -angularImpulseMagnitude, true);
 };
