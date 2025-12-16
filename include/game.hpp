@@ -112,7 +112,7 @@ private:
         float linear_damping = 1.0f;
         float angular_damping = 1.0f;
         float boost_particle_impulse_fraction = 0.003f;
-        float boost_particle_linear_damping = 3.0f;
+        float boost_particle_linear_damping = 5.0f;
     };
     struct DeathSettings {
         float poison_death_probability = 1.0f;
