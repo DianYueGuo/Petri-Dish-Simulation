@@ -418,15 +418,11 @@ void CreatureCircle::consume_touching_circle(const b2WorldId &worldId, Game& gam
 void CreatureCircle::move_randomly(const b2WorldId &worldId, Game &game) {
     float probability = static_cast<float>(rand()) / RAND_MAX;
     if (probability > 0.9f)
-        this->boost_forward(worldId, game);
+        this->boost_eccentric_forward_right(worldId, game);
 
     probability = static_cast<float>(rand()) / RAND_MAX;
     if (probability > 0.9f)
-        this->apply_left_turn_impulse();
-
-    probability = static_cast<float>(rand()) / RAND_MAX;
-    if (probability > 0.9f)
-        this->apply_right_turn_impulse();
+        this->boost_eccentric_forward_left(worldId, game);
 }
 
 void CreatureCircle::run_brain_cycle_from_touching() {
@@ -444,16 +440,11 @@ void CreatureCircle::move_intelligently(const b2WorldId &worldId, Game &game, fl
     if (game.get_selected_creature() == this &&
         owner_game && owner_game->is_selected_creature_possessed()
     ) {
-        float probability = static_cast<float>(rand()) / RAND_MAX;
-        if (owner_game->get_left_key_down() && probability > 0.3f) {
-            this->apply_left_turn_impulse();
+        if (owner_game->get_left_key_down()) {
+            this->boost_eccentric_forward_left(worldId, game);
         }
-        probability = static_cast<float>(rand()) / RAND_MAX;
-        if (owner_game->get_right_key_down() && probability > 0.3f) {
-            this->apply_right_turn_impulse();
-        }
-        if (owner_game->get_up_key_down()) {
-            this->boost_forward(worldId, game);
+        if (owner_game->get_right_key_down()) {
+            this->boost_eccentric_forward_right(worldId, game);
         }
         if (owner_game->get_space_key_down()) {
             this->divide(worldId, game);
@@ -461,18 +452,14 @@ void CreatureCircle::move_intelligently(const b2WorldId &worldId, Game &game, fl
     } else {
         float probability = static_cast<float>(rand()) / RAND_MAX;
         if (brain_outputs[0] >= probability) {
-            this->boost_forward(worldId, game);
+            this->boost_eccentric_forward_left(worldId, game);
         }
         probability = static_cast<float>(rand()) / RAND_MAX;
         if (brain_outputs[1] >= probability) {
-            this->apply_left_turn_impulse();
+            this->boost_eccentric_forward_right(worldId, game);
         }
         probability = static_cast<float>(rand()) / RAND_MAX;
         if (brain_outputs[2] >= probability) {
-            this->apply_right_turn_impulse();
-        }
-        probability = static_cast<float>(rand()) / RAND_MAX;
-        if (brain_outputs[3] >= probability) {
             this->divide(worldId, game);
         }
     }
@@ -492,10 +479,10 @@ void CreatureCircle::move_intelligently(const b2WorldId &worldId, Game &game, fl
             game.get_mutate_add_node_iterations());
     }
 
-    // Update memory from the first four outputs (clamped).
-    // Memory outputs are distinct: outputs 7-10.
+    // Update memory from dedicated memory outputs (clamped).
+    // Memory outputs are distinct: outputs 6-9.
     for (int i = 0; i < MEMORY_SLOTS; ++i) {
-        memory_state[i] = std::clamp(brain_outputs[7 + i], 0.0f, 1.0f);
+        memory_state[i] = std::clamp(brain_outputs[6 + i], 0.0f, 1.0f);
     }
 
 }
@@ -557,12 +544,19 @@ b2Vec2 compute_lateral_boost_position(const CreatureCircle& creature, float boos
     float angle = creature.getAngle();
     b2Vec2 direction = {cos(angle), sin(angle)};
     b2Vec2 right_dir = {direction.y, -direction.x};
-    float forward_offset = creature.getRadius() + boost_radius;
-    float lateral_offset = creature.getRadius() * 0.5f * (to_right ? 1.0f : -1.0f);
-
+    constexpr float lateral_fraction = 0.5f; // exact lateral offset as a fraction of radius
+    float lateral_sign = to_right ? 1.0f : -1.0f;
+    float lat = std::clamp(lateral_fraction, 0.0f, 1.0f);
+    float back = std::sqrt(std::max(0.0f, 1.0f - lat * lat));
+    // Offset direction already unit length; scale to rim.
+    b2Vec2 offset_dir = {
+        -direction.x * back + right_dir.x * lat * lateral_sign,
+        -direction.y * back + right_dir.y * lat * lateral_sign
+    };
+    float scale = creature.getRadius();
     return {
-        pos.x - direction.x * forward_offset + right_dir.x * lateral_offset,
-        pos.y - direction.y * forward_offset + right_dir.y * lateral_offset
+        pos.x + offset_dir.x * scale,
+        pos.y + offset_dir.y * scale
     };
 }
 } // namespace
@@ -803,9 +797,9 @@ void CreatureCircle::mutate_lineage(const Game& game, CreatureCircle* child) {
 }
 
 void CreatureCircle::update_color_from_brain() {
-    float target_r = std::clamp(brain_outputs[4], 0.0f, 1.0f);
-    float target_g = std::clamp(brain_outputs[5], 0.0f, 1.0f);
-    float target_b = std::clamp(brain_outputs[6], 0.0f, 1.0f);
+    float target_r = std::clamp(brain_outputs[3], 0.0f, 1.0f);
+    float target_g = std::clamp(brain_outputs[4], 0.0f, 1.0f);
+    float target_b = std::clamp(brain_outputs[5], 0.0f, 1.0f);
     set_color_rgb(target_r, target_g, target_b); // keep the signal exact
     constexpr float smoothing = 0.1f; // exponential smoothing factor for display only
     smooth_display_color(smoothing);

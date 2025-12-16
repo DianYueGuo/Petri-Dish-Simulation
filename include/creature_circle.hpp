@@ -60,7 +60,7 @@ protected:
 private:
     static constexpr int SENSOR_COUNT = kColorSensorCount;
     static constexpr int MEMORY_SLOTS = 4;
-    static constexpr int BRAIN_OUTPUTS = 11;
+    static constexpr int BRAIN_OUTPUTS = 10;
     static constexpr int SENSOR_INPUTS = SENSOR_COUNT * 3;
     static constexpr int SIZE_INPUT_INDEX = SENSOR_INPUTS;
     static constexpr int MEMORY_INPUT_START = SIZE_INPUT_INDEX + 1;
