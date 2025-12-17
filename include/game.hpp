@@ -88,7 +88,7 @@ private:
         std::size_t division_count_cached = 0;
     };
     struct MutationSettings {
-        float add_node_probability = 0.005f;
+        float add_node_probability = 0.001f;
         float add_connection_probability = 0.02f;
         float tick_add_node_probability = 0.0f;
         float tick_add_connection_probability = 0.0f;
