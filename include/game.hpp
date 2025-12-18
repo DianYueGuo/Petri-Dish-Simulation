@@ -94,7 +94,7 @@ private:
         float add_connection_thresh = 0.05f;
         float tick_add_node_thresh = 0.0f;
         float tick_add_connection_thresh = 0.0f;
-        float weight_extremum_init = 1.0f;
+        float weight_extremum_init = 0.0f;
         bool live_mutation_enabled = false;
         float mutate_weight_thresh = 0.8f;
         float mutate_weight_full_change_thresh = 0.1f;
