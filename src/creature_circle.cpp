@@ -251,6 +251,61 @@ void accumulate_touching_circle(const CirclePhysics& circle,
     }
 }
 
+void accumulate_outside_petri(const b2Vec2& self_pos,
+                              float self_radius,
+                              float cos_h,
+                              float sin_h,
+                              float petri_radius,
+                              const SectorSegments& sector_segments,
+                              SensorColors& summed_colors,
+                              SensorWeights& weights) {
+    if (petri_radius <= 0.0f || self_radius <= 0.0f) {
+        return;
+    }
+
+    // Petri dish is centered at the world origin.
+    b2Vec2 rel_world{-self_pos.x, -self_pos.y};
+    b2Vec2 dish_local{
+        cos_h * rel_world.x + sin_h * rel_world.y,
+        -sin_h * rel_world.x + cos_h * rel_world.y
+    };
+
+    constexpr float epsilon = 1e-6f;
+    for (int sector = 0; sector < SENSOR_COUNT; ++sector) {
+        float outside_area = 0.0f;
+        const auto& segs = sector_segments[sector];
+        for (int idx = 0; idx < segs.count; ++idx) {
+            const auto& seg = segs.segments[idx];
+            float span = seg.second - seg.first;
+            if (span <= 0.0f) {
+                continue;
+            }
+
+            // Scale the ray length so the triangle area matches the circular sector area.
+            float sin_span = std::sin(span);
+            float ray_length = self_radius;
+            if (std::fabs(sin_span) > epsilon) {
+                ray_length = self_radius * std::sqrt(span / sin_span);
+            }
+
+            b2Vec2 p1{std::cos(seg.first) * ray_length, std::sin(seg.first) * ray_length};
+            b2Vec2 p2{std::cos(seg.second) * ray_length, std::sin(seg.second) * ray_length};
+            std::array<b2Vec2, 3> triangle{{b2Vec2{0.0f, 0.0f}, p1, p2}};
+
+            float inside_area = circle_triangle_intersection_area(triangle, dish_local, petri_radius);
+            float segment_area = 0.5f * self_radius * self_radius * span;
+            inside_area = std::clamp(inside_area, 0.0f, segment_area);
+
+            outside_area += segment_area - inside_area;
+        }
+
+        if (outside_area > 0.0f) {
+            summed_colors[sector][0] += outside_area; // Sense outside as red.
+            weights[sector] += outside_area;
+        }
+    }
+}
+
 void spawn_boost_particle(const b2WorldId& worldId,
                           Game& game,
                           const CreatureCircle& parent,
@@ -809,13 +864,13 @@ void CreatureCircle::update_brain_inputs_from_touching() {
     SensorColors summed_colors{};
     SensorWeights weights{};
 
-    if (!touching_circles.empty()) {
-        const b2Vec2 self_pos = this->getPosition();
-        const float heading = this->getAngle();
-        const float cos_h = std::cos(heading);
-        const float sin_h = std::sin(heading);
-        const auto& sector_segments = get_sector_segments();
+    const b2Vec2 self_pos = this->getPosition();
+    const float heading = this->getAngle();
+    const float cos_h = std::cos(heading);
+    const float sin_h = std::sin(heading);
+    const auto& sector_segments = get_sector_segments();
 
+    if (!touching_circles.empty()) {
         for_each_touching([&](const CirclePhysics& circle) {
             auto* drawable = dynamic_cast<const DrawableCircle*>(&circle);
             if (!drawable) {
@@ -823,6 +878,11 @@ void CreatureCircle::update_brain_inputs_from_touching() {
             }
             accumulate_touching_circle(circle, *drawable, self_pos, cos_h, sin_h, sector_segments, summed_colors, weights);
         });
+    }
+
+    if (owner_game) {
+        float petri_radius = owner_game->get_petri_radius();
+        accumulate_outside_petri(self_pos, getRadius(), cos_h, sin_h, petri_radius, sector_segments, summed_colors, weights);
     }
 
     apply_sensor_inputs(summed_colors, weights);
