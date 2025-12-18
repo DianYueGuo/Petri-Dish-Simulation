@@ -405,11 +405,13 @@ void render_spawning_region(Game& game, UiState& state) {
     }
     show_hover_text("Size of the petri dish in world meters.");
 
+#ifndef NDEBUG
     bool auto_remove_outside = game.get_auto_remove_outside();
     if (ImGui::Checkbox("Auto-remove outside radius", &auto_remove_outside)) {
         game.set_auto_remove_outside(auto_remove_outside);
     }
     show_hover_text("Automatically culls any circle that leaves the dish boundary.");
+#endif // NDEBUG
 }
 
 void render_preset_buttons(Game& game, UiState& state) {
