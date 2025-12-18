@@ -217,7 +217,16 @@ const CreatureCircle* SelectionManager::find_nearest_creature(const b2Vec2& pos)
 void SelectionManager::handle_selection_after_removal(const Snapshot& snapshot, bool was_removed, const CreatureCircle* preferred_fallback, const b2Vec2& fallback_position) {
     if (was_removed) {
         if (follow_selected) {
-            const CreatureCircle* fallback = preferred_fallback;
+            const CreatureCircle* fallback = nullptr;
+            if (preferred_fallback && circles) {
+                const bool still_exists = std::any_of(
+                    circles->begin(),
+                    circles->end(),
+                    [&](const std::unique_ptr<EatableCircle>& c) { return c.get() == preferred_fallback; });
+                if (still_exists) {
+                    fallback = preferred_fallback;
+                }
+            }
             if (!fallback) {
                 fallback = find_nearest_creature(fallback_position);
             }
