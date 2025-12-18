@@ -98,6 +98,7 @@ const CreatureCircle* SelectionManager::get_oldest_smallest_creature() const {
     return best;
 }
 
+#ifndef NDEBUG
 const CreatureCircle* SelectionManager::get_oldest_middle_creature() const {
     if (!circles || !sim_time) return nullptr;
     std::vector<std::pair<float, const CreatureCircle*>> candidates;
@@ -121,6 +122,7 @@ const CreatureCircle* SelectionManager::get_oldest_middle_creature() const {
     std::sort(candidates.begin(), candidates.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
     return candidates[candidates.size() / 2].second;
 }
+#endif
 
 const CreatureCircle* SelectionManager::get_follow_target_creature() const {
     if (follow_selected) {

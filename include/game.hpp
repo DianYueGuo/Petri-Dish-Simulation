@@ -33,7 +33,9 @@ public:
     enum class SelectionMode {
         Manual = 0,
         OldestLargest,
+#ifndef NDEBUG
         OldestMedian,
+#endif
         OldestSmallest
     };
 private:
@@ -299,7 +301,9 @@ public:
     const CreatureCircle* get_selected_creature() const;
     const CreatureCircle* get_oldest_largest_creature() const;
     const CreatureCircle* get_oldest_smallest_creature() const;
+#ifndef NDEBUG
     const CreatureCircle* get_oldest_middle_creature() const;
+#endif
     const CreatureCircle* get_follow_target_creature() const;
     void set_selection_to_creature(const CreatureCircle* creature);
     const CreatureCircle* find_nearest_creature(const b2Vec2& pos) const;

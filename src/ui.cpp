@@ -91,6 +91,49 @@ struct CleanupSettings {
     float cleanup_interval = 30.0f; // deprecated, kept for state init
 };
 
+struct SelectionOption {
+    const char* label;
+    Game::SelectionMode mode;
+};
+
+template <typename T, std::size_t N>
+constexpr int array_size(const T (&)[N]) {
+    return static_cast<int>(N);
+}
+
+#ifndef NDEBUG
+constexpr SelectionOption kSelectionOptions[] = {
+    {"Manual selection", Game::SelectionMode::Manual},
+    {"Oldest (largest)", Game::SelectionMode::OldestLargest},
+    {"Oldest (median)", Game::SelectionMode::OldestMedian},
+    {"Oldest (smallest)", Game::SelectionMode::OldestSmallest}
+};
+#else
+constexpr SelectionOption kSelectionOptions[] = {
+    {"Manual selection", Game::SelectionMode::Manual},
+    {"Oldest (largest)", Game::SelectionMode::OldestLargest},
+    {"Oldest (smallest)", Game::SelectionMode::OldestSmallest}
+};
+#endif
+
+constexpr int kSelectionOptionCount = array_size(kSelectionOptions);
+
+int selection_mode_to_index(Game::SelectionMode mode) {
+    for (int i = 0; i < kSelectionOptionCount; ++i) {
+        if (kSelectionOptions[i].mode == mode) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+Game::SelectionMode selection_index_to_mode(int index) {
+    if (index < 0 || index >= kSelectionOptionCount) {
+        return kSelectionOptions[0].mode;
+    }
+    return kSelectionOptions[index].mode;
+}
+
 struct UiState {
     CursorSettings cursor;
     TimeScaleSettings time_scale;
@@ -348,7 +391,7 @@ void initialize_state(UiState& state, Game& game) {
     state.spawning.toxic_density = game.get_toxic_pellet_density();
     state.spawning.division_density = game.get_division_pellet_density();
     state.follow_selected = game.get_follow_selected();
-    state.selection_mode = static_cast<int>(game.get_selection_mode());
+    state.selection_mode = selection_mode_to_index(game.get_selection_mode());
     state.initialized = true;
 }
 
@@ -465,24 +508,18 @@ void render_overview_content(Game& game, UiState& state) {
 
         ImGui::Text("Selection mode:");
         show_hover_text("Auto-updates the selected creature until you switch back to Manual.");
-        int selection_mode = state.selection_mode;
-        const char* selection_labels[] = {
-            "Manual selection",
-            "Oldest (largest)",
-            "Oldest (median)",
-            "Oldest (smallest)"
-        };
-        for (int i = 0; i < 4; ++i) {
+        int selection_mode = std::clamp(state.selection_mode, 0, kSelectionOptionCount - 1);
+        for (int i = 0; i < kSelectionOptionCount; ++i) {
             if (i > 0) {
                 ImGui::SameLine();
             }
-            if (ImGui::RadioButton(selection_labels[i], selection_mode == i)) {
+            if (ImGui::RadioButton(kSelectionOptions[i].label, selection_mode == i)) {
                 selection_mode = i;
             }
         }
         if (selection_mode != state.selection_mode) {
             state.selection_mode = selection_mode;
-            game.set_selection_mode(static_cast<Game::SelectionMode>(selection_mode));
+            game.set_selection_mode(selection_index_to_mode(selection_mode));
         }
 
         const neat::Genome* selected_brain = game.get_selected_brain();

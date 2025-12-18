@@ -39,6 +39,26 @@ void handle_sensor_end_touch(const b2SensorEndTouchEvent& endTouch) {
         }
     }
 }
+
+Game::SelectionMode sanitize_selection_mode(Game::SelectionMode mode) {
+#ifndef NDEBUG
+    switch (mode) {
+        case Game::SelectionMode::Manual:
+        case Game::SelectionMode::OldestLargest:
+        case Game::SelectionMode::OldestMedian:
+        case Game::SelectionMode::OldestSmallest:
+            return mode;
+    }
+#else
+    switch (mode) {
+        case Game::SelectionMode::Manual:
+        case Game::SelectionMode::OldestLargest:
+        case Game::SelectionMode::OldestSmallest:
+            return mode;
+    }
+#endif
+    return Game::SelectionMode::Manual;
+}
 } // namespace
 
 Game::Game()
@@ -354,9 +374,11 @@ const CreatureCircle* Game::get_oldest_smallest_creature() const {
     return selection.get_oldest_smallest_creature();
 }
 
+#ifndef NDEBUG
 const CreatureCircle* Game::get_oldest_middle_creature() const {
     return selection.get_oldest_middle_creature();
 }
+#endif
 
 const CreatureCircle* Game::get_follow_target_creature() const {
     return selection.get_follow_target_creature();
@@ -375,7 +397,7 @@ bool Game::get_follow_selected() const {
 }
 
 void Game::set_selection_mode(SelectionMode mode) {
-    selection_mode = mode;
+    selection_mode = sanitize_selection_mode(mode);
     selection_dirty = true;
     apply_selection_mode();
 }
@@ -401,9 +423,11 @@ void Game::apply_selection_mode() {
         case SelectionMode::OldestLargest:
             selection.set_selection_to_creature(selection.get_oldest_largest_creature());
             break;
+#ifndef NDEBUG
         case SelectionMode::OldestMedian:
             selection.set_selection_to_creature(selection.get_oldest_middle_creature());
             break;
+#endif
         case SelectionMode::OldestSmallest:
             selection.set_selection_to_creature(selection.get_oldest_smallest_creature());
             break;
