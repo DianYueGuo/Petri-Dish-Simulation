@@ -127,7 +127,6 @@ public:
     void process_game_logic_with_speed();
     void process_game_logic();
     void accumulate_real_time(float dt);
-    void frame_rendered();
     void update_actual_sim_speed();
     void set_circle_density(float d);
     void set_linear_impulse_magnitude(float m);

@@ -240,10 +240,6 @@ void GameSimulationController::accumulate_real_time(float dt) {
     }
 }
 
-void GameSimulationController::frame_rendered() {
-    // reserved for any per-frame hooks; fps handled in accumulate_real_time
-}
-
 void GameSimulationController::update_actual_sim_speed() {
     constexpr float eps = std::numeric_limits<float>::epsilon();
     if (game.timing.last_real_dt > eps) {
