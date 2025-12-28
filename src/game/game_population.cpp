@@ -25,8 +25,6 @@ void GamePopulationManager::add_circle(std::unique_ptr<EatableCircle> circle) {
     }
     if (circle && circle->get_kind() == CircleKind::Creature) {
         auto* creature_circle = static_cast<CreatureCircle*>(circle.get());
-        const float creation_time = creature_circle->get_creation_time();
-        const float division_time = creature_circle->get_last_division_time();
         ctx.population_on_creature_added(*creature_circle);
     }
     if (circle && circle->get_kind() == CircleKind::Creature) {
