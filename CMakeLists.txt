@@ -98,15 +98,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(box2d)
 
-set(MULTINEAT_ENABLE_PYTHON OFF CACHE BOOL "" FORCE)
-
-FetchContent_Declare(
-    NEAT
-    GIT_REPOSITORY https://github.com/DianYueGuo/NEAT.git
-    GIT_TAG fix-cmake-version
-)
-FetchContent_MakeAvailable(NEAT)
-
 add_executable(
     ${APP_TARGET}
     MACOSX_BUNDLE
@@ -116,6 +107,9 @@ add_executable(
     src/game/game_selection.cpp
     src/game/game_population.cpp
     src/game/game_simulation.cpp
+    src/neat/genome.cpp
+    src/neat/node.cpp
+    src/neat/connection.cpp
     src/circle_physics.cpp
     src/drawable_circle.cpp
     src/eatable_circle.cpp
@@ -135,7 +129,6 @@ target_link_libraries(${APP_TARGET} PRIVATE SFML::Graphics SFML::Audio SFML::Net
 target_link_libraries(${APP_TARGET} PRIVATE imgui)
 target_link_libraries(${APP_TARGET} PRIVATE ImGui-SFML::ImGui-SFML)
 target_link_libraries(${APP_TARGET} PRIVATE box2d)
-target_link_libraries(${APP_TARGET} PRIVATE neat)
 
 if(CLANG_TIDY_COMMAND)
     set_target_properties(
