@@ -7,14 +7,16 @@
 #include <SFML/System/Vector2.hpp>
 #include <box2d/box2d.h>
 
+#include "game/spawn_types.hpp"
+
 class EatableCircle;
 class CreatureCircle;
-class SpawnContext;
+class Game;
 
 // Responsible for creating circles and spawning logic.
 class Spawner {
 public:
-    explicit Spawner(SpawnContext& context_ref);
+    explicit Spawner(Game& game_ref);
 
     void spawn_selected_type_at(const sf::Vector2f& worldPos);
     void begin_add_drag_if_applicable(const sf::Vector2f& worldPos);
@@ -32,7 +34,7 @@ private:
     bool pellet_cap_reached(int add_type_value) const;
     void sprinkle_with_rate(float rate, int type, float dt);
 
-    SpawnContext& context;
+    Game& context;
     bool add_dragging = false;
     std::optional<sf::Vector2f> last_add_world_pos;
     std::optional<sf::Vector2f> last_drag_world_pos;

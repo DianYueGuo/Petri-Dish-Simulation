@@ -153,30 +153,6 @@ void Game::mark_selection_dirty() {
     selection_ctrl().mark_selection_dirty();
 }
 
-std::size_t Game::spawn_get_food_pellet_count() const {
-    return population_mgr().get_food_pellet_count();
-}
-
-std::size_t Game::spawn_get_toxic_pellet_count() const {
-    return population_mgr().get_toxic_pellet_count();
-}
-
-std::size_t Game::spawn_get_division_pellet_count() const {
-    return population_mgr().get_division_pellet_count();
-}
-
-std::size_t Game::spawn_get_creature_count() const {
-    return population_mgr().get_creature_count();
-}
-
-void Game::spawn_add_circle(std::unique_ptr<EatableCircle> circle) {
-    population_mgr().add_circle(std::move(circle));
-}
-
-void Game::spawn_update_max_generation_from_circle(const EatableCircle* circle) {
-    update_max_generation_from_circle(circle);
-}
-
 const CreatureCircle* Game::sim_selected_creature() const {
     return selection_ctrl().get_selected_creature();
 }
