@@ -22,6 +22,7 @@ private:
     void updateLayersRec(int nodeId);
     void ensureForwardLayers();
     void rebuildTopology();
+    static float randomUnitExclusive();
 
 public:
     int nbInput;

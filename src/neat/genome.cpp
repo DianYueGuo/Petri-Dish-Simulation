@@ -59,6 +59,14 @@ int Genome::getInnovId(std::vector<std::vector<int>>* innovIds, int* lastInnovId
     return (*innovIds)[inNodeId][outNodeId];
 }
 
+float Genome::randomUnitExclusive() {
+    float randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    while (randomNb >= 1.0f - 1e-10f) {
+        randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    }
+    return randomNb;
+}
+
 void Genome::loadInputs(float inputs[]) {
     for (int i = 0; i < nbInput; i++) {
         nodes[i + 1].sumInput = inputs[i];
@@ -93,25 +101,16 @@ void Genome::getOutputs(float outputs[]) {
 }
 
 void Genome::mutate(std::vector<std::vector<int>>* innovIds, int* lastInnovId, float mutateWeightThresh, float mutateWeightFullChangeThresh, float mutateWeightFactor, float addConnectionThresh, int maxIterationsFindConnectionThresh, float reactivateConnectionThresh, float addNodeThresh, int maxIterationsFindNodeThresh) {
-    float randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    while (randomNb >= 1.0f - 1e-10f) {
-        randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    }
+    float randomNb = randomUnitExclusive();
 
     mutateWeights(mutateWeightFullChangeThresh, mutateWeightFactor, mutateWeightThresh);
 
-    randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    while (randomNb >= 1.0f - 1e-10f) {
-        randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    }
+    randomNb = randomUnitExclusive();
     if (randomNb < addConnectionThresh) {
         addConnection(innovIds, lastInnovId, maxIterationsFindConnectionThresh, reactivateConnectionThresh);
     }
 
-    randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    while (randomNb >= 1.0f - 1e-10f) {
-        randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    }
+    randomNb = randomUnitExclusive();
     if (randomNb < addNodeThresh) {
         addNode(innovIds, lastInnovId, maxIterationsFindNodeThresh);
     }
@@ -124,10 +123,7 @@ void Genome::mutateWeights(float mutateWeightFullChangeThresh, float mutateWeigh
             continue;
         }
 
-        randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        while (randomNb >= 1.0f - 1e-10f) {
-            randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        }
+        randomNb = randomUnitExclusive();
         if (randomNb < mutateWeightFullChangeThresh) {
             conn.weight = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f * weightExtremumInit - weightExtremumInit;
         } else {
@@ -156,10 +152,7 @@ bool Genome::addConnection(std::vector<std::vector<int>>* innovIds, int* lastInn
     }
 
     if (isValid == 2) {
-        float randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        while (randomNb >= 1.0f - 1e-10f) {
-            randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        }
+        float randomNb = randomUnitExclusive();
         if (randomNb < reactivateConnectionThresh) {
             // Prefer to reactivate a disabled connection; if none, treat as success.
             for (auto& conn : connections) {
