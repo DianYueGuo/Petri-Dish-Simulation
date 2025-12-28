@@ -159,18 +159,17 @@ bool Genome::addConnection(std::vector<std::vector<int>>* innovIds, int* lastInn
             randomNb = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
         }
         if (randomNb < reactivateConnectionThresh) {
-            int iConnDisabled = 0;
-            while (iConnDisabled < static_cast<int>(connections.size()) &&
-                   !(!connections[iConnDisabled].enabled && connections[iConnDisabled].inNodeId == inNodeId && connections[iConnDisabled].outNodeId == outNodeId)) {
-                iConnDisabled++;
+            // Prefer to reactivate a disabled connection; if none, treat as success.
+            for (auto& conn : connections) {
+                if (conn.inNodeId == inNodeId && conn.outNodeId == outNodeId) {
+                    if (!conn.enabled) {
+                        conn.enabled = true;
+                        topoDirty = true;
+                    }
+                    return true;
+                }
             }
-            if (iConnDisabled < static_cast<int>(connections.size())) {
-                connections[iConnDisabled].enabled = true;
-                topoDirty = true;
-                return true;
-            }
-            std::cout << "Error : Genome::addConnection" << std::endl;
-            return false;
+            return true;
         }
         return true;
     }
