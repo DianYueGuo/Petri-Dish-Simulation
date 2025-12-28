@@ -29,9 +29,9 @@ float calculate_overlap_area(float r1, float r2, float distance) {
 
 void CreatureCircle::process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal) {
     poisoned = false;
-    if (owner_game) {
-        auto& graph = owner_game->get_contact_graph();
-        auto& registry = owner_game->get_circle_registry();
+    if (contacts.graph && contacts.registry) {
+        auto& graph = *contacts.graph;
+        auto& registry = *contacts.registry;
         graph.for_each_neighbor(get_id(), [&](CircleId neighbor) {
             auto* edible = registry.get_edible(neighbor);
             auto* touching_circle = registry.get_physics(neighbor);

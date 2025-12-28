@@ -110,6 +110,7 @@ void GameSimulationController::update_creatures(const b2WorldId& worldId, float 
     for (size_t i = 0; i < game.circles.size(); ++i) {
         if (game.circles[i] && game.circles[i]->get_kind() == CircleKind::Creature) {
             auto* creature_circle = static_cast<CreatureCircle*>(game.circles[i].get());
+            creature_circle->set_contact_context(game.get_contact_graph(), game.get_circle_registry(), game.get_petri_radius());
             creature_circle->process_eating(worldId, game, game.death.poison_death_probability, game.death.poison_death_probability_normal);
             creature_circle->update_inactivity(dt, game.death.inactivity_timeout);
         }
@@ -125,6 +126,7 @@ void GameSimulationController::run_brain_updates(const b2WorldId& worldId, float
                 auto* creature_circle = static_cast<CreatureCircle*>(game.circles[i].get());
                 creature_circle->set_minimum_area(game.creature.minimum_area);
                 creature_circle->set_display_mode(!game.show_true_color);
+                creature_circle->set_contact_context(game.get_contact_graph(), game.get_circle_registry(), game.get_petri_radius());
                 creature_circle->move_intelligently(worldId, game, brain_period);
             }
         }

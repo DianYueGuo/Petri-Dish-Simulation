@@ -1,6 +1,8 @@
 #pragma once
 
 #include "eatable_circle.hpp"
+#include "contact_graph.hpp"
+#include "circle_registry.hpp"
 #include "simulation_config.hpp"
 #include <NEAT/genome.hpp>
 
@@ -52,11 +54,18 @@ public:
     float get_creation_time() const { return creation_time; }
     void set_last_division_time(float t) { last_division_time = t; }
     float get_last_division_time() const { return last_division_time; }
+    void set_contact_context(ContactGraph& graph, CircleRegistry& registry, float petri_radius);
 
 protected:
     bool should_draw_direction_indicator() const override { return true; }
 
 private:
+    struct ContactContext {
+        ContactGraph* graph = nullptr;
+        CircleRegistry* registry = nullptr;
+        float petri_radius = 0.0f;
+    };
+
     static constexpr int SENSOR_COUNT = kColorSensorCount;
     static constexpr int MEMORY_SLOTS = 4;
     static constexpr int BRAIN_OUTPUTS = 10;
@@ -100,4 +109,5 @@ private:
     float creation_time = 0.0f;
     float last_division_time = 0.0f;
     Game* owner_game = nullptr;
+    ContactContext contacts;
 };

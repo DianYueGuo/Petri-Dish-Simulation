@@ -326,9 +326,9 @@ void CreatureCircle::update_brain_inputs_from_touching() {
     const float sin_h = std::sin(heading);
     const auto& sector_segments = get_sector_segments();
 
-    if (owner_game) {
-        auto& graph = owner_game->get_contact_graph();
-        auto& registry = owner_game->get_circle_registry();
+    if (contacts.graph && contacts.registry) {
+        auto& graph = *contacts.graph;
+        auto& registry = *contacts.registry;
         graph.for_each_neighbor(get_id(), [&](CircleId neighbor) {
             const auto* senseable = registry.get_senseable(neighbor);
             const auto* physics = registry.get_physics(neighbor);
@@ -350,9 +350,8 @@ void CreatureCircle::update_brain_inputs_from_touching() {
         });
     }
 
-    if (owner_game) {
-        float petri_radius = owner_game->get_petri_radius();
-        accumulate_outside_petri(self_pos, getRadius(), cos_h, sin_h, petri_radius, sector_segments, summed_colors, weights);
+    if (contacts.petri_radius > 0.0f) {
+        accumulate_outside_petri(self_pos, getRadius(), cos_h, sin_h, contacts.petri_radius, sector_segments, summed_colors, weights);
     }
 
     apply_sensor_inputs(summed_colors, weights);

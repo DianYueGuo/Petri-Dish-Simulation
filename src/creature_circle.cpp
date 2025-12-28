@@ -32,6 +32,12 @@ CreatureCircle::CreatureCircle(const b2WorldId &worldId,
     smooth_display_color(1.0f); // start display at brain-driven color immediately
 }
 
+void CreatureCircle::set_contact_context(ContactGraph& graph, CircleRegistry& registry, float petri_radius) {
+    contacts.graph = &graph;
+    contacts.registry = &registry;
+    contacts.petri_radius = petri_radius;
+}
+
 void CreatureCircle::initialize_brain(int mutation_rounds, float add_node_thresh, float add_connection_thresh) {
     // Mutate repeatedly to seed a non-trivial brain topology.
     int rounds = std::max(0, mutation_rounds);
