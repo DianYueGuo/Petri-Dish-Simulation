@@ -25,6 +25,50 @@ Game::~Game() {
     b2DestroyWorld(worldId);
 }
 
+void Game::population_adjust_pellet_count(const EatableCircle* circle, int delta) {
+    if (!circle) return;
+    if (circle->is_boost_particle()) return;
+    if (circle->get_kind() == CircleKind::Creature) return;
+
+    auto apply = [&](std::size_t& counter) {
+        if (delta > 0) {
+            counter += static_cast<std::size_t>(delta);
+        } else {
+            std::size_t dec = static_cast<std::size_t>(-delta);
+            counter = (counter > dec) ? (counter - dec) : 0;
+        }
+    };
+
+    if (circle->is_division_pellet()) {
+        apply(pellets.division_count_cached);
+    } else if (circle->is_toxic()) {
+        apply(pellets.toxic_count_cached);
+    } else {
+        apply(pellets.food_count_cached);
+    }
+}
+
+void Game::population_on_creature_added(const CreatureCircle& creature_circle) {
+    if (!age.dirty && creature_circle.get_kind() == CircleKind::Creature) {
+        const float creation_time = creature_circle.get_creation_time();
+        const float division_time = creature_circle.get_last_division_time();
+        if (!age.has_creature) {
+            age.has_creature = true;
+            age.min_creation_time = creation_time;
+            age.min_division_time = division_time;
+        } else {
+            age.min_creation_time = std::min(age.min_creation_time, creation_time);
+            age.min_division_time = std::min(age.min_division_time, division_time);
+        }
+        age.max_age_since_creation = std::max(0.0f, timing.sim_time_accum - age.min_creation_time);
+        age.max_age_since_division = std::max(0.0f, timing.sim_time_accum - age.min_division_time);
+    }
+}
+
+void Game::population_spawn_cloud(const CreatureCircle& creature, std::vector<std::unique_ptr<EatableCircle>>& out) {
+    spawner.spawn_eatable_cloud(creature, out);
+}
+
 void Game::process_game_logic_with_speed() {
     simulation->process_game_logic_with_speed();
 }

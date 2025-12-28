@@ -6,47 +6,38 @@
 #include "game/game_components.hpp"
 
 #include "creature_circle.hpp"
-#include "game.hpp"
+#include "game/population_context.hpp"
 
-GamePopulationManager::GamePopulationManager(Game& game) : game(game) {}
+GamePopulationManager::GamePopulationManager(PopulationContext& context) : ctx(context) {}
 
 namespace {
-void cleanup_circle(Game& game, EatableCircle& circle) {
-    game.get_contact_graph().remove_circle(circle.get_id());
-    game.get_circle_registry().unregister_circle(circle);
+void cleanup_circle(PopulationContext& ctx, EatableCircle& circle) {
+    ctx.population_contact_graph().remove_circle(circle.get_id());
+    ctx.population_circle_registry().unregister_circle(circle);
 }
 } // namespace
 
 void GamePopulationManager::add_circle(std::unique_ptr<EatableCircle> circle) {
-    game.selection_controller->update_max_generation_from_circle(circle.get());
+    ctx.population_selection_controller().update_max_generation_from_circle(circle.get());
     adjust_pellet_count(circle.get(), 1);
     if (circle) {
-        game.get_circle_registry().register_capabilities(*circle);
+        ctx.population_circle_registry().register_capabilities(*circle);
     }
-    if (!game.age.dirty && circle && circle->get_kind() == CircleKind::Creature) {
+    if (circle && circle->get_kind() == CircleKind::Creature) {
         auto* creature_circle = static_cast<CreatureCircle*>(circle.get());
         const float creation_time = creature_circle->get_creation_time();
         const float division_time = creature_circle->get_last_division_time();
-        if (!game.age.has_creature) {
-            game.age.has_creature = true;
-            game.age.min_creation_time = creation_time;
-            game.age.min_division_time = division_time;
-        } else {
-            game.age.min_creation_time = std::min(game.age.min_creation_time, creation_time);
-            game.age.min_division_time = std::min(game.age.min_division_time, division_time);
-        }
-        game.age.max_age_since_creation = std::max(0.0f, game.timing.sim_time_accum - game.age.min_creation_time);
-        game.age.max_age_since_division = std::max(0.0f, game.timing.sim_time_accum - game.age.min_division_time);
+        ctx.population_on_creature_added(*creature_circle);
     }
     if (circle && circle->get_kind() == CircleKind::Creature) {
-        game.selection_controller->mark_selection_dirty();
+        ctx.population_selection_controller().mark_selection_dirty();
     }
-    game.circles.push_back(std::move(circle));
+    ctx.population_circles().push_back(std::move(circle));
 }
 
 std::size_t GamePopulationManager::get_creature_count() const {
     std::size_t count = 0;
-    for (const auto& c : game.circles) {
+    for (const auto& c : ctx.population_circles()) {
         if (c && c->get_kind() == CircleKind::Creature) {
             ++count;
         }
@@ -59,7 +50,7 @@ GamePopulationManager::RemovalResult GamePopulationManager::evaluate_circle_remo
     if (circle.get_kind() == CircleKind::Creature) {
         const auto* creature_circle = static_cast<const CreatureCircle*>(&circle);
         if (creature_circle->is_poisoned()) {
-            game.spawner.spawn_eatable_cloud(*creature_circle, spawned_cloud);
+            ctx.population_spawn_cloud(*creature_circle, spawned_cloud);
             result.should_remove = true;
             result.killer = creature_circle->get_eaten_by();
         } else if (creature_circle->is_eaten()) {
@@ -74,22 +65,22 @@ GamePopulationManager::RemovalResult GamePopulationManager::evaluate_circle_remo
 
 GamePopulationManager::CullState GamePopulationManager::collect_removal_state(const SelectionManager::Snapshot& selection_snapshot, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud) {
     CullState state;
-    state.remove_mask.assign(game.circles.size(), 0);
+    state.remove_mask.assign(ctx.population_circles().size(), 0);
 
-    for (std::size_t i = 0; i < game.circles.size(); ++i) {
-        RemovalResult removal = evaluate_circle_removal(*game.circles[i], spawned_cloud);
+    for (std::size_t i = 0; i < ctx.population_circles().size(); ++i) {
+        RemovalResult removal = evaluate_circle_removal(*ctx.population_circles()[i], spawned_cloud);
         if (!removal.should_remove) {
             continue;
         }
         state.removed_any = true;
-        if (game.circles[i]->get_kind() == CircleKind::Creature) {
+        if (ctx.population_circles()[i]->get_kind() == CircleKind::Creature) {
             state.removed_creature = true;
         }
-        if (selection_snapshot.circle && selection_snapshot.circle == game.circles[i].get()) {
+        if (selection_snapshot.circle && selection_snapshot.circle == ctx.population_circles()[i].get()) {
             state.selected_was_removed = true;
             state.selected_killer = removal.killer;
         }
-        adjust_pellet_count(game.circles[i].get(), -1);
+        adjust_pellet_count(ctx.population_circles()[i].get(), -1);
         state.remove_mask[i] = 1;
     }
 
@@ -101,29 +92,29 @@ void GamePopulationManager::compact_circles(const std::vector<char>& remove_mask
         return;
     }
 
-    for (std::size_t i = 0; i < game.circles.size(); ++i) {
+    for (std::size_t i = 0; i < ctx.population_circles().size(); ++i) {
         if (i < remove_mask.size() && remove_mask[i]) {
-            if (game.circles[i]) {
-                cleanup_circle(game, *game.circles[i]);
+            if (ctx.population_circles()[i]) {
+                cleanup_circle(ctx, *ctx.population_circles()[i]);
             }
         }
     }
 
     std::size_t write = 0;
-    for (std::size_t read = 0; read < game.circles.size(); ++read) {
+    for (std::size_t read = 0; read < ctx.population_circles().size(); ++read) {
         if (!remove_mask[read]) {
             if (write != read) {
-                game.circles[write] = std::move(game.circles[read]);
+                ctx.population_circles()[write] = std::move(ctx.population_circles()[read]);
             }
             ++write;
         }
     }
-    game.circles.resize(write);
+    ctx.population_circles().resize(write);
 }
 
 void GamePopulationManager::cull_consumed() {
     std::vector<std::unique_ptr<EatableCircle>> spawned_cloud;
-    auto selection_snapshot = game.selection.capture_snapshot();
+    auto selection_snapshot = ctx.population_selection().capture_snapshot();
 
     CullState state = collect_removal_state(selection_snapshot, spawned_cloud);
 
@@ -131,12 +122,12 @@ void GamePopulationManager::cull_consumed() {
         compact_circles(state.remove_mask);
     }
     if (state.removed_creature) {
-        game.selection_controller->mark_age_dirty();
-        game.selection_controller->mark_selection_dirty();
+        ctx.population_selection_controller().mark_age_dirty();
+        ctx.population_selection_controller().mark_selection_dirty();
     }
 
-    game.selection.handle_selection_after_removal(selection_snapshot, state.selected_was_removed, state.selected_killer, selection_snapshot.position);
-    game.selection_controller->refresh_generation_and_age();
+    ctx.population_selection().handle_selection_after_removal(selection_snapshot, state.selected_was_removed, state.selected_killer, selection_snapshot.position);
+    ctx.population_selection_controller().refresh_generation_and_age();
 
     for (auto& c : spawned_cloud) {
         add_circle(std::move(c));
@@ -148,29 +139,29 @@ void GamePopulationManager::erase_indices_descending(std::vector<std::size_t>& i
         return;
     }
 
-    auto snapshot = game.selection.capture_snapshot();
+    auto snapshot = ctx.population_selection().capture_snapshot();
 
     std::sort(indices.begin(), indices.end(), std::greater<std::size_t>());
     indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
 
     bool removed_creature = false;
     for (std::size_t idx : indices) {
-        if (idx < game.circles.size()) {
-            if (game.circles[idx]->get_kind() == CircleKind::Creature) {
+        if (idx < ctx.population_circles().size()) {
+            if (ctx.population_circles()[idx]->get_kind() == CircleKind::Creature) {
                 removed_creature = true;
             }
-            adjust_pellet_count(game.circles[idx].get(), -1);
-            cleanup_circle(game, *game.circles[idx]);
-            game.circles.erase(game.circles.begin() + static_cast<std::ptrdiff_t>(idx));
+            adjust_pellet_count(ctx.population_circles()[idx].get(), -1);
+            cleanup_circle(ctx, *ctx.population_circles()[idx]);
+            ctx.population_circles().erase(ctx.population_circles().begin() + static_cast<std::ptrdiff_t>(idx));
         }
     }
 
-    game.selection.revalidate_selection(snapshot.circle);
+    ctx.population_selection().revalidate_selection(snapshot.circle);
     if (removed_creature) {
-        game.selection_controller->mark_age_dirty();
-        game.selection_controller->mark_selection_dirty();
+        ctx.population_selection_controller().mark_age_dirty();
+        ctx.population_selection_controller().mark_selection_dirty();
     }
-    game.selection_controller->refresh_generation_and_age();
+    ctx.population_selection_controller().refresh_generation_and_age();
 }
 
 bool GamePopulationManager::is_circle_outside_dish(const EatableCircle& circle, float dish_radius) const {
@@ -231,34 +222,34 @@ bool GamePopulationManager::handle_outside_removal(const std::unique_ptr<Eatable
 }
 
 void GamePopulationManager::remove_outside_petri() {
-    if (game.circles.empty()) {
+    if (ctx.population_circles().empty()) {
         return;
     }
 
-    auto snapshot = game.selection.capture_snapshot();
+    auto snapshot = ctx.population_selection().capture_snapshot();
 
     bool selected_removed = false;
     bool removed_creature = false;
-    const float dish_radius = game.dish.radius;
-    game.circles.erase(
+    const float dish_radius = ctx.population_dish_radius();
+    ctx.population_circles().erase(
         std::remove_if(
-            game.circles.begin(),
-            game.circles.end(),
+            ctx.population_circles().begin(),
+            ctx.population_circles().end(),
             [&](const std::unique_ptr<EatableCircle>& circle) {
                 bool remove = handle_outside_removal(circle, snapshot, dish_radius, selected_removed, removed_creature);
                 if (remove) {
-                    cleanup_circle(game, *circle);
+                    cleanup_circle(ctx, *circle);
                 }
                 return remove;
             }),
-        game.circles.end());
+        ctx.population_circles().end());
 
-    game.selection.handle_selection_after_removal(snapshot, selected_removed, nullptr, snapshot.position);
+    ctx.population_selection().handle_selection_after_removal(snapshot, selected_removed, nullptr, snapshot.position);
     if (removed_creature) {
-        game.selection_controller->mark_age_dirty();
-        game.selection_controller->mark_selection_dirty();
+        ctx.population_selection_controller().mark_age_dirty();
+        ctx.population_selection_controller().mark_selection_dirty();
     }
-    game.selection_controller->refresh_generation_and_age();
+    ctx.population_selection_controller().refresh_generation_and_age();
 }
 
 std::size_t GamePopulationManager::compute_target_removal_count(std::size_t available, float percentage) const {
@@ -271,16 +262,16 @@ std::size_t GamePopulationManager::compute_target_removal_count(std::size_t avai
 }
 
 void GamePopulationManager::remove_random_percentage(float percentage) {
-    if (game.circles.empty()) {
+    if (ctx.population_circles().empty()) {
         return;
     }
 
-    std::size_t target = compute_target_removal_count(game.circles.size(), percentage);
+    std::size_t target = compute_target_removal_count(ctx.population_circles().size(), percentage);
     if (target == 0) {
         return;
     }
 
-    std::vector<std::size_t> indices(game.circles.size());
+    std::vector<std::size_t> indices(ctx.population_circles().size());
     std::iota(indices.begin(), indices.end(), 0);
 
     static std::mt19937 rng{std::random_device{}()};
@@ -292,9 +283,9 @@ void GamePopulationManager::remove_random_percentage(float percentage) {
 
 std::vector<std::size_t> GamePopulationManager::collect_pellet_indices(bool toxic, bool division_pellet) const {
     std::vector<std::size_t> indices;
-    indices.reserve(game.circles.size());
-    for (std::size_t i = 0; i < game.circles.size(); ++i) {
-        if (auto* e = dynamic_cast<const EatableCircle*>(game.circles[i].get())) {
+    indices.reserve(ctx.population_circles().size());
+    for (std::size_t i = 0; i < ctx.population_circles().size(); ++i) {
+        if (auto* e = dynamic_cast<const EatableCircle*>(ctx.population_circles()[i].get())) {
             if (e->is_boost_particle()) continue;
             if (e->get_kind() == CircleKind::Creature) continue;
             if (e->is_toxic() == toxic && e->is_division_pellet() == division_pellet) {
@@ -306,7 +297,7 @@ std::vector<std::size_t> GamePopulationManager::collect_pellet_indices(bool toxi
 }
 
 void GamePopulationManager::remove_percentage_pellets(float percentage, bool toxic, bool division_pellet) {
-    if (game.circles.empty()) {
+    if (ctx.population_circles().empty()) {
         return;
     }
 
@@ -328,8 +319,8 @@ void GamePopulationManager::remove_percentage_pellets(float percentage, bool tox
 
 std::size_t GamePopulationManager::count_pellets(bool toxic, bool division_pellet) const {
     std::size_t count = 0;
-    const float dish_radius = game.dish.radius;
-    for (const auto& c : game.circles) {
+    const float dish_radius = ctx.population_dish_radius();
+    for (const auto& c : ctx.population_circles()) {
         if (auto* e = dynamic_cast<const EatableCircle*>(c.get())) {
             if (e->is_boost_particle()) continue;
             if (e->get_kind() == CircleKind::Creature) continue;
@@ -349,49 +340,30 @@ std::size_t GamePopulationManager::count_pellets(bool toxic, bool division_pelle
 }
 
 std::size_t GamePopulationManager::get_cached_pellet_count(bool toxic, bool division_pellet) const {
-    if (division_pellet) return game.pellets.division_count_cached;
-    return toxic ? game.pellets.toxic_count_cached : game.pellets.food_count_cached;
+    if (division_pellet) return ctx.population_get_division_cached();
+    return toxic ? ctx.population_get_toxic_cached() : ctx.population_get_food_cached();
 }
 
 void GamePopulationManager::adjust_pellet_count(const EatableCircle* circle, int delta) {
-    if (!circle) return;
-    if (circle->is_boost_particle()) return;
-    if (circle->get_kind() == CircleKind::Creature) return;
-
-    auto apply = [&](std::size_t& counter) {
-        if (delta > 0) {
-            counter += static_cast<std::size_t>(delta);
-        } else {
-            std::size_t dec = static_cast<std::size_t>(-delta);
-            counter = (counter > dec) ? (counter - dec) : 0;
-        }
-    };
-
-    if (circle->is_division_pellet()) {
-        apply(game.pellets.division_count_cached);
-    } else if (circle->is_toxic()) {
-        apply(game.pellets.toxic_count_cached);
-    } else {
-        apply(game.pellets.food_count_cached);
-    }
+    ctx.population_adjust_pellet_count(circle, delta);
 }
 
 std::size_t GamePopulationManager::get_food_pellet_count() const {
-    return game.pellets.food_count_cached;
+    return ctx.population_get_food_cached();
 }
 
 std::size_t GamePopulationManager::get_toxic_pellet_count() const {
-    return game.pellets.toxic_count_cached;
+    return ctx.population_get_toxic_cached();
 }
 
 std::size_t GamePopulationManager::get_division_pellet_count() const {
-    return game.pellets.division_count_cached;
+    return ctx.population_get_division_cached();
 }
 
 float GamePopulationManager::desired_pellet_count(float density_target) const {
     constexpr float PI = 3.14159f;
-    float area = PI * game.dish.radius * game.dish.radius;
-    float pellet_area = std::max(game.creature.add_eatable_area, 1e-6f);
+    float area = PI * ctx.population_dish_radius() * ctx.population_dish_radius();
+    float pellet_area = std::max(ctx.population_add_eatable_area(), 1e-6f);
     float desired_area = std::max(0.0f, density_target) * area;
     return desired_area / pellet_area;
 }
@@ -417,38 +389,38 @@ GamePopulationManager::SpawnRates GamePopulationManager::calculate_spawn_rates(b
 }
 
 void GamePopulationManager::adjust_cleanup_rates() {
-    auto food_rates = calculate_spawn_rates(false, false, game.pellets.food_density);
-    auto toxic_rates = calculate_spawn_rates(true, false, game.pellets.toxic_density);
-    auto division_rates = calculate_spawn_rates(false, true, game.pellets.division_density);
-    game.pellets.sprinkle_rate_eatable = food_rates.sprinkle;
-    game.pellets.cleanup_rate_food = food_rates.cleanup;
-    game.pellets.sprinkle_rate_toxic = toxic_rates.sprinkle;
-    game.pellets.cleanup_rate_toxic = toxic_rates.cleanup;
-    game.pellets.sprinkle_rate_division = division_rates.sprinkle;
-    game.pellets.cleanup_rate_division = division_rates.cleanup;
+    auto food_rates = calculate_spawn_rates(false, false, ctx.population_food_density());
+    auto toxic_rates = calculate_spawn_rates(true, false, ctx.population_toxic_density());
+    auto division_rates = calculate_spawn_rates(false, true, ctx.population_division_density());
+    ctx.population_set_sprinkle_rate_eatable(food_rates.sprinkle);
+    ctx.population_set_cleanup_rate_food(food_rates.cleanup);
+    ctx.population_set_sprinkle_rate_toxic(toxic_rates.sprinkle);
+    ctx.population_set_cleanup_rate_toxic(toxic_rates.cleanup);
+    ctx.population_set_sprinkle_rate_division(division_rates.sprinkle);
+    ctx.population_set_cleanup_rate_division(division_rates.cleanup);
 }
 
 void GamePopulationManager::cleanup_pellets_by_rate(float timeStep) {
     adjust_cleanup_rates();
     // continuous pellet cleanup by rate (percent per second)
-    if (game.pellets.cleanup_rate_food > 0.0f) {
-        remove_percentage_pellets(game.pellets.cleanup_rate_food * timeStep, false, false);
+    if (ctx.population_get_cleanup_rate_food() > 0.0f) {
+        remove_percentage_pellets(ctx.population_get_cleanup_rate_food() * timeStep, false, false);
     }
-    if (game.pellets.cleanup_rate_toxic > 0.0f) {
-        remove_percentage_pellets(game.pellets.cleanup_rate_toxic * timeStep, true, false);
+    if (ctx.population_get_cleanup_rate_toxic() > 0.0f) {
+        remove_percentage_pellets(ctx.population_get_cleanup_rate_toxic() * timeStep, true, false);
     }
-    if (game.pellets.cleanup_rate_division > 0.0f) {
-        remove_percentage_pellets(game.pellets.cleanup_rate_division * timeStep, false, true);
+    if (ctx.population_get_cleanup_rate_division() > 0.0f) {
+        remove_percentage_pellets(ctx.population_get_cleanup_rate_division() * timeStep, false, true);
     }
 }
 
 void GamePopulationManager::remove_stopped_boost_particles() {
     constexpr float vel_epsilon = 1e-3f;
-    auto snapshot = game.selection.capture_snapshot();
-    game.circles.erase(
+    auto snapshot = ctx.population_selection().capture_snapshot();
+    ctx.population_circles().erase(
         std::remove_if(
-            game.circles.begin(),
-            game.circles.end(),
+            ctx.population_circles().begin(),
+            ctx.population_circles().end(),
             [&](const std::unique_ptr<EatableCircle>& circle) {
                 if (!circle->is_boost_particle()) {
                     return false;
@@ -456,13 +428,13 @@ void GamePopulationManager::remove_stopped_boost_particles() {
                 b2Vec2 v = circle->getLinearVelocity();
                 bool should_remove = (std::fabs(v.x) <= vel_epsilon && std::fabs(v.y) <= vel_epsilon);
                 if (should_remove) {
-                    cleanup_circle(game, *circle);
+                    cleanup_circle(ctx, *circle);
                 }
                 return should_remove;
             }),
-        game.circles.end());
-    game.selection.handle_selection_after_removal(snapshot, false, nullptr, snapshot.position);
-    game.selection_controller->refresh_generation_and_age();
+        ctx.population_circles().end());
+    ctx.population_selection().handle_selection_after_removal(snapshot, false, nullptr, snapshot.position);
+    ctx.population_selection_controller().refresh_generation_and_age();
 }
 
 void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
