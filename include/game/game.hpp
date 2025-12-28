@@ -11,7 +11,6 @@
 
 #include "circles/circle_registry.hpp"
 #include "circles/eatable_circle.hpp"
-#include "game/population_context.hpp"
 #include "game/selection_manager.hpp"
 #include "game/spawn_types.hpp"
 #include "game/simulation_context.hpp"
@@ -24,7 +23,7 @@ class GameSelectionController;
 class GamePopulationManager;
 class GameSimulationController;
 
-class Game : public PopulationContext, public SimulationContext {
+class Game : public SimulationContext {
     friend class Spawner;
     friend class CreatureCircle;
     friend class GameInputHandler;
@@ -202,38 +201,6 @@ public:
 
     b2WorldId world_id() const { return worldId; }
 
-    // PopulationContext implementation
-    SelectionManager& population_selection() override { return selection; }
-    GameSelectionController& population_selection_controller() override { return *selection_controller; }
-    ContactGraph& population_contact_graph() override { return contact_graph; }
-    CircleRegistry& population_circle_registry() override { return circle_registry; }
-    std::vector<std::unique_ptr<EatableCircle>>& population_circles() override { return circles; }
-    float population_sim_time() const override { return timing.sim_time_accum; }
-    float population_dish_radius() const override { return dish.radius; }
-    float population_add_eatable_area() const override { return creature.add_eatable_area; }
-    float population_creature_cloud_area_percentage() const override { return death.creature_cloud_area_percentage; }
-    float population_food_density() const override { return pellets.food_density; }
-    float population_toxic_density() const override { return pellets.toxic_density; }
-    float population_division_density() const override { return pellets.division_density; }
-    void population_set_sprinkle_rate_eatable(float v) override { pellets.sprinkle_rate_eatable = v; }
-    void population_set_sprinkle_rate_toxic(float v) override { pellets.sprinkle_rate_toxic = v; }
-    void population_set_sprinkle_rate_division(float v) override { pellets.sprinkle_rate_division = v; }
-    float population_get_sprinkle_rate_eatable() const override { return pellets.sprinkle_rate_eatable; }
-    float population_get_sprinkle_rate_toxic() const override { return pellets.sprinkle_rate_toxic; }
-    float population_get_sprinkle_rate_division() const override { return pellets.sprinkle_rate_division; }
-    void population_set_cleanup_rate_food(float v) override { pellets.cleanup_rate_food = v; }
-    void population_set_cleanup_rate_toxic(float v) override { pellets.cleanup_rate_toxic = v; }
-    void population_set_cleanup_rate_division(float v) override { pellets.cleanup_rate_division = v; }
-    float population_get_cleanup_rate_food() const override { return pellets.cleanup_rate_food; }
-    float population_get_cleanup_rate_toxic() const override { return pellets.cleanup_rate_toxic; }
-    float population_get_cleanup_rate_division() const override { return pellets.cleanup_rate_division; }
-    std::size_t population_get_food_cached() const override { return pellets.food_count_cached; }
-    std::size_t population_get_toxic_cached() const override { return pellets.toxic_count_cached; }
-    std::size_t population_get_division_cached() const override { return pellets.division_count_cached; }
-    void population_adjust_pellet_count(const EatableCircle* circle, int delta) override;
-    void population_on_creature_added(const CreatureCircle& creature_circle) override;
-    void population_spawn_cloud(const CreatureCircle& creature, std::vector<std::unique_ptr<EatableCircle>>& out) override;
-
     // SimulationContext implementation
     b2WorldId sim_world_id() const override { return worldId; }
     float sim_time_scale() const override { return timing.time_scale; }
@@ -349,6 +316,11 @@ public:
     void cc_spawn_circle(std::unique_ptr<EatableCircle> circle) override;
 
 private:
+    // Internal helpers used by managers
+    void population_adjust_pellet_count(const EatableCircle* circle, int delta);
+    void population_on_creature_added(const CreatureCircle& creature_circle);
+    void population_spawn_cloud(const CreatureCircle& creature, std::vector<std::unique_ptr<EatableCircle>>& out);
+
     struct SimulationTiming {
         float time_scale = 1.0f;
         float sim_time_accum = 0.0f;

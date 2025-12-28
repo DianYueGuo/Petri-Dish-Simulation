@@ -70,7 +70,7 @@ private:
 
 class GamePopulationManager {
 public:
-    explicit GamePopulationManager(PopulationContext& context);
+    explicit GamePopulationManager(Game& game);
 
     void add_circle(std::unique_ptr<EatableCircle> circle);
     std::size_t get_creature_count() const;
@@ -117,7 +117,7 @@ private:
     float compute_cleanup_rate(std::size_t count, float desired) const;
     SpawnRates calculate_spawn_rates(bool toxic, bool division_pellet, float density_target) const;
 
-    PopulationContext& ctx;
+    Game& game;
 };
 
 class GameSimulationController {
