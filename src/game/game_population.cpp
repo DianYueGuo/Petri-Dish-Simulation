@@ -10,9 +10,19 @@
 
 GamePopulationManager::GamePopulationManager(Game& game) : game(game) {}
 
+namespace {
+void cleanup_circle(Game& game, EatableCircle& circle) {
+    game.get_contact_graph().remove_circle(circle.get_id());
+    game.get_circle_registry().unregister_circle(circle);
+}
+} // namespace
+
 void GamePopulationManager::add_circle(std::unique_ptr<EatableCircle> circle) {
     game.selection_controller->update_max_generation_from_circle(circle.get());
     adjust_pellet_count(circle.get(), 1);
+    if (circle) {
+        game.get_circle_registry().register_capabilities(*circle);
+    }
     if (!game.age.dirty && circle && circle->get_kind() == CircleKind::Creature) {
         auto* creature_circle = static_cast<CreatureCircle*>(circle.get());
         const float creation_time = creature_circle->get_creation_time();
@@ -91,6 +101,14 @@ void GamePopulationManager::compact_circles(const std::vector<char>& remove_mask
         return;
     }
 
+    for (std::size_t i = 0; i < game.circles.size(); ++i) {
+        if (i < remove_mask.size() && remove_mask[i]) {
+            if (game.circles[i]) {
+                cleanup_circle(game, *game.circles[i]);
+            }
+        }
+    }
+
     std::size_t write = 0;
     for (std::size_t read = 0; read < game.circles.size(); ++read) {
         if (!remove_mask[read]) {
@@ -142,6 +160,7 @@ void GamePopulationManager::erase_indices_descending(std::vector<std::size_t>& i
                 removed_creature = true;
             }
             adjust_pellet_count(game.circles[idx].get(), -1);
+            cleanup_circle(game, *game.circles[idx]);
             game.circles.erase(game.circles.begin() + static_cast<std::ptrdiff_t>(idx));
         }
     }
@@ -226,7 +245,11 @@ void GamePopulationManager::remove_outside_petri() {
             game.circles.begin(),
             game.circles.end(),
             [&](const std::unique_ptr<EatableCircle>& circle) {
-                return handle_outside_removal(circle, snapshot, dish_radius, selected_removed, removed_creature);
+                bool remove = handle_outside_removal(circle, snapshot, dish_radius, selected_removed, removed_creature);
+                if (remove) {
+                    cleanup_circle(game, *circle);
+                }
+                return remove;
             }),
         game.circles.end());
 
@@ -431,7 +454,11 @@ void GamePopulationManager::remove_stopped_boost_particles() {
                     return false;
                 }
                 b2Vec2 v = circle->getLinearVelocity();
-                return (std::fabs(v.x) <= vel_epsilon && std::fabs(v.y) <= vel_epsilon);
+                bool should_remove = (std::fabs(v.x) <= vel_epsilon && std::fabs(v.y) <= vel_epsilon);
+                if (should_remove) {
+                    cleanup_circle(game, *circle);
+                }
+                return should_remove;
             }),
         game.circles.end());
     game.selection.handle_selection_after_removal(snapshot, false, nullptr, snapshot.position);

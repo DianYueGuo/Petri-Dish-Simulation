@@ -1,12 +1,13 @@
 #pragma once
 
+#include "circle_capabilities.hpp"
 #include "circle_physics.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <array>
 
 
-class DrawableCircle : public CirclePhysics {
+class DrawableCircle : public CirclePhysics, public ISenseable {
 public:
     explicit DrawableCircle(const b2WorldId &worldId,
                    float position_x = 0.0f,
@@ -23,6 +24,10 @@ public:
     void smooth_display_color(float factor);
     void set_use_smoothed_display(bool enabled) { use_smoothed_display = enabled; }
     void set_display_mode(bool smoothed) { use_smoothed_display = smoothed; }
+    // ISenseable
+    b2Vec2 sense_position() const override { return getPosition(); }
+    float sense_radius() const override { return getRadius(); }
+    const std::array<float, 3>& sense_color() const override { return get_color_rgb(); }
 protected:
     std::array<float, 3> color_rgb{};
     std::array<float, 3> display_color_rgb{};

@@ -1,4 +1,6 @@
 #include "circle_physics.hpp"
+#include "drawable_circle.hpp"
+#include "eatable_circle.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -13,7 +15,11 @@ CirclePhysics::CirclePhysics(const b2WorldId &worldId, Config config) :
     angularDamping(1.0f),
     linearImpulseMagnitude(5.0f),
     angularImpulseMagnitude(5.0f),
-    kind(config.kind) {
+    kind(config.kind),
+    id([]{
+        static std::atomic<uint32_t> next_id{1};
+        return CircleId{next_id.fetch_add(1)};
+    }()) {
     BodyState initialState{};
     initialState.position = config.position;
     initialState.rotation = b2MakeRot(config.angle);
@@ -239,6 +245,28 @@ void CirclePhysics::for_each_touching(const std::function<void(const CirclePhysi
     for (auto* c : touching_circles) {
         if (c) {
             fn(*c);
+        }
+    }
+}
+
+void CirclePhysics::for_each_touching_drawable(const std::function<void(const DrawableCircle&)>& fn) const {
+    for (auto* c : touching_circles) {
+        if (!c) {
+            continue;
+        }
+        if (auto* drawable = dynamic_cast<const DrawableCircle*>(c)) {
+            fn(*drawable);
+        }
+    }
+}
+
+void CirclePhysics::for_each_touching_eatable(const std::function<void(EatableCircle&)>& fn) {
+    for (auto* c : touching_circles) {
+        if (!c) {
+            continue;
+        }
+        if (auto* eatable = dynamic_cast<EatableCircle*>(c)) {
+            fn(*eatable);
         }
     }
 }

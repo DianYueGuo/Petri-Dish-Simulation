@@ -326,13 +326,27 @@ void CreatureCircle::update_brain_inputs_from_touching() {
     const float sin_h = std::sin(heading);
     const auto& sector_segments = get_sector_segments();
 
-    if (!touching_circles.empty()) {
-        for_each_touching([&](const CirclePhysics& circle) {
-            auto* drawable = dynamic_cast<const DrawableCircle*>(&circle);
+    if (owner_game) {
+        auto& graph = owner_game->get_contact_graph();
+        auto& registry = owner_game->get_circle_registry();
+        graph.for_each_neighbor(get_id(), [&](CircleId neighbor) {
+            const auto* senseable = registry.get_senseable(neighbor);
+            const auto* physics = registry.get_physics(neighbor);
+            if (!senseable || !physics) {
+                return;
+            }
+            auto* drawable = dynamic_cast<const DrawableCircle*>(physics);
             if (!drawable) {
                 return;
             }
-            accumulate_touching_circle(circle, *drawable, self_pos, cos_h, sin_h, sector_segments, summed_colors, weights);
+            accumulate_touching_circle(*physics,
+                                       *drawable,
+                                       self_pos,
+                                       cos_h,
+                                       sin_h,
+                                       sector_segments,
+                                       summed_colors,
+                                       weights);
         });
     }
 

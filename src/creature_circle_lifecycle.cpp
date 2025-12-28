@@ -29,23 +29,32 @@ float calculate_overlap_area(float r1, float r2, float distance) {
 
 void CreatureCircle::process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal) {
     poisoned = false;
-    for_each_touching([&](CirclePhysics& touching_circle) {
-        if (!can_eat_circle(touching_circle)) {
-            return;
-        }
-        auto* eatable = dynamic_cast<EatableCircle*>(&touching_circle);
-        if (!eatable) {
-            return;
-        }
-        if (eatable->is_eaten()) {
-            return;
-        }
-        if (!has_overlap_to_eat(touching_circle)) {
-            return;
-        }
-        float touching_area = eatable->getArea();
-        consume_touching_circle(worldId, game, *eatable, touching_area, poison_death_probability_toxic, poison_death_probability_normal);
-    });
+    if (owner_game) {
+        auto& graph = owner_game->get_contact_graph();
+        auto& registry = owner_game->get_circle_registry();
+        graph.for_each_neighbor(get_id(), [&](CircleId neighbor) {
+            auto* edible = registry.get_edible(neighbor);
+            auto* touching_circle = registry.get_physics(neighbor);
+            if (!edible || !touching_circle) {
+                return;
+            }
+            if (!can_eat_circle(*touching_circle)) {
+                return;
+            }
+            if (edible->edible_is_eaten()) {
+                return;
+            }
+            if (!has_overlap_to_eat(*touching_circle)) {
+                return;
+            }
+            float touching_area = edible->edible_area();
+            auto* eatable_circle = dynamic_cast<EatableCircle*>(touching_circle);
+            if (!eatable_circle) {
+                return;
+            }
+            consume_touching_circle(worldId, game, *eatable_circle, touching_area, poison_death_probability_toxic, poison_death_probability_normal);
+        });
+    }
 
     if (poisoned) {
         this->be_eaten();

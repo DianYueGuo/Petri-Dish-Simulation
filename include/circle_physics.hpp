@@ -4,6 +4,11 @@
 #include <unordered_set>
 
 #include <box2d/box2d.h>
+#include <atomic>
+
+#include "contact_graph.hpp"
+class DrawableCircle;
+class EatableCircle;
 
 enum class CircleKind {
     Unknown,
@@ -84,6 +89,9 @@ public:
     CircleKind get_kind() const { return kind; }
     void for_each_touching(const std::function<void(CirclePhysics&)>& fn);
     void for_each_touching(const std::function<void(const CirclePhysics&)>& fn) const;
+    void for_each_touching_drawable(const std::function<void(const DrawableCircle&)>& fn) const;
+    void for_each_touching_eatable(const std::function<void(EatableCircle&)>& fn);
+    CircleId get_id() const { return id; }
 private:
     void set_cached_radius(float r) { radius_cached = r; }
 
@@ -111,6 +119,7 @@ private:
     float angularImpulseMagnitude;
     float radius_cached = 1.0f;
     CircleKind kind;
+    CircleId id;
 protected:
     std::unordered_set<CirclePhysics*> touching_circles;
     void set_kind(CircleKind k) { kind = k; }

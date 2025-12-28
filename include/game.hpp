@@ -9,6 +9,7 @@
 #include <box2d/box2d.h>
 #include <NEAT/genome.hpp>
 
+#include "circle_registry.hpp"
 #include "eatable_circle.hpp"
 #include "game/selection_manager.hpp"
 #include "game/spawner.hpp"
@@ -59,6 +60,10 @@ public:
     float get_real_time() const { return timing.real_time_accum; }
     float get_actual_sim_speed() const { return timing.actual_sim_speed_inst; }
     float get_last_fps() const { return fps.last; }
+    ContactGraph& get_contact_graph() { return contact_graph; }
+    const ContactGraph& get_contact_graph() const { return contact_graph; }
+    CircleRegistry& get_circle_registry() { return circle_registry; }
+    const CircleRegistry& get_circle_registry() const { return circle_registry; }
 
     // Cursor & spawning
     void set_cursor_mode(CursorMode mode) { cursor.mode = mode; }
@@ -368,6 +373,8 @@ private:
     ViewDragState view_drag;
     SelectionManager selection;
     Spawner spawner;
+    ContactGraph contact_graph;
+    CircleRegistry circle_registry;
     PossesingSelectedCreature possesing;
     bool show_true_color = false;
     bool paused = false;

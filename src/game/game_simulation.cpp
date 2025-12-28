@@ -12,7 +12,7 @@ CirclePhysics* circle_from_shape(const b2ShapeId& shapeId) {
     return static_cast<CirclePhysics*>(b2Shape_GetUserData(shapeId));
 }
 
-void handle_sensor_begin_touch(const b2SensorBeginTouchEvent& beginTouch) {
+void handle_sensor_begin_touch(const b2SensorBeginTouchEvent& beginTouch, Game& game) {
     if (!b2Shape_IsValid(beginTouch.sensorShapeId) || !b2Shape_IsValid(beginTouch.visitorShapeId)) {
         return;
     }
@@ -21,12 +21,13 @@ void handle_sensor_begin_touch(const b2SensorBeginTouchEvent& beginTouch) {
             if (sensor != visitor) {
                 sensor->add_touching_circle(visitor);
                 visitor->add_touching_circle(sensor);
+                game.get_contact_graph().add_contact(sensor->get_id(), visitor->get_id());
             }
         }
     }
 }
 
-void handle_sensor_end_touch(const b2SensorEndTouchEvent& endTouch) {
+void handle_sensor_end_touch(const b2SensorEndTouchEvent& endTouch, Game& game) {
     if (!b2Shape_IsValid(endTouch.sensorShapeId) || !b2Shape_IsValid(endTouch.visitorShapeId)) {
         return;
     }
@@ -35,23 +36,24 @@ void handle_sensor_end_touch(const b2SensorEndTouchEvent& endTouch) {
             if (sensor != visitor) {
                 sensor->remove_touching_circle(visitor);
                 visitor->remove_touching_circle(sensor);
+                game.get_contact_graph().remove_contact(sensor->get_id(), visitor->get_id());
             }
         }
     }
 }
 
-void process_touch_events(const b2WorldId& worldId) {
+void process_touch_events(const b2WorldId& worldId, Game& game) {
     b2SensorEvents sensorEvents = b2World_GetSensorEvents(worldId);
     for (int i = 0; i < sensorEvents.beginCount; ++i)
     {
         b2SensorBeginTouchEvent* beginTouch = sensorEvents.beginEvents + i;
-        handle_sensor_begin_touch(*beginTouch);
+        handle_sensor_begin_touch(*beginTouch, game);
     }
 
     for (int i = 0; i < sensorEvents.endCount; ++i)
     {
         b2SensorEndTouchEvent* endTouch = sensorEvents.endEvents + i;
-        handle_sensor_end_touch(*endTouch);
+        handle_sensor_end_touch(*endTouch, game);
     }
 }
 } // namespace
@@ -94,7 +96,7 @@ void GameSimulationController::process_game_logic() {
     b2World_Step(game.worldId, timeStep, subStepCount);
     game.timing.sim_time_accum += timeStep;
 
-    process_touch_events(game.worldId);
+    process_touch_events(game.worldId, game);
 
     game.brain.time_accumulator += timeStep;
     game.spawner.sprinkle_entities(timeStep);
