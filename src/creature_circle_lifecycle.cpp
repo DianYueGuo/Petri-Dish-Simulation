@@ -190,8 +190,7 @@ std::unique_ptr<CreatureCircle> CreatureCircle::create_division_child(const b2Wo
         division.init_add_connection_thresh,
         &brain,
         ctx.cc_owner_game().get_neat_innovations(),
-        ctx.cc_owner_game().get_neat_last_innovation_id(),
-        &ctx.cc_owner_game());
+        ctx.cc_owner_game().get_neat_last_innovation_id());
 
     if (new_circle) {
         configure_child_after_division(*new_circle, worldId, ctx, angle, parent_brain_copy);
@@ -206,15 +205,10 @@ void CreatureCircle::apply_post_division_updates(CreatureContext& ctx, CreatureC
         child->set_generation(next_generation);
     }
 
-    Game& game = ctx.cc_owner_game();
-    owner_game = &game;
     set_last_division_time(division.sim_time);
-    if (owner_game) {
-        owner_game->mark_age_dirty();
-    }
-
-    game.update_max_generation_from_circle(this);
-    game.update_max_generation_from_circle(child);
+    ctx.cc_owner_game().mark_age_dirty();
+    ctx.cc_owner_game().update_max_generation_from_circle(this);
+    ctx.cc_owner_game().update_max_generation_from_circle(child);
 
     this->apply_forward_impulse();
 

@@ -164,8 +164,7 @@ std::unique_ptr<CreatureCircle> Spawner::create_creature_at(const b2Vec2& pos) {
         context.spawn_get_init_add_connection_thresh(),
         base_brain,
         context.spawn_get_neat_innovations(),
-        context.spawn_get_neat_last_innovation_id(),
-        context.spawn_get_owner_game());
+        context.spawn_get_neat_last_innovation_id());
     circle->set_creation_time(context.spawn_get_sim_time());
     circle->set_last_division_time(context.spawn_get_sim_time());
     circle->set_impulse_magnitudes(context.spawn_get_linear_impulse_magnitude(), context.spawn_get_angular_impulse_magnitude());

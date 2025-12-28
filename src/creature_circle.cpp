@@ -15,14 +15,12 @@ CreatureCircle::CreatureCircle(const b2WorldId &worldId,
                          float init_add_connection_thresh,
                          const neat::Genome* base_brain,
                          std::vector<std::vector<int>>* innov_ids,
-                         int* last_innov_id,
-                         Game* owner) :
+                         int* last_innov_id) :
     EatableCircle(worldId, position_x, position_y, radius, density, /*toxic=*/false, /*division_pellet=*/false, angle, /*boost_particle=*/false),
-    brain(base_brain ? *base_brain : neat::Genome(BRAIN_INPUTS, BRAIN_OUTPUTS, innov_ids, last_innov_id, owner ? owner->get_weight_extremum_init() : 0.001f)) {
+    brain(base_brain ? *base_brain : neat::Genome(BRAIN_INPUTS, BRAIN_OUTPUTS, innov_ids, last_innov_id, 0.001f)) {
     set_kind(CircleKind::Creature);
     neat_innovations = innov_ids;
     neat_last_innov_id = last_innov_id;
-    owner_game = owner;
     set_generation(generation);
     initialize_brain(
         init_mutation_rounds,
@@ -49,14 +47,6 @@ void CreatureCircle::initialize_brain(int mutation_rounds, float add_node_thresh
             float reactivate = 0.25f;
             int add_conn_iters = 20;
             int add_node_iters = 20;
-            if (owner_game) {
-                weight_thresh = owner_game->get_mutate_weight_thresh();
-                weight_full = owner_game->get_mutate_weight_full_change_thresh();
-                weight_factor = owner_game->get_mutate_weight_factor();
-                reactivate = owner_game->get_reactivate_connection_thresh();
-                add_conn_iters = owner_game->get_max_iterations_find_connection_thresh();
-                add_node_iters = owner_game->get_max_iterations_find_node_thresh();
-            }
             brain.mutate(
                 neat_innovations,
                 neat_last_innov_id,
