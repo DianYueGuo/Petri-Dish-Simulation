@@ -320,15 +320,8 @@ public:
     bool select_circle_at_world(const b2Vec2& pos);
     void mark_age_dirty();
     void mark_selection_dirty();
-    void apply_selection_mode();
-    void refresh_generation_and_age();
-    void update_max_ages();
     CursorMode get_cursor_mode() const { return cursor.mode; }
 private:
-    void update_actual_sim_speed();
-    void apply_impulse_magnitudes_to_circles();
-    void apply_damping_to_circles();
-
     struct RemovalResult {
         bool should_remove = false;
         const CreatureCircle* killer = nullptr;

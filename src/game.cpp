@@ -56,10 +56,6 @@ void Game::frame_rendered() {
     simulation->frame_rendered();
 }
 
-void Game::update_actual_sim_speed() {
-    simulation->update_actual_sim_speed();
-}
-
 void Game::set_circle_density(float d) {
     simulation->set_circle_density(d);
 }
@@ -72,18 +68,10 @@ void Game::set_angular_impulse_magnitude(float m) {
     simulation->set_angular_impulse_magnitude(m);
 }
 
-void Game::apply_impulse_magnitudes_to_circles() {
-    simulation->apply_impulse_magnitudes_to_circles();
-}
-
 void Game::set_linear_damping(float d) {
     simulation->set_linear_damping(d);
 }
 
 void Game::set_angular_damping(float d) {
     simulation->set_angular_damping(d);
-}
-
-void Game::apply_damping_to_circles() {
-    simulation->apply_damping_to_circles();
 }

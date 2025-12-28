@@ -257,20 +257,12 @@ void Game::update_follow_view(sf::View& view) const {
     selection_controller->update_follow_view(view);
 }
 
-void Game::apply_selection_mode() {
-    selection_controller->apply_selection_mode();
-}
-
 void Game::update_max_generation_from_circle(const EatableCircle* circle) {
     selection_controller->update_max_generation_from_circle(circle);
 }
 
 void Game::recompute_max_generation() {
     selection_controller->recompute_max_generation();
-}
-
-void Game::update_max_ages() {
-    selection_controller->update_max_ages();
 }
 
 void Game::mark_age_dirty() {
@@ -287,8 +279,4 @@ void Game::set_selection_to_creature(const CreatureCircle* creature) {
 
 const CreatureCircle* Game::find_nearest_creature(const b2Vec2& pos) const {
     return selection_controller->find_nearest_creature(pos);
-}
-
-void Game::refresh_generation_and_age() {
-    selection_controller->refresh_generation_and_age();
 }
