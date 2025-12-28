@@ -8,8 +8,8 @@
 
 namespace {
 struct CursorSettings {
-    int cursor_mode = static_cast<int>(Game::CursorMode::Add);
-    int add_type = static_cast<int>(Game::AddType::Creature);
+    int cursor_mode = static_cast<int>(UiFacade::CursorMode::Add);
+    int add_type = static_cast<int>(UiFacade::AddType::Creature);
 };
 
 struct TimeScaleSettings {
@@ -93,7 +93,7 @@ struct CleanupSettings {
 
 struct SelectionOption {
     const char* label;
-    Game::SelectionMode mode;
+    UiFacade::SelectionMode mode;
 };
 
 template <typename T, std::size_t N>
@@ -103,22 +103,22 @@ constexpr int array_size(const T (&)[N]) {
 
 #ifndef NDEBUG
 constexpr SelectionOption kSelectionOptions[] = {
-    {"Manual selection", Game::SelectionMode::Manual},
-    {"Oldest (largest)", Game::SelectionMode::OldestLargest},
-    {"Oldest (median)", Game::SelectionMode::OldestMedian},
-    {"Oldest (smallest)", Game::SelectionMode::OldestSmallest}
+    {"Manual selection", UiFacade::SelectionMode::Manual},
+    {"Oldest (largest)", UiFacade::SelectionMode::OldestLargest},
+    {"Oldest (median)", UiFacade::SelectionMode::OldestMedian},
+    {"Oldest (smallest)", UiFacade::SelectionMode::OldestSmallest}
 };
 #else
 constexpr SelectionOption kSelectionOptions[] = {
-    {"Manual selection", Game::SelectionMode::Manual},
-    {"Oldest (largest)", Game::SelectionMode::OldestLargest},
-    {"Oldest (smallest)", Game::SelectionMode::OldestSmallest}
+    {"Manual selection", UiFacade::SelectionMode::Manual},
+    {"Oldest (largest)", UiFacade::SelectionMode::OldestLargest},
+    {"Oldest (smallest)", UiFacade::SelectionMode::OldestSmallest}
 };
 #endif
 
 constexpr int kSelectionOptionCount = array_size(kSelectionOptions);
 
-int selection_mode_to_index(Game::SelectionMode mode) {
+int selection_mode_to_index(UiFacade::SelectionMode mode) {
     for (int i = 0; i < kSelectionOptionCount; ++i) {
         if (kSelectionOptions[i].mode == mode) {
             return i;
@@ -127,7 +127,7 @@ int selection_mode_to_index(Game::SelectionMode mode) {
     return 0;
 }
 
-Game::SelectionMode selection_index_to_mode(int index) {
+UiFacade::SelectionMode selection_index_to_mode(int index) {
     if (index < 0 || index >= kSelectionOptionCount) {
         return kSelectionOptions[0].mode;
     }
@@ -170,7 +170,7 @@ void set_and_apply(T& field, T value, Setter setter) {
     setter(value);
 }
 
-void apply_preset(Preset preset, UiState& state, Game& game) {
+void apply_preset(Preset preset, UiState& state, UiFacade& game) {
     switch (preset) {
         case Preset::Default:
             set_and_apply(state.spawning.food_density, 0.1f, [&](float v) { game.set_food_pellet_density(v); });
@@ -289,51 +289,51 @@ void render_brain_graph(const neat::Genome& brain) {
     ImGui::EndChild();
 }
 
-void render_cursor_controls(Game& game, UiState& state) {
+void render_cursor_controls(UiFacade& game, UiState& state) {
     bool cursor_mode_changed = false;
-    if (ImGui::RadioButton("Manual spawning", state.cursor.cursor_mode == static_cast<int>(Game::CursorMode::Add))) {
-        state.cursor.cursor_mode = static_cast<int>(Game::CursorMode::Add);
+    if (ImGui::RadioButton("Manual spawning", state.cursor.cursor_mode == static_cast<int>(UiFacade::CursorMode::Add))) {
+        state.cursor.cursor_mode = static_cast<int>(UiFacade::CursorMode::Add);
         cursor_mode_changed = true;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Select", state.cursor.cursor_mode == static_cast<int>(Game::CursorMode::Select))) {
-        state.cursor.cursor_mode = static_cast<int>(Game::CursorMode::Select);
+    if (ImGui::RadioButton("Select", state.cursor.cursor_mode == static_cast<int>(UiFacade::CursorMode::Select))) {
+        state.cursor.cursor_mode = static_cast<int>(UiFacade::CursorMode::Select);
         cursor_mode_changed = true;
     }
     show_hover_text("Add mode places new circles; Select lets you pick existing circles.");
     if (cursor_mode_changed) {
-        game.set_cursor_mode(static_cast<Game::CursorMode>(state.cursor.cursor_mode));
+        game.set_cursor_mode(static_cast<UiFacade::CursorMode>(state.cursor.cursor_mode));
     }
 
-    if (state.cursor.cursor_mode == static_cast<int>(Game::CursorMode::Add)) {
+    if (state.cursor.cursor_mode == static_cast<int>(UiFacade::CursorMode::Add)) {
         bool add_type_changed = false;
-        if (ImGui::RadioButton("Creature", state.cursor.add_type == static_cast<int>(Game::AddType::Creature))) {
-            state.cursor.add_type = static_cast<int>(Game::AddType::Creature);
+        if (ImGui::RadioButton("Creature", state.cursor.add_type == static_cast<int>(UiFacade::AddType::Creature))) {
+            state.cursor.add_type = static_cast<int>(UiFacade::AddType::Creature);
             add_type_changed = true;
         }
         ImGui::SameLine();
-        if (ImGui::RadioButton("Food pellet", state.cursor.add_type == static_cast<int>(Game::AddType::FoodPellet))) {
-            state.cursor.add_type = static_cast<int>(Game::AddType::FoodPellet);
+        if (ImGui::RadioButton("Food pellet", state.cursor.add_type == static_cast<int>(UiFacade::AddType::FoodPellet))) {
+            state.cursor.add_type = static_cast<int>(UiFacade::AddType::FoodPellet);
             add_type_changed = true;
         }
         ImGui::SameLine();
-        if (ImGui::RadioButton("Toxic pellet", state.cursor.add_type == static_cast<int>(Game::AddType::ToxicPellet))) {
-            state.cursor.add_type = static_cast<int>(Game::AddType::ToxicPellet);
+        if (ImGui::RadioButton("Toxic pellet", state.cursor.add_type == static_cast<int>(UiFacade::AddType::ToxicPellet))) {
+            state.cursor.add_type = static_cast<int>(UiFacade::AddType::ToxicPellet);
             add_type_changed = true;
         }
         ImGui::SameLine();
-        if (ImGui::RadioButton("Division pellet", state.cursor.add_type == static_cast<int>(Game::AddType::DivisionPellet))) {
-            state.cursor.add_type = static_cast<int>(Game::AddType::DivisionPellet);
+        if (ImGui::RadioButton("Division pellet", state.cursor.add_type == static_cast<int>(UiFacade::AddType::DivisionPellet))) {
+            state.cursor.add_type = static_cast<int>(UiFacade::AddType::DivisionPellet);
             add_type_changed = true;
         }
         show_hover_text("Choose what to place when clicking in Add mode.");
         if (add_type_changed) {
-            game.set_add_type(static_cast<Game::AddType>(state.cursor.add_type));
+            game.set_add_type(static_cast<UiFacade::AddType>(state.cursor.add_type));
         }
     }
 }
 
-void initialize_state(UiState& state, Game& game) {
+void initialize_state(UiState& state, UiFacade& game) {
     if (state.initialized) return;
 
     state.cursor.cursor_mode = static_cast<int>(game.get_cursor_mode());
@@ -395,7 +395,7 @@ void initialize_state(UiState& state, Game& game) {
     state.initialized = true;
 }
 
-void render_view_controls(sf::RenderWindow& window, sf::View& view, Game& game, UiState& state) {
+void render_view_controls(sf::RenderWindow& window, sf::View& view, UiFacade& game, UiState& state) {
     if (ImGui::Button("Reset view to center")) {
         view = window.getView();
         float aspect = static_cast<float>(window.getSize().x) / static_cast<float>(window.getSize().y);
@@ -418,7 +418,7 @@ void render_view_controls(sf::RenderWindow& window, sf::View& view, Game& game, 
     show_hover_text("Control the selected creature with the keyboard (Left, Right, Up, and Space keys).");
 }
 
-void render_simulation_controls(Game& game, UiState& state) {
+void render_simulation_controls(UiFacade& game, UiState& state) {
     bool paused = game.is_paused();
     if (ImGui::Checkbox("Pause simulation", &paused)) {
         game.set_paused(paused);
@@ -442,7 +442,7 @@ void render_simulation_controls(Game& game, UiState& state) {
     }
 }
 
-void render_spawning_region(Game& game, UiState& state) {
+void render_spawning_region(UiFacade& game, UiState& state) {
     if (ImGui::SliderFloat("Region radius (m)", &state.region.petri_radius, 30.0f, 70.0f, "%.2f")) {
         game.set_petri_radius(state.region.petri_radius);
     }
@@ -457,7 +457,7 @@ void render_spawning_region(Game& game, UiState& state) {
 #endif // NDEBUG
 }
 
-void render_preset_buttons(Game& game, UiState& state) {
+void render_preset_buttons(UiFacade& game, UiState& state) {
     if (ImGui::Button("Default mix")) {
         apply_preset(Preset::Default, state, game);
     }
@@ -475,7 +475,7 @@ void render_preset_buttons(Game& game, UiState& state) {
     }
 }
 
-void render_overview_content(Game& game, UiState& state) {
+void render_overview_content(UiFacade& game, UiState& state) {
     if (ImGui::CollapsingHeader("Status", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Text("Object count: %zu", game.get_circle_count());
         show_hover_text("How many circles currently exist inside the dish.");
@@ -542,7 +542,7 @@ void render_overview_content(Game& game, UiState& state) {
     }
 }
 
-void render_overview_window(Game& game, UiState& state) {
+void render_overview_window(UiFacade& game, UiState& state) {
     if (ImGui::Begin("Overview")) {
         render_overview_content(game, state);
     }
@@ -550,7 +550,7 @@ void render_overview_window(Game& game, UiState& state) {
 }
 
 #ifndef NDEBUG
-void render_simulation_tab(Game& game, UiState& state) {
+void render_simulation_tab(UiFacade& game, UiState& state) {
     if (!ImGui::BeginTabItem("Simulation")) {
         return;
     }
@@ -645,7 +645,7 @@ void render_simulation_tab(Game& game, UiState& state) {
 #endif // NDEBUG
 
 #ifndef NDEBUG
-void render_mutation_tab(Game& game, UiState& state) {
+void render_mutation_tab(UiFacade& game, UiState& state) {
     if (!ImGui::BeginTabItem("Mutation")) {
         return;
     }
@@ -730,7 +730,7 @@ void render_mutation_tab(Game& game, UiState& state) {
 }
 #endif // NDEBUG
 
-void render_spawning_controls(Game& game, UiState& state) {
+void render_spawning_controls(UiFacade& game, UiState& state) {
     if (ImGui::CollapsingHeader("Spawn & density targets", ImGuiTreeNodeFlags_DefaultOpen)) {
         bool spawning_changed = false;
         spawning_changed |= ImGui::SliderInt("Minimum creature count", &state.spawning.minimum_creatures, 0, 500);
@@ -775,7 +775,7 @@ void render_spawning_controls(Game& game, UiState& state) {
 }
 } // namespace
 
-void render_ui(sf::RenderWindow& window, sf::View& view, Game& game) {
+void render_ui(sf::RenderWindow& window, sf::View& view, UiFacade& game) {
     static UiState state;
     initialize_state(state, game);
 

@@ -10,6 +10,7 @@
 
 #include "game.hpp"
 #include "ui.hpp"
+#include "ui_facade.hpp"
 
 #include <time.h>
 
@@ -20,6 +21,7 @@ int main() {
     srand(time(NULL));
 
     Game game;
+    UiFacade ui(game);
 
     sf::RenderWindow window(sf::VideoMode({1280, 720}), "Petri Dish Simulation");
     window.setFramerateLimit(60);
@@ -47,7 +49,7 @@ int main() {
         window.setView(view);
         ImGui::SFML::Update(window, sf::seconds(dt));
 
-        render_ui(window, view, game);
+        render_ui(window, view, ui);
 
         window.clear();
         window.setView(view);
