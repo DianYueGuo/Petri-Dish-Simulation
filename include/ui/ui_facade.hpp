@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "game/game.hpp"
+#include "game/game_components.hpp"
 
 // Thin wrapper exposing only the surface used by the UI layer.
 // This keeps ImGui code from depending on the full Game implementation details.
@@ -89,15 +90,15 @@ public:
     int get_mutation_rounds() const { return game->get_mutation_rounds(); }
 
     // Movement
-    void set_circle_density(float d) { game->set_circle_density(d); }
+    void set_circle_density(float d) { game->sim().set_circle_density(d); }
     float get_circle_density() const { return game->get_circle_density(); }
-    void set_linear_impulse_magnitude(float m) { game->set_linear_impulse_magnitude(m); }
+    void set_linear_impulse_magnitude(float m) { game->sim().set_linear_impulse_magnitude(m); }
     float get_linear_impulse_magnitude() const { return game->get_linear_impulse_magnitude(); }
-    void set_angular_impulse_magnitude(float m) { game->set_angular_impulse_magnitude(m); }
+    void set_angular_impulse_magnitude(float m) { game->sim().set_angular_impulse_magnitude(m); }
     float get_angular_impulse_magnitude() const { return game->get_angular_impulse_magnitude(); }
-    void set_linear_damping(float d) { game->set_linear_damping(d); }
+    void set_linear_damping(float d) { game->sim().set_linear_damping(d); }
     float get_linear_damping() const { return game->get_linear_damping(); }
-    void set_angular_damping(float d) { game->set_angular_damping(d); }
+    void set_angular_damping(float d) { game->sim().set_angular_damping(d); }
     float get_angular_damping() const { return game->get_angular_damping(); }
     void set_boost_particle_impulse_fraction(float f) { game->set_boost_particle_impulse_fraction(f); }
     float get_boost_particle_impulse_fraction() const { return game->get_boost_particle_impulse_fraction(); }
@@ -125,9 +126,9 @@ public:
     float get_toxic_pellet_density() const { return game->get_toxic_pellet_density(); }
     void set_division_pellet_density(float d) { game->set_division_pellet_density(d); }
     float get_division_pellet_density() const { return game->get_division_pellet_density(); }
-    std::size_t get_food_pellet_count() const { return game->get_food_pellet_count(); }
-    std::size_t get_toxic_pellet_count() const { return game->get_toxic_pellet_count(); }
-    std::size_t get_division_pellet_count() const { return game->get_division_pellet_count(); }
+    std::size_t get_food_pellet_count() const { return game->population_mgr().get_food_pellet_count(); }
+    std::size_t get_toxic_pellet_count() const { return game->population_mgr().get_toxic_pellet_count(); }
+    std::size_t get_division_pellet_count() const { return game->population_mgr().get_division_pellet_count(); }
 
     // Death & reproduction
     void set_creature_cloud_area_percentage(float percentage) { game->set_creature_cloud_area_percentage(percentage); }
@@ -142,18 +143,18 @@ public:
     float get_poison_death_probability_normal() const { return game->get_poison_death_probability_normal(); }
 
     // Selection
-    void set_follow_selected(bool v) { game->set_follow_selected(v); }
-    bool get_follow_selected() const { return game->get_follow_selected(); }
-    void set_selection_mode(SelectionMode mode) { game->set_selection_mode(mode); }
-    SelectionMode get_selection_mode() const { return game->get_selection_mode(); }
-    const neat::Genome* get_selected_brain() const { return game->get_selected_brain(); }
-    const CreatureCircle* get_selected_creature() const { return game->get_selected_creature(); }
-    int get_selected_generation() const { return game->get_selected_generation(); }
+    void set_follow_selected(bool v) { game->selection_ctrl().set_follow_selected(v); }
+    bool get_follow_selected() const { return game->selection_ctrl().get_follow_selected(); }
+    void set_selection_mode(SelectionMode mode) { game->selection_ctrl().set_selection_mode(mode); }
+    SelectionMode get_selection_mode() const { return game->selection_ctrl().get_selection_mode(); }
+    const neat::Genome* get_selected_brain() const { return game->selection_ctrl().get_selected_brain(); }
+    const CreatureCircle* get_selected_creature() const { return game->selection_ctrl().get_selected_creature(); }
+    int get_selected_generation() const { return game->selection_ctrl().get_selected_generation(); }
 
     // Population & stats
-    void remove_random_percentage(float percentage) { game->remove_random_percentage(percentage); }
+    void remove_random_percentage(float percentage) { game->population_mgr().remove_random_percentage(percentage); }
     std::size_t get_circle_count() const { return game->get_circle_count(); }
-    std::size_t get_creature_count() const { return game->get_creature_count(); }
+    std::size_t get_creature_count() const { return game->population_mgr().get_creature_count(); }
     float get_longest_life_since_creation() const { return game->get_longest_life_since_creation(); }
     float get_longest_life_since_division() const { return game->get_longest_life_since_division(); }
     int get_max_generation() const { return game->get_max_generation(); }

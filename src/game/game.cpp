@@ -25,6 +25,38 @@ Game::~Game() {
     b2DestroyWorld(worldId);
 }
 
+GameSimulationController& Game::sim() {
+    return *simulation;
+}
+
+const GameSimulationController& Game::sim() const {
+    return *simulation;
+}
+
+GameSelectionController& Game::selection_ctrl() {
+    return *selection_controller;
+}
+
+const GameSelectionController& Game::selection_ctrl() const {
+    return *selection_controller;
+}
+
+GamePopulationManager& Game::population_mgr() {
+    return *population;
+}
+
+const GamePopulationManager& Game::population_mgr() const {
+    return *population;
+}
+
+GameInputHandler& Game::input_ctrl() {
+    return *input_handler;
+}
+
+const GameInputHandler& Game::input_ctrl() const {
+    return *input_handler;
+}
+
 void Game::population_adjust_pellet_count(const EatableCircle* circle, int delta) {
     if (!circle) return;
     if (circle->is_boost_particle()) return;
@@ -90,14 +122,6 @@ void Game::sim_update_selection_after_step() {
     }
 }
 
-void Game::process_game_logic_with_speed() {
-    simulation->process_game_logic_with_speed();
-}
-
-void Game::process_game_logic() {
-    simulation->process_game_logic();
-}
-
 void Game::draw(sf::RenderWindow& window) const {
     // Draw petri dish boundary
     sf::CircleShape boundary(dish.radius);
@@ -113,30 +137,58 @@ void Game::draw(sf::RenderWindow& window) const {
     }
 }
 
-void Game::accumulate_real_time(float dt) {
-    simulation->accumulate_real_time(dt);
+void Game::update_max_generation_from_circle(const EatableCircle* circle) {
+    selection_ctrl().update_max_generation_from_circle(circle);
 }
 
-void Game::frame_rendered() {
-    simulation->frame_rendered();
+void Game::recompute_max_generation() {
+    selection_ctrl().recompute_max_generation();
 }
 
-void Game::set_circle_density(float d) {
-    simulation->set_circle_density(d);
+void Game::mark_age_dirty() {
+    selection_ctrl().mark_age_dirty();
 }
 
-void Game::set_linear_impulse_magnitude(float m) {
-    simulation->set_linear_impulse_magnitude(m);
+void Game::mark_selection_dirty() {
+    selection_ctrl().mark_selection_dirty();
 }
 
-void Game::set_angular_impulse_magnitude(float m) {
-    simulation->set_angular_impulse_magnitude(m);
+std::size_t Game::spawn_get_food_pellet_count() const {
+    return population_mgr().get_food_pellet_count();
 }
 
-void Game::set_linear_damping(float d) {
-    simulation->set_linear_damping(d);
+std::size_t Game::spawn_get_toxic_pellet_count() const {
+    return population_mgr().get_toxic_pellet_count();
 }
 
-void Game::set_angular_damping(float d) {
-    simulation->set_angular_damping(d);
+std::size_t Game::spawn_get_division_pellet_count() const {
+    return population_mgr().get_division_pellet_count();
+}
+
+std::size_t Game::spawn_get_creature_count() const {
+    return population_mgr().get_creature_count();
+}
+
+void Game::spawn_add_circle(std::unique_ptr<EatableCircle> circle) {
+    population_mgr().add_circle(std::move(circle));
+}
+
+void Game::spawn_update_max_generation_from_circle(const EatableCircle* circle) {
+    update_max_generation_from_circle(circle);
+}
+
+const CreatureCircle* Game::sim_selected_creature() const {
+    return selection_ctrl().get_selected_creature();
+}
+
+void Game::sim_frame_rendered() {
+    sim().frame_rendered();
+}
+
+bool Game::cc_selected_and_possessed(const void* creature_ptr) const {
+    return possesing.possess_selected_creature && (selection_ctrl().get_selected_creature() == creature_ptr);
+}
+
+void Game::cc_spawn_circle(std::unique_ptr<EatableCircle> circle) {
+    population_mgr().add_circle(std::move(circle));
 }

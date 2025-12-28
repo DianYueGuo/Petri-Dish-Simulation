@@ -47,19 +47,24 @@ public:
     Game();
     ~Game();
 
+    // Controller access (avoid adding new trivial wrappers).
+    GameSimulationController& sim();
+    const GameSimulationController& sim() const;
+    GameSelectionController& selection_ctrl();
+    const GameSelectionController& selection_ctrl() const;
+    GamePopulationManager& population_mgr();
+    const GamePopulationManager& population_mgr() const;
+    GameInputHandler& input_ctrl();
+    const GameInputHandler& input_ctrl() const;
+
     // Core lifecycle
-    void process_game_logic_with_speed();
-    void process_game_logic();
     void draw(sf::RenderWindow& window) const;
-    void process_input_events(sf::RenderWindow& window, const std::optional<sf::Event>& event);
 
     // Time & pause
     void set_time_scale(float scale) { timing.time_scale = scale; }
     float get_time_scale() const { return timing.time_scale; }
     void set_paused(bool p) { paused = p; }
     bool is_paused() const { return paused; }
-    void accumulate_real_time(float dt);
-    void frame_rendered();
     float get_sim_time() const { return timing.sim_time_accum; }
     float get_real_time() const { return timing.real_time_accum; }
     float get_actual_sim_speed() const { return timing.actual_sim_speed_inst; }
@@ -128,15 +133,10 @@ public:
     int get_mutation_rounds() const { return mutation.mutation_rounds; }
 
     // Movement
-    void set_circle_density(float d);
     float get_circle_density() const { return movement.circle_density; }
-    void set_linear_impulse_magnitude(float m);
     float get_linear_impulse_magnitude() const { return movement.linear_impulse_magnitude; }
-    void set_angular_impulse_magnitude(float m);
     float get_angular_impulse_magnitude() const { return movement.angular_impulse_magnitude; }
-    void set_linear_damping(float d);
     float get_linear_damping() const { return movement.linear_damping; }
-    void set_angular_damping(float d);
     float get_angular_damping() const { return movement.angular_damping; }
     void set_boost_particle_impulse_fraction(float f) { movement.boost_particle_impulse_fraction = std::clamp(f, 0.0f, 1.0f); }
     float get_boost_particle_impulse_fraction() const { return movement.boost_particle_impulse_fraction; }
@@ -168,9 +168,6 @@ public:
     float get_toxic_pellet_density() const { return pellets.toxic_density; }
     void set_division_pellet_density(float d) { pellets.division_density = std::max(0.0f, d); }
     float get_division_pellet_density() const { return pellets.division_density; }
-    std::size_t get_food_pellet_count() const;
-    std::size_t get_toxic_pellet_count() const;
-    std::size_t get_division_pellet_count() const;
 
     // Death & reproduction
     void set_creature_cloud_area_percentage(float percentage) { death.creature_cloud_area_percentage = percentage; }
@@ -181,35 +178,12 @@ public:
     float get_inactivity_timeout() const { return death.inactivity_timeout; }
 
     // Selection
-    void set_follow_selected(bool v);
-    bool get_follow_selected() const;
-    void set_selection_mode(SelectionMode mode);
-    SelectionMode get_selection_mode() const;
-    void update_follow_view(sf::View& view) const;
-    void clear_selection();
-    const neat::Genome* get_selected_brain() const;
-    const CreatureCircle* get_selected_creature() const;
-    const CreatureCircle* get_oldest_largest_creature() const;
-    const CreatureCircle* get_oldest_smallest_creature() const;
-#ifndef NDEBUG
-    const CreatureCircle* get_oldest_middle_creature() const;
-#endif
-    const CreatureCircle* get_follow_target_creature() const;
-    void set_selection_to_creature(const CreatureCircle* creature);
-    const CreatureCircle* find_nearest_creature(const b2Vec2& pos) const;
-    int get_selected_generation() const;
-    bool select_circle_at_world(const b2Vec2& pos);
+    void update_max_generation_from_circle(const EatableCircle* circle);
+    void recompute_max_generation();
     void mark_age_dirty();
     void mark_selection_dirty();
 
     // Population & stats
-    void add_circle(std::unique_ptr<EatableCircle> circle);
-    std::size_t get_creature_count() const;
-    void update_max_generation_from_circle(const EatableCircle* circle);
-    void recompute_max_generation();
-    void remove_random_percentage(float percentage);
-    void remove_percentage_pellets(float percentage, bool toxic, bool division_pellet);
-    void remove_outside_petri();
     void set_show_true_color(bool value) { show_true_color = value; }
     bool get_show_true_color() const { return show_true_color; }
     void set_selected_creature_possessed(bool possessed) { possesing.possess_selected_creature = possessed; }
@@ -243,13 +217,13 @@ public:
         }
         return SpawnContext::CursorMode::Add;
     }
-    std::size_t spawn_get_food_pellet_count() const override { return get_food_pellet_count(); }
-    std::size_t spawn_get_toxic_pellet_count() const override { return get_toxic_pellet_count(); }
-    std::size_t spawn_get_division_pellet_count() const override { return get_division_pellet_count(); }
+    std::size_t spawn_get_food_pellet_count() const override;
+    std::size_t spawn_get_toxic_pellet_count() const override;
+    std::size_t spawn_get_division_pellet_count() const override;
     int spawn_get_max_food_pellets() const override { return get_max_food_pellets(); }
     int spawn_get_max_toxic_pellets() const override { return get_max_toxic_pellets(); }
     int spawn_get_max_division_pellets() const override { return get_max_division_pellets(); }
-    std::size_t spawn_get_creature_count() const override { return get_creature_count(); }
+    std::size_t spawn_get_creature_count() const override;
     int spawn_get_minimum_creature_count() const override { return get_minimum_creature_count(); }
     float spawn_get_add_eatable_area() const override { return get_add_eatable_area(); }
     float spawn_get_petri_radius() const override { return get_petri_radius(); }
@@ -272,8 +246,8 @@ public:
     int* spawn_get_neat_last_innovation_id() const override { return const_cast<Game*>(this)->get_neat_last_innovation_id(); }
     b2WorldId spawn_get_world_id() const override { return worldId; }
     Game* spawn_get_owner_game() const override { return const_cast<Game*>(this); }
-    void spawn_add_circle(std::unique_ptr<EatableCircle> circle) override { add_circle(std::move(circle)); }
-    void spawn_update_max_generation_from_circle(const EatableCircle* circle) override { update_max_generation_from_circle(circle); }
+    void spawn_add_circle(std::unique_ptr<EatableCircle> circle) override;
+    void spawn_update_max_generation_from_circle(const EatableCircle* circle) override;
 
     // PopulationContext implementation
     SelectionManager& population_selection() override { return selection; }
@@ -371,13 +345,13 @@ public:
     int sim_mutation_rounds() const override { return mutation.mutation_rounds; }
     float sim_add_connection_thresh() const override { return mutation.add_connection_thresh; }
     float sim_add_node_thresh() const override { return mutation.add_node_thresh; }
-    const CreatureCircle* sim_selected_creature() const override { return get_selected_creature(); }
+    const CreatureCircle* sim_selected_creature() const override;
     bool sim_is_selected_possessed() const override { return possesing.possess_selected_creature; }
     bool sim_left_key_down() const override { return possesing.left_key_down; }
     bool sim_right_key_down() const override { return possesing.right_key_down; }
     bool sim_up_key_down() const override { return possesing.up_key_down; }
     bool sim_space_key_down() const override { return possesing.space_key_down; }
-    void sim_frame_rendered() override { frame_rendered(); }
+    void sim_frame_rendered() override;
     void sim_cleanup_population(float timeStep) override;
     void sim_remove_outside_if_enabled() override;
     void sim_update_selection_after_step() override;
@@ -415,11 +389,11 @@ public:
     float cc_add_node_thresh() const override { return mutation.add_node_thresh; }
     float cc_sim_time() const override { return timing.sim_time_accum; }
     Game& cc_owner_game() override { return *this; }
-    bool cc_selected_and_possessed(const void* creature_ptr) const override { return possesing.possess_selected_creature && (get_selected_creature() == creature_ptr); }
+    bool cc_selected_and_possessed(const void* creature_ptr) const override;
     bool cc_left_key_down() const override { return possesing.left_key_down; }
     bool cc_right_key_down() const override { return possesing.right_key_down; }
     bool cc_space_key_down() const override { return possesing.space_key_down; }
-    void cc_spawn_circle(std::unique_ptr<EatableCircle> circle) override { add_circle(std::move(circle)); }
+    void cc_spawn_circle(std::unique_ptr<EatableCircle> circle) override;
 
 private:
     struct SimulationTiming {

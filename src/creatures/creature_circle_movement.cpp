@@ -1,5 +1,5 @@
 #include "creatures/creature_circle.hpp"
-#include "game/game.hpp"
+#include "game/game_components.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -36,7 +36,7 @@ void spawn_boost_particle(const b2WorldId& worldId,
     if (behavior.spawn_circle) {
         behavior.spawn_circle(std::move(boost_circle));
     } else {
-        game.add_circle(std::move(boost_circle));
+        game.population_mgr().add_circle(std::move(boost_circle));
     }
     boost_circle_ptr->setAngle(angle + PI, worldId);
     boost_circle_ptr->apply_forward_impulse();

@@ -46,7 +46,7 @@ void GameInputHandler::handle_mouse_press(sf::RenderWindow& window, const sf::Ev
             game.spawner.spawn_selected_type_at(worldPos);
             game.spawner.begin_add_drag_if_applicable(worldPos);
         } else if (game.cursor.mode == Game::CursorMode::Select) {
-            game.select_circle_at_world({worldPos.x, worldPos.y});
+            game.selection_ctrl().select_circle_at_world({worldPos.x, worldPos.y});
         }
     } else if (e.button == sf::Mouse::Button::Right) {
         start_view_drag(e, true);
@@ -167,8 +167,4 @@ void GameInputHandler::process_input_events(sf::RenderWindow& window, const std:
     if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
         handle_key_release(*keyReleased);
     }
-}
-
-void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf::Event>& event) {
-    input_handler->process_input_events(window, event);
 }

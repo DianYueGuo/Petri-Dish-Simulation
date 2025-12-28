@@ -434,35 +434,3 @@ void GamePopulationManager::remove_stopped_boost_particles() {
     ctx.population_selection().handle_selection_after_removal(snapshot, false, nullptr, snapshot.position);
     ctx.population_selection_controller().refresh_generation_and_age();
 }
-
-void Game::add_circle(std::unique_ptr<EatableCircle> circle) {
-    population->add_circle(std::move(circle));
-}
-
-std::size_t Game::get_creature_count() const {
-    return population->get_creature_count();
-}
-
-void Game::remove_random_percentage(float percentage) {
-    population->remove_random_percentage(percentage);
-}
-
-void Game::remove_percentage_pellets(float percentage, bool toxic, bool division_pellet) {
-    population->remove_percentage_pellets(percentage, toxic, division_pellet);
-}
-
-void Game::remove_outside_petri() {
-    population->remove_outside_petri();
-}
-
-std::size_t Game::get_food_pellet_count() const {
-    return population->get_food_pellet_count();
-}
-
-std::size_t Game::get_toxic_pellet_count() const {
-    return population->get_toxic_pellet_count();
-}
-
-std::size_t Game::get_division_pellet_count() const {
-    return population->get_division_pellet_count();
-}

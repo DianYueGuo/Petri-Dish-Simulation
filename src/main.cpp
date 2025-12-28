@@ -9,6 +9,7 @@
 #include <box2d/box2d.h>
 
 #include "game/game.hpp"
+#include "game/game_components.hpp"
 #include "ui/ui.hpp"
 #include "ui/ui_facade.hpp"
 
@@ -38,14 +39,14 @@ int main() {
     window.setView(view);
     while (window.isOpen()) {
         float dt = deltaClock.restart().asSeconds();
-        game.accumulate_real_time(dt);
+        game.sim().accumulate_real_time(dt);
 
-        game.process_game_logic_with_speed();
+        game.sim().process_game_logic_with_speed();
 
         handle_events(window, view, game);
 
         view = window.getView(); // sync view after input handling
-        game.update_follow_view(view);
+        game.selection_ctrl().update_follow_view(view);
         window.setView(view);
         ImGui::SFML::Update(window, sf::seconds(dt));
 
@@ -88,6 +89,6 @@ void handle_events(sf::RenderWindow& window, sf::View& view, Game& game) {
             continue;
         }
 
-        game.process_input_events(window, event);
+        game.input_ctrl().process_input_events(window, event);
     }
 }
