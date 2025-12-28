@@ -3,8 +3,8 @@
 
 #include "game/game_components.hpp"
 
-#include "creature_circle.hpp"
-#include "game.hpp"
+#include "creatures/creature_circle.hpp"
+#include "game/game.hpp"
 
 GameSelectionController::GameSelectionController(Game& game) : game(game) {}
 

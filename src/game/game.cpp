@@ -2,8 +2,8 @@
 #include <cmath>
 #include <limits>
 
-#include "game.hpp"
-#include "creature_circle.hpp"
+#include "game/game.hpp"
+#include "creatures/creature_circle.hpp"
 #include "game/game_components.hpp"
 
 Game::Game()

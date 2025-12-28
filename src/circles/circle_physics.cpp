@@ -1,6 +1,6 @@
-#include "circle_physics.hpp"
-#include "drawable_circle.hpp"
-#include "eatable_circle.hpp"
+#include "circles/circle_physics.hpp"
+#include "circles/drawable_circle.hpp"
+#include "circles/eatable_circle.hpp"
 
 #include <algorithm>
 #include <cmath>

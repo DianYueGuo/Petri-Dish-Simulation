@@ -1,4 +1,4 @@
-#include <NEAT/node.hpp>
+#include <neat/node.hpp>
 
 namespace neat {
 

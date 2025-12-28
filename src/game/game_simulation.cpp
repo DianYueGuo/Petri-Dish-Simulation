@@ -4,7 +4,7 @@
 
 #include "game/game_components.hpp"
 
-#include "creature_circle.hpp"
+#include "creatures/creature_circle.hpp"
 #include "game/simulation_context.hpp"
 
 namespace {

@@ -7,16 +7,16 @@
 
 #include <SFML/Graphics.hpp>
 #include <box2d/box2d.h>
-#include <NEAT/genome.hpp>
+#include <neat/genome.hpp>
 
-#include "circle_registry.hpp"
-#include "eatable_circle.hpp"
+#include "circles/circle_registry.hpp"
+#include "circles/eatable_circle.hpp"
 #include "game/population_context.hpp"
 #include "game/selection_manager.hpp"
 #include "game/spawn_context.hpp"
 #include "game/simulation_context.hpp"
 #include "game/spawner.hpp"
-#include "creature_circle.hpp"
+#include "creatures/creature_circle.hpp"
 
 class CreatureCircle;
 class GameInputHandler;

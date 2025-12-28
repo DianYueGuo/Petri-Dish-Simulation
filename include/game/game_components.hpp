@@ -6,9 +6,9 @@
 
 #include <SFML/Graphics.hpp>
 #include <box2d/box2d.h>
-#include <NEAT/genome.hpp>
+#include <neat/genome.hpp>
 #include "game/selection_manager.hpp"
-#include "game.hpp"
+#include "game/game.hpp"
 
 class EatableCircle;
 class CreatureCircle;

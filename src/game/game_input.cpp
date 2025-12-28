@@ -1,6 +1,6 @@
 #include "game/game_components.hpp"
 
-#include "game.hpp"
+#include "game/game.hpp"
 
 GameInputHandler::GameInputHandler(Game& game) : game(game) {}
 

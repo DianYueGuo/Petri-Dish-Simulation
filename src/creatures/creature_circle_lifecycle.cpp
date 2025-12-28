@@ -1,5 +1,5 @@
-#include "creature_circle.hpp"
-#include "game.hpp"
+#include "creatures/creature_circle.hpp"
+#include "game/game.hpp"
 
 #include <algorithm>
 #include <cmath>

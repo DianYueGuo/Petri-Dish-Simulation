@@ -6,7 +6,7 @@
 #include <box2d/box2d.h>
 #include <atomic>
 
-#include "contact_graph.hpp"
+#include "circles/contact_graph.hpp"
 class DrawableCircle;
 class EatableCircle;
 

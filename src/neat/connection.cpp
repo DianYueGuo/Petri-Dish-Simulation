@@ -1,4 +1,4 @@
-#include <NEAT/connection.hpp>
+#include <neat/connection.hpp>
 
 namespace neat {
 

@@ -1,4 +1,4 @@
-#include <NEAT/genome.hpp>
+#include <neat/genome.hpp>
 
 #include <algorithm>
 #include <cmath>

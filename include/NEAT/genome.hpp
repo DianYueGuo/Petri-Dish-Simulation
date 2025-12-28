@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <NEAT/node.hpp>
-#include <NEAT/connection.hpp>
+#include <neat/node.hpp>
+#include <neat/connection.hpp>
 
 namespace neat {
 

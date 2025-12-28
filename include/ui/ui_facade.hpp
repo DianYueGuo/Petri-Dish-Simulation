@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "game.hpp"
+#include "game/game.hpp"
 
 // Thin wrapper exposing only the surface used by the UI layer.
 // This keeps ImGui code from depending on the full Game implementation details.

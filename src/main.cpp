@@ -8,9 +8,9 @@
 
 #include <box2d/box2d.h>
 
-#include "game.hpp"
-#include "ui.hpp"
-#include "ui_facade.hpp"
+#include "game/game.hpp"
+#include "ui/ui.hpp"
+#include "ui/ui_facade.hpp"
 
 #include <time.h>
 

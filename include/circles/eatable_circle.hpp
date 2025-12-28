@@ -1,7 +1,7 @@
 #pragma once
 
-#include "circle_capabilities.hpp"
-#include "drawable_circle.hpp"
+#include "circles/circle_capabilities.hpp"
+#include "circles/drawable_circle.hpp"
 
 class CreatureCircle;
 

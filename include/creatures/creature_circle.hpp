@@ -1,12 +1,12 @@
 #pragma once
 
-#include "eatable_circle.hpp"
+#include "circles/eatable_circle.hpp"
 #include <functional>
-#include "contact_graph.hpp"
-#include "circle_registry.hpp"
-#include "simulation_config.hpp"
+#include "circles/contact_graph.hpp"
+#include "circles/circle_registry.hpp"
+#include "config/simulation_config.hpp"
 #include "game/creature_context.hpp"
-#include <NEAT/genome.hpp>
+#include <neat/genome.hpp>
 
 #include <algorithm>
 #include <array>

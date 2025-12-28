@@ -1,7 +1,7 @@
 #pragma once
 
-#include "circle_capabilities.hpp"
-#include "circle_physics.hpp"
+#include "circles/circle_capabilities.hpp"
+#include "circles/circle_physics.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <array>

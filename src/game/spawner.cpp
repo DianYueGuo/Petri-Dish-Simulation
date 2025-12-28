@@ -6,7 +6,7 @@
 #include <limits>
 #include <random>
 
-#include "creature_circle.hpp"
+#include "creatures/creature_circle.hpp"
 #include "game/spawn_context.hpp"
 
 namespace {

@@ -1,5 +1,5 @@
-#include "eatable_circle.hpp"
-#include "creature_circle.hpp"
+#include "circles/eatable_circle.hpp"
+#include "creatures/creature_circle.hpp"
 
 EatableCircle::EatableCircle(const b2WorldId &worldId, float position_x, float position_y, float radius, float density, bool toxic, bool division_pellet, float angle, bool boost_particle) :
     DrawableCircle(

@@ -1,6 +1,6 @@
-#include "creature_circle.hpp"
-#include "drawable_circle.hpp"
-#include "game.hpp"
+#include "creatures/creature_circle.hpp"
+#include "circles/drawable_circle.hpp"
+#include "game/game.hpp"
 
 #include <algorithm>
 #include <array>

@@ -4,8 +4,8 @@
 #include <cmath>
 #include <limits>
 
-#include "creature_circle.hpp"
-#include "eatable_circle.hpp"
+#include "creatures/creature_circle.hpp"
+#include "circles/eatable_circle.hpp"
 
 SelectionManager::SelectionManager(std::vector<std::unique_ptr<EatableCircle>>& circles, float& sim_time_accum)
     : circles(&circles), sim_time(&sim_time_accum) {}

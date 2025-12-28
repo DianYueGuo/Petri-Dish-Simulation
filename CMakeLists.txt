@@ -102,24 +102,24 @@ add_executable(
     ${APP_TARGET}
     MACOSX_BUNDLE
     src/main.cpp
-    src/game.cpp
+    src/game/game.cpp
     src/game/game_input.cpp
     src/game/game_selection.cpp
     src/game/game_population.cpp
     src/game/game_simulation.cpp
+    src/game/spawner.cpp
+    src/game/selection_manager.cpp
+    src/circles/circle_physics.cpp
+    src/circles/drawable_circle.cpp
+    src/circles/eatable_circle.cpp
+    src/creatures/creature_circle.cpp
+    src/creatures/creature_circle_brain.cpp
+    src/creatures/creature_circle_movement.cpp
+    src/creatures/creature_circle_lifecycle.cpp
     src/neat/genome.cpp
     src/neat/node.cpp
     src/neat/connection.cpp
-    src/circle_physics.cpp
-    src/drawable_circle.cpp
-    src/eatable_circle.cpp
-    src/creature_circle.cpp
-    src/creature_circle_brain.cpp
-    src/creature_circle_movement.cpp
-    src/creature_circle_lifecycle.cpp
-    src/ui.cpp
-    src/game/spawner.cpp
-    src/game/selection_manager.cpp
+    src/ui/ui.cpp
 )
 
 if(APPLE)

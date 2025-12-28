@@ -2,9 +2,9 @@
 
 #include <unordered_map>
 
-#include "circle_capabilities.hpp"
-#include "contact_graph.hpp"
-#include "circle_physics.hpp"
+#include "circles/circle_capabilities.hpp"
+#include "circles/contact_graph.hpp"
+#include "circles/circle_physics.hpp"
 
 class CircleRegistry {
 public:

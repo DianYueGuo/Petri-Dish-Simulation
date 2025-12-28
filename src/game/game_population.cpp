@@ -5,7 +5,7 @@
 
 #include "game/game_components.hpp"
 
-#include "creature_circle.hpp"
+#include "creatures/creature_circle.hpp"
 #include "game/population_context.hpp"
 
 GamePopulationManager::GamePopulationManager(PopulationContext& context) : ctx(context) {}

@@ -1,8 +1,8 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 
-#include "ui.hpp"
-#include "creature_circle.hpp"
+#include "ui/ui.hpp"
+#include "creatures/creature_circle.hpp"
 #include <unordered_map>
 #include <algorithm>
 
