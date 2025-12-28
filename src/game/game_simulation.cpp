@@ -106,7 +106,7 @@ void GameSimulationController::process_game_logic() {
     ctx.sim_update_selection_after_step();
 }
 
-void GameSimulationController::update_creatures(const b2WorldId& worldId, float dt) {
+void GameSimulationController::update_creatures(const b2WorldId&, float dt) {
     for (size_t i = 0; i < ctx.sim_circles().size(); ++i) {
         if (ctx.sim_circles()[i] && ctx.sim_circles()[i]->get_kind() == CircleKind::Creature) {
             auto* creature_circle = static_cast<CreatureCircle*>(ctx.sim_circles()[i].get());
@@ -258,14 +258,13 @@ void GameSimulationController::set_circle_density(float d) {
 
 void GameSimulationController::set_linear_impulse_magnitude(float m) {
     float clamped = std::max(m, 0.0f);
-    (void)clamped;
-    // Impulse magnitudes pulled per creature via context; noop setter retained for API compatibility.
+    ctx.sim_set_linear_impulse_magnitude(clamped);
     apply_impulse_magnitudes_to_circles();
 }
 
 void GameSimulationController::set_angular_impulse_magnitude(float m) {
     float clamped = std::max(m, 0.0f);
-    (void)clamped;
+    ctx.sim_set_angular_impulse_magnitude(clamped);
     apply_impulse_magnitudes_to_circles();
 }
 
@@ -277,13 +276,13 @@ void GameSimulationController::apply_impulse_magnitudes_to_circles() {
 
 void GameSimulationController::set_linear_damping(float d) {
     float clamped = std::max(d, 0.0f);
-    (void)clamped;
+    ctx.sim_set_linear_damping(clamped);
     apply_damping_to_circles();
 }
 
 void GameSimulationController::set_angular_damping(float d) {
     float clamped = std::max(d, 0.0f);
-    (void)clamped;
+    ctx.sim_set_angular_damping(clamped);
     apply_damping_to_circles();
 }
 

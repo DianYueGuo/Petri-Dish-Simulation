@@ -49,6 +49,10 @@ public:
     virtual float sim_angular_impulse_magnitude() const = 0;
     virtual float sim_linear_damping() const = 0;
     virtual float sim_angular_damping() const = 0;
+    virtual void sim_set_linear_impulse_magnitude(float v) = 0;
+    virtual void sim_set_angular_impulse_magnitude(float v) = 0;
+    virtual void sim_set_linear_damping(float v) = 0;
+    virtual void sim_set_angular_damping(float v) = 0;
     virtual bool sim_live_mutation_enabled() const = 0;
     virtual float sim_mutate_weight_thresh() const = 0;
     virtual float sim_mutate_weight_full_change_thresh() const = 0;

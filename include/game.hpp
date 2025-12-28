@@ -346,6 +346,10 @@ public:
     float sim_angular_impulse_magnitude() const override { return movement.angular_impulse_magnitude; }
     float sim_linear_damping() const override { return movement.linear_damping; }
     float sim_angular_damping() const override { return movement.angular_damping; }
+    void sim_set_linear_impulse_magnitude(float v) override { movement.linear_impulse_magnitude = std::max(0.0f, v); }
+    void sim_set_angular_impulse_magnitude(float v) override { movement.angular_impulse_magnitude = std::max(0.0f, v); }
+    void sim_set_linear_damping(float v) override { movement.linear_damping = std::max(0.0f, v); }
+    void sim_set_angular_damping(float v) override { movement.angular_damping = std::max(0.0f, v); }
     bool sim_live_mutation_enabled() const override { return mutation.live_mutation_enabled; }
     float sim_mutate_weight_thresh() const override { return mutation.mutate_weight_thresh; }
     float sim_mutate_weight_full_change_thresh() const override { return mutation.mutate_weight_full_change_thresh; }
