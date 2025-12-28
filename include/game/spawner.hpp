@@ -9,12 +9,12 @@
 
 class EatableCircle;
 class CreatureCircle;
-class Game;
+class SpawnContext;
 
 // Responsible for creating circles and spawning logic.
 class Spawner {
 public:
-    explicit Spawner(Game& game_ref);
+    explicit Spawner(SpawnContext& context_ref);
 
     void spawn_selected_type_at(const sf::Vector2f& worldPos);
     void begin_add_drag_if_applicable(const sf::Vector2f& worldPos);
@@ -32,7 +32,7 @@ private:
     bool pellet_cap_reached(int add_type_value) const;
     void sprinkle_with_rate(float rate, int type, float dt);
 
-    Game& game;
+    SpawnContext& context;
     bool add_dragging = false;
     std::optional<sf::Vector2f> last_add_world_pos;
     std::optional<sf::Vector2f> last_drag_world_pos;

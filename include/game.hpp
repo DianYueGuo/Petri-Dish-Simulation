@@ -12,6 +12,7 @@
 #include "circle_registry.hpp"
 #include "eatable_circle.hpp"
 #include "game/selection_manager.hpp"
+#include "game/spawn_context.hpp"
 #include "game/spawner.hpp"
 
 class CreatureCircle;
@@ -20,7 +21,7 @@ class GameSelectionController;
 class GamePopulationManager;
 class GameSimulationController;
 
-class Game {
+class Game : public SpawnContext {
     friend class Spawner;
     friend class CreatureCircle;
     friend class GameInputHandler;
@@ -221,6 +222,55 @@ public:
     const neat::Genome* get_max_generation_brain() const { return generation.brain ? &(*generation.brain) : nullptr; }
     std::vector<std::vector<int>>* get_neat_innovations() { return &innovation.innovations; }
     int* get_neat_last_innovation_id() { return &innovation.last_innovation_id; }
+
+    // SpawnContext implementation
+    SpawnContext::AddType spawn_get_add_type() const override {
+        switch (cursor.add_type) {
+            case AddType::Creature: return SpawnContext::AddType::Creature;
+            case AddType::FoodPellet: return SpawnContext::AddType::FoodPellet;
+            case AddType::ToxicPellet: return SpawnContext::AddType::ToxicPellet;
+            case AddType::DivisionPellet: return SpawnContext::AddType::DivisionPellet;
+        }
+        return SpawnContext::AddType::Creature;
+    }
+    SpawnContext::CursorMode spawn_get_cursor_mode() const override {
+        switch (cursor.mode) {
+            case CursorMode::Add: return SpawnContext::CursorMode::Add;
+            case CursorMode::Select: return SpawnContext::CursorMode::Select;
+        }
+        return SpawnContext::CursorMode::Add;
+    }
+    std::size_t spawn_get_food_pellet_count() const override { return get_food_pellet_count(); }
+    std::size_t spawn_get_toxic_pellet_count() const override { return get_toxic_pellet_count(); }
+    std::size_t spawn_get_division_pellet_count() const override { return get_division_pellet_count(); }
+    int spawn_get_max_food_pellets() const override { return get_max_food_pellets(); }
+    int spawn_get_max_toxic_pellets() const override { return get_max_toxic_pellets(); }
+    int spawn_get_max_division_pellets() const override { return get_max_division_pellets(); }
+    std::size_t spawn_get_creature_count() const override { return get_creature_count(); }
+    int spawn_get_minimum_creature_count() const override { return get_minimum_creature_count(); }
+    float spawn_get_add_eatable_area() const override { return get_add_eatable_area(); }
+    float spawn_get_petri_radius() const override { return get_petri_radius(); }
+    float spawn_get_circle_density() const override { return get_circle_density(); }
+    float spawn_get_linear_impulse_magnitude() const override { return get_linear_impulse_magnitude(); }
+    float spawn_get_angular_impulse_magnitude() const override { return get_angular_impulse_magnitude(); }
+    float spawn_get_linear_damping() const override { return get_linear_damping(); }
+    float spawn_get_angular_damping() const override { return get_angular_damping(); }
+    float spawn_get_average_creature_area() const override { return get_average_creature_area(); }
+    float spawn_get_sprinkle_rate_eatable() const override { return get_sprinkle_rate_eatable(); }
+    float spawn_get_sprinkle_rate_toxic() const override { return get_sprinkle_rate_toxic(); }
+    float spawn_get_sprinkle_rate_division() const override { return get_sprinkle_rate_division(); }
+    int spawn_get_init_mutation_rounds() const override { return get_init_mutation_rounds(); }
+    float spawn_get_init_add_node_thresh() const override { return get_init_add_node_thresh(); }
+    float spawn_get_init_add_connection_thresh() const override { return get_init_add_connection_thresh(); }
+    float spawn_get_minimum_area() const override { return get_minimum_area(); }
+    float spawn_get_creature_cloud_area_percentage() const override { return get_creature_cloud_area_percentage(); }
+    float spawn_get_sim_time() const override { return get_sim_time(); }
+    std::vector<std::vector<int>>* spawn_get_neat_innovations() const override { return const_cast<Game*>(this)->get_neat_innovations(); }
+    int* spawn_get_neat_last_innovation_id() const override { return const_cast<Game*>(this)->get_neat_last_innovation_id(); }
+    b2WorldId spawn_get_world_id() const override { return worldId; }
+    Game* spawn_get_owner_game() const override { return const_cast<Game*>(this); }
+    void spawn_add_circle(std::unique_ptr<EatableCircle> circle) override { add_circle(std::move(circle)); }
+    void spawn_update_max_generation_from_circle(const EatableCircle* circle) override { update_max_generation_from_circle(circle); }
 
 private:
     struct SimulationTiming {
