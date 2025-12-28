@@ -49,7 +49,7 @@ public:
     void boost_forward(const b2WorldId &worldId, Game& game);
     void boost_eccentric_forward_right(const b2WorldId &worldId, Game& game);
     void boost_eccentric_forward_left(const b2WorldId &worldId, Game& game);
-    void divide(const b2WorldId &worldId, Game& game);
+    void divide(const b2WorldId &worldId, CreatureContext& ctx);
 
     bool is_poisoned() const { return poisoned; }
     void set_creation_time(float t) { creation_time = t; }
@@ -129,19 +129,19 @@ private:
     void update_color_from_brain();
     bool can_eat_circle(const CirclePhysics& circle) const;
     bool has_overlap_to_eat(const CirclePhysics& circle) const;
-    void consume_touching_circle(const b2WorldId &worldId, Game& game, EatableCircle& eatable, float touching_area, float poison_death_probability_toxic, float poison_death_probability_normal);
+    void consume_touching_circle(const b2WorldId &worldId, CreatureContext& ctx, EatableCircle& eatable, float touching_area, float poison_death_probability_toxic, float poison_death_probability_normal);
     bool has_sufficient_area_for_division(float divided_area) const;
     std::pair<b2Vec2, b2Vec2> calculate_division_positions(const b2Vec2& original_pos, float angle, float new_radius) const;
     std::unique_ptr<CreatureCircle> create_division_child(const b2WorldId& worldId,
-                                                          Game& game,
+                                                          CreatureContext& ctx,
                                                           float new_radius,
                                                           float angle,
                                                           int next_generation,
                                                           const b2Vec2& child_position,
                                                           const neat::Genome& parent_brain_copy);
-    void apply_post_division_updates(Game& game, CreatureCircle* child, int next_generation);
-    void configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const Game& game, float angle, const neat::Genome& parent_brain_copy) const;
-    void mutate_lineage(const Game& game, CreatureCircle* child);
+    void apply_post_division_updates(CreatureContext& ctx, CreatureCircle* child, int next_generation);
+    void configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const CreatureContext& ctx, float angle, const neat::Genome& parent_brain_copy) const;
+    void mutate_lineage(const CreatureContext& ctx, CreatureCircle* child);
 
     neat::Genome brain;
     std::array<float, BRAIN_INPUTS> brain_inputs{};

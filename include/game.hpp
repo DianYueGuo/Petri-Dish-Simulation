@@ -405,6 +405,7 @@ public:
     bool cc_show_true_color() const override { return show_true_color; }
     float cc_poison_death_probability() const override { return death.poison_death_probability; }
     float cc_poison_death_probability_normal() const override { return death.poison_death_probability_normal; }
+    float cc_division_pellet_divide_probability() const override { return death.division_pellet_divide_probability; }
     float cc_inactivity_timeout() const override { return death.inactivity_timeout; }
     int cc_init_mutation_rounds() const override { return mutation.init_mutation_rounds; }
     float cc_init_add_node_thresh() const override { return mutation.init_add_node_thresh; }

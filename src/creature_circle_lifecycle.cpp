@@ -29,7 +29,7 @@ float calculate_overlap_area(float r1, float r2, float distance) {
 
 void CreatureCircle::process_eating(const b2WorldId &worldId, CreatureContext& ctx, float poison_death_probability_toxic, float poison_death_probability_normal) {
     poisoned = false;
-    Game& game = ctx.cc_owner_game();
+    (void)ctx.cc_owner_game(); // ensures owner_game initialized lazily elsewhere if needed
     if (contacts.graph && contacts.registry) {
         auto& graph = *contacts.graph;
         auto& registry = *contacts.registry;
@@ -53,7 +53,7 @@ void CreatureCircle::process_eating(const b2WorldId &worldId, CreatureContext& c
             if (!eatable_circle) {
                 return;
             }
-            consume_touching_circle(worldId, game, *eatable_circle, touching_area, poison_death_probability_toxic, poison_death_probability_normal);
+            consume_touching_circle(worldId, ctx, *eatable_circle, touching_area, poison_death_probability_toxic, poison_death_probability_normal);
         });
     }
 
@@ -99,7 +99,7 @@ bool CreatureCircle::has_overlap_to_eat(const CirclePhysics& circle) const {
     return overlap_area >= overlap_threshold;
 }
 
-void CreatureCircle::consume_touching_circle(const b2WorldId &worldId, Game& game, EatableCircle& eatable, float touching_area, float poison_death_probability_toxic, float poison_death_probability_normal) {
+void CreatureCircle::consume_touching_circle(const b2WorldId &worldId, CreatureContext& ctx, EatableCircle& eatable, float touching_area, float poison_death_probability_toxic, float poison_death_probability_normal) {
     float roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
     if (eatable.is_toxic()) {
         if (roll < poison_death_probability_toxic) {
@@ -115,8 +115,8 @@ void CreatureCircle::consume_touching_circle(const b2WorldId &worldId, Game& gam
         eatable.set_eaten_by(this);
         if (eatable.is_division_pellet()) {
             float div_roll = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-            if (div_roll <= game.get_division_pellet_divide_probability()) {
-                this->divide(worldId, game);
+            if (div_roll <= ctx.cc_division_pellet_divide_probability()) {
+                this->divide(worldId, ctx);
             }
         }
     }
@@ -124,7 +124,7 @@ void CreatureCircle::consume_touching_circle(const b2WorldId &worldId, Game& gam
     this->grow_by_area(touching_area, worldId);
 }
 
-void CreatureCircle::divide(const b2WorldId &worldId, Game& game) {
+void CreatureCircle::divide(const b2WorldId &worldId, CreatureContext& ctx) {
     const float current_area = this->getArea();
     const float divided_area = current_area / 2.0f;
 
@@ -145,7 +145,7 @@ void CreatureCircle::divide(const b2WorldId &worldId, Game& game) {
     const int next_generation = this->get_generation() + 1;
     auto new_circle = create_division_child(
         worldId,
-        game,
+        ctx,
         new_radius,
         angle,
         next_generation,
@@ -153,8 +153,8 @@ void CreatureCircle::divide(const b2WorldId &worldId, Game& game) {
         parent_brain_copy);
     CreatureCircle* new_circle_ptr = new_circle.get();
 
-    apply_post_division_updates(game, new_circle_ptr, next_generation);
-    game.add_circle(std::move(new_circle));
+    apply_post_division_updates(ctx, new_circle_ptr, next_generation);
+    ctx.cc_spawn_circle(std::move(new_circle));
 }
 
 bool CreatureCircle::has_sufficient_area_for_division(float divided_area) const {
@@ -171,7 +171,7 @@ std::pair<b2Vec2, b2Vec2> CreatureCircle::calculate_division_positions(const b2V
 }
 
 std::unique_ptr<CreatureCircle> CreatureCircle::create_division_child(const b2WorldId& worldId,
-                                                                      Game& game,
+                                                                      CreatureContext& ctx,
                                                                       float new_radius,
                                                                       float angle,
                                                                       int next_generation,
@@ -189,23 +189,24 @@ std::unique_ptr<CreatureCircle> CreatureCircle::create_division_child(const b2Wo
         division.init_add_node_thresh,
         division.init_add_connection_thresh,
         &brain,
-        game.get_neat_innovations(),
-        game.get_neat_last_innovation_id(),
-        &game);
+        ctx.cc_owner_game().get_neat_innovations(),
+        ctx.cc_owner_game().get_neat_last_innovation_id(),
+        &ctx.cc_owner_game());
 
     if (new_circle) {
-        configure_child_after_division(*new_circle, worldId, game, angle, parent_brain_copy);
+        configure_child_after_division(*new_circle, worldId, ctx, angle, parent_brain_copy);
     }
 
     return new_circle;
 }
 
-void CreatureCircle::apply_post_division_updates(Game& game, CreatureCircle* child, int next_generation) {
+void CreatureCircle::apply_post_division_updates(CreatureContext& ctx, CreatureCircle* child, int next_generation) {
     this->set_generation(next_generation);
     if (child) {
         child->set_generation(next_generation);
     }
 
+    Game& game = ctx.cc_owner_game();
     owner_game = &game;
     set_last_division_time(division.sim_time);
     if (owner_game) {
@@ -217,15 +218,15 @@ void CreatureCircle::apply_post_division_updates(Game& game, CreatureCircle* chi
 
     this->apply_forward_impulse();
 
-    mutate_lineage(game, child);
+    mutate_lineage(ctx, child);
 
     update_color_from_brain();
 }
 
-void CreatureCircle::configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const Game&, float angle, const neat::Genome& parent_brain_copy) const {
+void CreatureCircle::configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const CreatureContext& ctx, float angle, const neat::Genome& parent_brain_copy) const {
     child.brain = parent_brain_copy;
     child.set_impulse_magnitudes(division.linear_impulse_magnitude, division.angular_impulse_magnitude);
-    child.set_linear_damping(division.linear_damping, worldId);
+    child.set_linear_damping(ctx.cc_linear_damping(), worldId);
     child.set_angular_damping(division.angular_damping, worldId);
     child.setAngle(angle + PI, worldId);
     child.apply_forward_impulse();
@@ -235,7 +236,7 @@ void CreatureCircle::configure_child_after_division(CreatureCircle& child, const
     child.set_last_division_time(division.sim_time);
 }
 
-void CreatureCircle::mutate_lineage(const Game&, CreatureCircle* child) {
+void CreatureCircle::mutate_lineage(const CreatureContext&, CreatureCircle* child) {
     const int mutation_rounds = std::max(0, division.mutation_rounds);
     float weight_thresh = division.mutate_weight_thresh;
     float weight_full = division.mutate_weight_full_change_thresh;

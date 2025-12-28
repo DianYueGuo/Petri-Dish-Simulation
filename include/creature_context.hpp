@@ -34,6 +34,7 @@ public:
     virtual bool cc_show_true_color() const = 0;
     virtual float cc_poison_death_probability() const = 0;
     virtual float cc_poison_death_probability_normal() const = 0;
+    virtual float cc_division_pellet_divide_probability() const = 0;
     virtual float cc_inactivity_timeout() const = 0;
     virtual int cc_init_mutation_rounds() const = 0;
     virtual float cc_init_add_node_thresh() const = 0;
