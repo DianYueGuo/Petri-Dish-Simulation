@@ -27,8 +27,9 @@ float calculate_overlap_area(float r1, float r2, float distance) {
 }
 } // namespace
 
-void CreatureCircle::process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal) {
+void CreatureCircle::process_eating(const b2WorldId &worldId, CreatureContext& ctx, float poison_death_probability_toxic, float poison_death_probability_normal) {
     poisoned = false;
+    Game& game = ctx.cc_owner_game();
     if (contacts.graph && contacts.registry) {
         auto& graph = *contacts.graph;
         auto& registry = *contacts.registry;

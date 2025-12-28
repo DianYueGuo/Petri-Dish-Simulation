@@ -5,6 +5,7 @@
 #include "contact_graph.hpp"
 #include "circle_registry.hpp"
 #include "simulation_config.hpp"
+#include "creature_context.hpp"
 #include <NEAT/genome.hpp>
 
 #include <algorithm>
@@ -39,7 +40,7 @@ public:
     void set_generation(int g) { generation = std::max(0, g); }
     const neat::Genome& get_brain() const { return brain; }
 
-    void process_eating(const b2WorldId &worldId, Game& game, float poison_death_probability_toxic, float poison_death_probability_normal);
+    void process_eating(const b2WorldId &worldId, CreatureContext& ctx, float poison_death_probability_toxic, float poison_death_probability_normal);
     void update_inactivity(float dt, float timeout);
 
     void move_randomly(const b2WorldId &worldId, Game &game);

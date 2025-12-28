@@ -6,6 +6,8 @@
 #include <SFML/Graphics/View.hpp>
 #include <box2d/box2d.h>
 
+#include "creature_context.hpp"
+
 class EatableCircle;
 class CreatureCircle;
 class Spawner;
@@ -14,7 +16,7 @@ class CircleRegistry;
 class Game;
 
 // Minimal surface consumed by GameSimulationController.
-class SimulationContext {
+class SimulationContext : public CreatureContext {
 public:
     virtual ~SimulationContext() = default;
 
