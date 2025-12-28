@@ -219,6 +219,7 @@ void CreatureCircle::apply_post_division_updates(Game& game, CreatureCircle* chi
 
 void CreatureCircle::configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const Game& game, float angle, const neat::Genome& parent_brain_copy) const {
     child.brain = parent_brain_copy;
+    child.memory_state = memory_state;
     child.set_impulse_magnitudes(division.linear_impulse_magnitude, division.angular_impulse_magnitude);
     child.set_linear_damping(game.movement.linear_damping, worldId);
     child.set_angular_damping(division.angular_damping, worldId);
