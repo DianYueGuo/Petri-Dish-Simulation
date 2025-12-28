@@ -13,7 +13,6 @@
 #include "circles/eatable_circle.hpp"
 #include "game/selection_manager.hpp"
 #include "game/spawn_types.hpp"
-#include "game/creature_context.hpp"
 #include "game/spawner.hpp"
 #include "creatures/creature_circle.hpp"
 
@@ -23,7 +22,7 @@ class GameSelectionController;
 class GamePopulationManager;
 class GameSimulationController;
 
-class Game : public CreatureContext {
+class Game {
     friend class Spawner;
     friend class CreatureCircle;
     friend class GameInputHandler;
@@ -200,44 +199,6 @@ public:
     int* get_neat_last_innovation_id() { return &innovation.last_innovation_id; }
 
     b2WorldId world_id() const { return worldId; }
-
-    // CreatureContext implementation
-    float cc_boost_area() const override { return creature.boost_area; }
-    float cc_circle_density() const override { return movement.circle_density; }
-    float cc_boost_particle_impulse_fraction() const override { return movement.boost_particle_impulse_fraction; }
-    float cc_boost_particle_linear_damping() const override { return movement.boost_particle_linear_damping; }
-    float cc_linear_impulse_magnitude() const override { return movement.linear_impulse_magnitude; }
-    float cc_angular_impulse_magnitude() const override { return movement.angular_impulse_magnitude; }
-    float cc_linear_damping() const override { return movement.linear_damping; }
-    float cc_angular_damping() const override { return movement.angular_damping; }
-    bool cc_live_mutation_enabled() const override { return mutation.live_mutation_enabled; }
-    float cc_mutate_weight_thresh() const override { return mutation.mutate_weight_thresh; }
-    float cc_mutate_weight_full_change_thresh() const override { return mutation.mutate_weight_full_change_thresh; }
-    float cc_mutate_weight_factor() const override { return mutation.mutate_weight_factor; }
-    float cc_tick_add_connection_thresh() const override { return mutation.tick_add_connection_thresh; }
-    float cc_tick_add_node_thresh() const override { return mutation.tick_add_node_thresh; }
-    int cc_max_iterations_find_connection() const override { return mutation.max_iterations_find_connection_thresh; }
-    int cc_max_iterations_find_node() const override { return mutation.max_iterations_find_node_thresh; }
-    float cc_reactivate_connection_thresh() const override { return mutation.reactivate_connection_thresh; }
-    float cc_minimum_area() const override { return creature.minimum_area; }
-    bool cc_show_true_color() const override { return show_true_color; }
-    float cc_poison_death_probability() const override { return death.poison_death_probability; }
-    float cc_poison_death_probability_normal() const override { return death.poison_death_probability_normal; }
-    float cc_division_pellet_divide_probability() const override { return death.division_pellet_divide_probability; }
-    float cc_inactivity_timeout() const override { return death.inactivity_timeout; }
-    int cc_init_mutation_rounds() const override { return mutation.init_mutation_rounds; }
-    float cc_init_add_node_thresh() const override { return mutation.init_add_node_thresh; }
-    float cc_init_add_connection_thresh() const override { return mutation.init_add_connection_thresh; }
-    int cc_mutation_rounds() const override { return mutation.mutation_rounds; }
-    float cc_add_connection_thresh() const override { return mutation.add_connection_thresh; }
-    float cc_add_node_thresh() const override { return mutation.add_node_thresh; }
-    float cc_sim_time() const override { return timing.sim_time_accum; }
-    Game& cc_owner_game() override { return *this; }
-    bool cc_selected_and_possessed(const void* creature_ptr) const override;
-    bool cc_left_key_down() const override { return possesing.left_key_down; }
-    bool cc_right_key_down() const override { return possesing.right_key_down; }
-    bool cc_space_key_down() const override { return possesing.space_key_down; }
-    void cc_spawn_circle(std::unique_ptr<EatableCircle> circle) override;
 
 private:
     // Internal helpers used by managers

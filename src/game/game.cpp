@@ -152,11 +152,3 @@ void Game::mark_age_dirty() {
 void Game::mark_selection_dirty() {
     selection_ctrl().mark_selection_dirty();
 }
-
-bool Game::cc_selected_and_possessed(const void* creature_ptr) const {
-    return possesing.possess_selected_creature && (selection_ctrl().get_selected_creature() == creature_ptr);
-}
-
-void Game::cc_spawn_circle(std::unique_ptr<EatableCircle> circle) {
-    population_mgr().add_circle(std::move(circle));
-}
