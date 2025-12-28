@@ -5,7 +5,7 @@
 #include "contact_graph.hpp"
 #include "circle_registry.hpp"
 #include "simulation_config.hpp"
-#include "creature_context.hpp"
+#include "game/creature_context.hpp"
 #include <NEAT/genome.hpp>
 
 #include <algorithm>

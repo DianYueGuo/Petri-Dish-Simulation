@@ -6,7 +6,7 @@
 #include <SFML/Graphics/View.hpp>
 #include <box2d/box2d.h>
 
-#include "creature_context.hpp"
+#include "game/creature_context.hpp"
 
 class EatableCircle;
 class CreatureCircle;

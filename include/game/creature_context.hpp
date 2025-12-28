@@ -44,7 +44,7 @@ public:
     virtual float cc_add_node_thresh() const = 0;
     virtual float cc_sim_time() const = 0;
 
-    virtual class Game& cc_owner_game() = 0;
+    virtual Game& cc_owner_game() = 0;
 
     virtual bool cc_selected_and_possessed(const void* creature_ptr) const = 0;
     virtual bool cc_left_key_down() const = 0;
