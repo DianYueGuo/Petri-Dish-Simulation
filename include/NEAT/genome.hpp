@@ -32,7 +32,7 @@ public:
     std::vector<Node> nodes;
     std::vector<Connection> connections;
 
-    Genome(int nbInput, int nbOutput, std::vector<std::vector<int>>* innovIds, int* lastInnovId, float weightExtremumInit = 20.0f);
+    Genome(int nbInput, int nbOutput, std::vector<std::vector<int>>* innovIds, int* lastInnovId, float weightExtremumInit = 20.0f, bool connectInputsToOutputs = true);
     void loadInputs(float inputs[]);
     void runNetwork(float activationFn(float input));
     void getOutputs(float outputs[]);

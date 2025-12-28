@@ -8,7 +8,7 @@
 
 namespace neat {
 
-Genome::Genome(int nbInput, int nbOutput, std::vector<std::vector<int>>* innovIds, int* lastInnovId, float weightExtremumInit)
+Genome::Genome(int nbInput, int nbOutput, std::vector<std::vector<int>>* innovIds, int* lastInnovId, float weightExtremumInit, bool connectInputsToOutputs)
     : weightExtremumInit(weightExtremumInit), nbInput(nbInput), nbOutput(nbOutput) {
     speciesId = -1;
 
@@ -26,11 +26,13 @@ Genome::Genome(int nbInput, int nbOutput, std::vector<std::vector<int>>* innovId
         nodes.push_back(Node(i, 1));
     }
 
-    for (int inNodeId = 0; inNodeId < nbInput + 1; inNodeId++) {
-        for (int outNodeId = nbInput + 1; outNodeId < nbInput + 1 + nbOutput; outNodeId++) {
-            int innovId = getInnovId(innovIds, lastInnovId, inNodeId, outNodeId);
-            float weight = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f * weightExtremumInit - weightExtremumInit;
-            connections.push_back(Connection(innovId, inNodeId, outNodeId, weight, true));
+    if (connectInputsToOutputs) {
+        for (int inNodeId = 0; inNodeId < nbInput + 1; inNodeId++) {
+            for (int outNodeId = nbInput + 1; outNodeId < nbInput + 1 + nbOutput; outNodeId++) {
+                int innovId = getInnovId(innovIds, lastInnovId, inNodeId, outNodeId);
+                float weight = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f * weightExtremumInit - weightExtremumInit;
+                connections.push_back(Connection(innovId, inNodeId, outNodeId, weight, true));
+            }
         }
     }
     topoDirty = true;
