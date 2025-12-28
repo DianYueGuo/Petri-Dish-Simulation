@@ -1,5 +1,4 @@
-#ifndef CIRCLE_PHYSICS_HPP
-#define CIRCLE_PHYSICS_HPP
+#pragma once
 
 #include <functional>
 #include <unordered_set>
@@ -116,5 +115,3 @@ protected:
     std::unordered_set<CirclePhysics*> touching_circles;
     void set_kind(CircleKind k) { kind = k; }
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
 #include <memory>
 #include <optional>
@@ -377,5 +376,3 @@ private:
     std::unique_ptr<GamePopulationManager> population;
     std::unique_ptr<GameSimulationController> simulation;
 };
-
-#endif

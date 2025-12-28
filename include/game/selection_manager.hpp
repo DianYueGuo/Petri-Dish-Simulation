@@ -1,5 +1,4 @@
-#ifndef GAME_SELECTION_MANAGER_HPP
-#define GAME_SELECTION_MANAGER_HPP
+#pragma once
 
 #include <memory>
 #include <optional>
@@ -49,5 +48,3 @@ private:
     std::optional<std::size_t> selected_index;
     bool follow_selected = false;
 };
-
-#endif

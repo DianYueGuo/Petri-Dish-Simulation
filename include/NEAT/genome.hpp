@@ -1,5 +1,4 @@
-#ifndef NEAT_GENOME_HPP
-#define NEAT_GENOME_HPP
+#pragma once
 
 #include <vector>
 
@@ -42,5 +41,3 @@ public:
 };
 
 } // namespace neat
-
-#endif // NEAT_GENOME_HPP

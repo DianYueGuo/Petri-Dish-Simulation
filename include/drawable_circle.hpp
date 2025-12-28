@@ -1,5 +1,4 @@
-#ifndef DRAWABLE_CIRCLE_HPP
-#define DRAWABLE_CIRCLE_HPP
+#pragma once
 
 #include "circle_physics.hpp"
 
@@ -32,5 +31,3 @@ protected:
 
     virtual bool should_draw_direction_indicator() const { return false; }
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef EATABLE_CIRCLE_HPP
-#define EATABLE_CIRCLE_HPP
+#pragma once
 
 #include "drawable_circle.hpp"
 
@@ -33,5 +32,3 @@ private:
     bool boost_particle = false;
     const CreatureCircle* eaten_by = nullptr;
 };
-
-#endif

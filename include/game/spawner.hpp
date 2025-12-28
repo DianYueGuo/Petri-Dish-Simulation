@@ -1,5 +1,4 @@
-#ifndef GAME_SPAWNER_HPP
-#define GAME_SPAWNER_HPP
+#pragma once
 
 #include <memory>
 #include <optional>
@@ -39,5 +38,3 @@ private:
     std::optional<sf::Vector2f> last_drag_world_pos;
     float add_drag_distance = 0.0f;
 };
-
-#endif

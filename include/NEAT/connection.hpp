@@ -1,5 +1,4 @@
-#ifndef NEAT_CONNECTION_HPP
-#define NEAT_CONNECTION_HPP
+#pragma once
 
 namespace neat {
 
@@ -16,5 +15,3 @@ public:
 };
 
 } // namespace neat
-
-#endif // NEAT_CONNECTION_HPP

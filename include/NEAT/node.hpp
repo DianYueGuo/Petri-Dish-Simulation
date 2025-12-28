@@ -1,5 +1,4 @@
-#ifndef NEAT_NODE_HPP
-#define NEAT_NODE_HPP
+#pragma once
 
 namespace neat {
 
@@ -15,5 +14,3 @@ public:
 };
 
 } // namespace neat
-
-#endif // NEAT_NODE_HPP

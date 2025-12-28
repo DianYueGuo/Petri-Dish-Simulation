@@ -1,5 +1,4 @@
-#ifndef CREATURE_CIRCLE_HPP
-#define CREATURE_CIRCLE_HPP
+#pragma once
 
 #include "eatable_circle.hpp"
 #include "simulation_config.hpp"
@@ -102,5 +101,3 @@ private:
     float last_division_time = 0.0f;
     Game* owner_game = nullptr;
 };
-
-#endif
