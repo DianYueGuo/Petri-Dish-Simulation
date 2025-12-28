@@ -115,6 +115,7 @@ add_executable(
     src/game/game_input.cpp
     src/game/game_selection.cpp
     src/game/game_population.cpp
+    src/game/game_simulation.cpp
     src/circle_physics.cpp
     src/drawable_circle.cpp
     src/eatable_circle.cpp

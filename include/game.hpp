@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 #include <algorithm>
+#include <memory>
 
 #include <SFML/Graphics.hpp>
 #include <box2d/box2d.h>
@@ -14,11 +15,19 @@
 #include <NEAT/genome.hpp>
 
 class CreatureCircle;
+class GameInputHandler;
+class GameSelectionController;
+class GamePopulationManager;
+class GameSimulationController;
 
 
 class Game {
     friend class Spawner;
     friend class CreatureCircle;
+    friend class GameInputHandler;
+    friend class GameSelectionController;
+    friend class GamePopulationManager;
+    friend class GameSimulationController;
 public:
     enum class CursorMode {
         Add,
@@ -309,8 +318,17 @@ public:
     const CreatureCircle* find_nearest_creature(const b2Vec2& pos) const;
     int get_selected_generation() const;
     bool select_circle_at_world(const b2Vec2& pos);
+    void mark_age_dirty();
+    void mark_selection_dirty();
+    void apply_selection_mode();
+    void refresh_generation_and_age();
+    void update_max_ages();
     CursorMode get_cursor_mode() const { return cursor.mode; }
 private:
+    void update_actual_sim_speed();
+    void apply_impulse_magnitudes_to_circles();
+    void apply_damping_to_circles();
+
     struct RemovalResult {
         bool should_remove = false;
         const CreatureCircle* killer = nullptr;
@@ -326,44 +344,6 @@ private:
         float sprinkle = 0.0f;
         float cleanup = 0.0f;
     };
-
-    sf::Vector2f pixel_to_world(sf::RenderWindow& window, const sf::Vector2i& pixel) const;
-    void start_view_drag(const sf::Event::MouseButtonPressed& e, bool is_right_button);
-    void pan_view(sf::RenderWindow& window, const sf::Event::MouseMoved& e);
-    void update_creatures(const b2WorldId& worldId, float dt);
-    void run_brain_updates(const b2WorldId& worldId, float timeStep);
-    void cull_consumed();
-    void remove_stopped_boost_particles();
-    void apply_impulse_magnitudes_to_circles();
-    void apply_damping_to_circles();
-    void adjust_pellet_count(const EatableCircle* circle, int delta);
-    std::size_t get_cached_pellet_count(bool toxic, bool division_pellet) const;
-    void handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseButtonPressed& e);
-    void handle_mouse_release(const sf::Event::MouseButtonReleased& e);
-    void handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e);
-    void handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e);
-    void handle_key_release(const sf::Event::KeyReleased& e);
-    void update_max_ages();
-    void mark_age_dirty();
-    void mark_selection_dirty();
-    void adjust_cleanup_rates();
-    void cleanup_pellets_by_rate(float timeStep);
-    void finalize_world_state();
-    std::size_t count_pellets(bool toxic, bool division_pellet) const;
-    float desired_pellet_count(float density_target) const;
-    float compute_cleanup_rate(std::size_t count, float desired) const;
-    SpawnRates calculate_spawn_rates(bool toxic, bool division_pellet, float density_target) const;
-    void erase_indices_descending(std::vector<std::size_t>& indices);
-    std::vector<std::size_t> collect_pellet_indices(bool toxic, bool division_pellet) const;
-    std::size_t compute_target_removal_count(std::size_t available, float percentage) const;
-    void refresh_generation_and_age();
-    RemovalResult evaluate_circle_removal(EatableCircle& circle, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
-    CullState collect_removal_state(const SelectionManager::Snapshot& selection_snapshot, std::vector<std::unique_ptr<EatableCircle>>& spawned_cloud);
-    void compact_circles(const std::vector<char>& remove_mask);
-    void update_actual_sim_speed();
-    void apply_selection_mode();
-    bool is_circle_outside_dish(const EatableCircle& circle, float dish_radius) const;
-    bool handle_outside_removal(const std::unique_ptr<EatableCircle>& circle, const SelectionManager::Snapshot& snapshot, float dish_radius, bool& selected_removed, bool& removed_creature);
 
     b2WorldId worldId;
     std::vector<std::unique_ptr<EatableCircle>> circles;
@@ -388,6 +368,10 @@ private:
     PossesingSelectedCreature possesing;
     bool show_true_color = false;
     bool paused = false;
+    std::unique_ptr<GameInputHandler> input_handler;
+    std::unique_ptr<GameSelectionController> selection_controller;
+    std::unique_ptr<GamePopulationManager> population;
+    std::unique_ptr<GameSimulationController> simulation;
 };
 
 #endif

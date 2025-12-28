@@ -1,18 +1,22 @@
+#include "game/game_components.hpp"
+
 #include "game.hpp"
 
-sf::Vector2f Game::pixel_to_world(sf::RenderWindow& window, const sf::Vector2i& pixel) const {
+GameInputHandler::GameInputHandler(Game& game) : game(game) {}
+
+sf::Vector2f GameInputHandler::pixel_to_world(sf::RenderWindow& window, const sf::Vector2i& pixel) const {
     sf::Vector2f viewPos = window.mapPixelToCoords(pixel);
     return viewPos;
 }
 
-void Game::start_view_drag(const sf::Event::MouseButtonPressed& e, bool is_right_button) {
-    view_drag.dragging = true;
-    view_drag.right_dragging = is_right_button;
-    view_drag.last_drag_pixels = e.position;
+void GameInputHandler::start_view_drag(const sf::Event::MouseButtonPressed& e, bool is_right_button) {
+    game.view_drag.dragging = true;
+    game.view_drag.right_dragging = is_right_button;
+    game.view_drag.last_drag_pixels = e.position;
 }
 
-void Game::pan_view(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
-    if (!view_drag.dragging) {
+void GameInputHandler::pan_view(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
+    if (!game.view_drag.dragging) {
         return;
     }
 
@@ -23,7 +27,7 @@ void Game::pan_view(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
     };
 
     sf::Vector2i current_pixels = e.position;
-    sf::Vector2i delta_pixels = view_drag.last_drag_pixels - current_pixels;
+    sf::Vector2i delta_pixels = game.view_drag.last_drag_pixels - current_pixels;
     sf::Vector2f delta_world = {
         static_cast<float>(delta_pixels.x) * pixels_to_world.x,
         static_cast<float>(delta_pixels.y) * pixels_to_world.y
@@ -31,40 +35,40 @@ void Game::pan_view(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
 
     view.move(delta_world);
     window.setView(view);
-    view_drag.last_drag_pixels = current_pixels;
+    game.view_drag.last_drag_pixels = current_pixels;
 }
 
-void Game::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseButtonPressed& e) {
+void GameInputHandler::handle_mouse_press(sf::RenderWindow& window, const sf::Event::MouseButtonPressed& e) {
     if (e.button == sf::Mouse::Button::Left) {
         sf::Vector2f worldPos = pixel_to_world(window, e.position);
 
-        if (cursor.mode == CursorMode::Add) {
-            spawner.spawn_selected_type_at(worldPos);
-            spawner.begin_add_drag_if_applicable(worldPos);
-        } else if (cursor.mode == CursorMode::Select) {
-            select_circle_at_world({worldPos.x, worldPos.y});
+        if (game.cursor.mode == Game::CursorMode::Add) {
+            game.spawner.spawn_selected_type_at(worldPos);
+            game.spawner.begin_add_drag_if_applicable(worldPos);
+        } else if (game.cursor.mode == Game::CursorMode::Select) {
+            game.select_circle_at_world({worldPos.x, worldPos.y});
         }
     } else if (e.button == sf::Mouse::Button::Right) {
         start_view_drag(e, true);
     }
 }
 
-void Game::handle_mouse_release(const sf::Event::MouseButtonReleased& e) {
+void GameInputHandler::handle_mouse_release(const sf::Event::MouseButtonReleased& e) {
     if (e.button == sf::Mouse::Button::Right) {
-        view_drag.dragging = false;
-        view_drag.right_dragging = false;
+        game.view_drag.dragging = false;
+        game.view_drag.right_dragging = false;
     }
     if (e.button == sf::Mouse::Button::Left) {
-        spawner.reset_add_drag_state();
+        game.spawner.reset_add_drag_state();
     }
 }
 
-void Game::handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
-    spawner.continue_add_drag(pixel_to_world(window, {e.position.x, e.position.y}));
+void GameInputHandler::handle_mouse_move(sf::RenderWindow& window, const sf::Event::MouseMoved& e) {
+    game.spawner.continue_add_drag(pixel_to_world(window, {e.position.x, e.position.y}));
     pan_view(window, e);
 }
 
-void Game::handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e) {
+void GameInputHandler::handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPressed& e) {
     sf::View view = window.getView();
     const float pan_fraction = 0.02f;
     const float pan_x = view.getSize().x * pan_fraction;
@@ -91,16 +95,16 @@ void Game::handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPresse
             view.zoom(zoom_step);
             break;
         case sf::Keyboard::Scancode::Left:
-            possesing.left_key_down = true;
+            game.possesing.left_key_down = true;
             break;
         case sf::Keyboard::Scancode::Right:
-            possesing.right_key_down = true;
+            game.possesing.right_key_down = true;
             break;
         case sf::Keyboard::Scancode::Up:
-            possesing.up_key_down = true;
+            game.possesing.up_key_down = true;
             break;
         case sf::Keyboard::Scancode::Space:
-            possesing.space_key_down = true;
+            game.possesing.space_key_down = true;
             break;
         default:
             break;
@@ -109,26 +113,26 @@ void Game::handle_key_press(sf::RenderWindow& window, const sf::Event::KeyPresse
     window.setView(view);
 }
 
-void Game::handle_key_release(const sf::Event::KeyReleased& e) {
+void GameInputHandler::handle_key_release(const sf::Event::KeyReleased& e) {
     switch (e.scancode) {
         case sf::Keyboard::Scancode::Left:
-            possesing.left_key_down = false;
+            game.possesing.left_key_down = false;
             break;
         case sf::Keyboard::Scancode::Right:
-            possesing.right_key_down = false;
+            game.possesing.right_key_down = false;
             break;
         case sf::Keyboard::Scancode::Up:
-            possesing.up_key_down = false;
+            game.possesing.up_key_down = false;
             break;
         case sf::Keyboard::Scancode::Space:
-            possesing.space_key_down = false;
+            game.possesing.space_key_down = false;
             break;
         default:
             break;
     }
 }
 
-void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf::Event>& event) {
+void GameInputHandler::process_input_events(sf::RenderWindow& window, const std::optional<sf::Event>& event) {
     if (!event) {
         return;
     }
@@ -163,4 +167,8 @@ void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf
     if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>()) {
         handle_key_release(*keyReleased);
     }
+}
+
+void Game::process_input_events(sf::RenderWindow& window, const std::optional<sf::Event>& event) {
+    input_handler->process_input_events(window, event);
 }
