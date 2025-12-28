@@ -181,12 +181,12 @@ std::unique_ptr<CreatureCircle> CreatureCircle::create_division_child(const b2Wo
         child_position.x,
         child_position.y,
         new_radius,
-        game.get_circle_density(),
+        division.circle_density,
         angle + PI,
         next_generation,
-        game.get_init_mutation_rounds(),
-        game.get_init_add_node_thresh(),
-        game.get_init_add_connection_thresh(),
+        division.init_mutation_rounds,
+        division.init_add_node_thresh,
+        division.init_add_connection_thresh,
         &brain,
         game.get_neat_innovations(),
         game.get_neat_last_innovation_id(),
@@ -206,7 +206,7 @@ void CreatureCircle::apply_post_division_updates(Game& game, CreatureCircle* chi
     }
 
     owner_game = &game;
-    set_last_division_time(game.get_sim_time());
+    set_last_division_time(division.sim_time);
     if (owner_game) {
         owner_game->mark_age_dirty();
     }
@@ -221,27 +221,27 @@ void CreatureCircle::apply_post_division_updates(Game& game, CreatureCircle* chi
     update_color_from_brain();
 }
 
-void CreatureCircle::configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const Game& game, float angle, const neat::Genome& parent_brain_copy) const {
+void CreatureCircle::configure_child_after_division(CreatureCircle& child, const b2WorldId& worldId, const Game&, float angle, const neat::Genome& parent_brain_copy) const {
     child.brain = parent_brain_copy;
-    child.set_impulse_magnitudes(game.get_linear_impulse_magnitude(), game.get_angular_impulse_magnitude());
-    child.set_linear_damping(game.get_linear_damping(), worldId);
-    child.set_angular_damping(game.get_angular_damping(), worldId);
+    child.set_impulse_magnitudes(division.linear_impulse_magnitude, division.angular_impulse_magnitude);
+    child.set_linear_damping(division.linear_damping, worldId);
+    child.set_angular_damping(division.angular_damping, worldId);
     child.setAngle(angle + PI, worldId);
     child.apply_forward_impulse();
     child.update_color_from_brain();
     // Keep the original creation age so lineage age persists across divisions.
     child.set_creation_time(get_creation_time());
-    child.set_last_division_time(game.get_sim_time());
+    child.set_last_division_time(division.sim_time);
 }
 
-void CreatureCircle::mutate_lineage(const Game& game, CreatureCircle* child) {
-    const int mutation_rounds = std::max(0, game.get_mutation_rounds());
-    float weight_thresh = game.get_mutate_weight_thresh();
-    float weight_full = game.get_mutate_weight_full_change_thresh();
-    float weight_factor = game.get_mutate_weight_factor();
-    float reactivate = game.get_reactivate_connection_thresh();
-    int add_conn_iters = game.get_max_iterations_find_connection_thresh();
-    int add_node_iters = game.get_max_iterations_find_node_thresh();
+void CreatureCircle::mutate_lineage(const Game&, CreatureCircle* child) {
+    const int mutation_rounds = std::max(0, division.mutation_rounds);
+    float weight_thresh = division.mutate_weight_thresh;
+    float weight_full = division.mutate_weight_full_change_thresh;
+    float weight_factor = division.mutate_weight_factor;
+    float reactivate = division.reactivate_connection_thresh;
+    int add_conn_iters = division.max_iterations_find_connection;
+    int add_node_iters = division.max_iterations_find_node;
     for (int i = 0; i < mutation_rounds; ++i) {
         if (neat_innovations && neat_last_innov_id) {
             brain.mutate(
@@ -250,10 +250,10 @@ void CreatureCircle::mutate_lineage(const Game& game, CreatureCircle* child) {
                 weight_thresh,
                 weight_full,
                 weight_factor,
-                game.get_add_connection_thresh(),
+                division.add_connection_thresh,
                 add_conn_iters,
                 reactivate,
-                game.get_add_node_thresh(),
+                division.add_node_thresh,
                 add_node_iters);
         }
         if (child && child->neat_innovations && child->neat_last_innov_id) {
@@ -263,10 +263,10 @@ void CreatureCircle::mutate_lineage(const Game& game, CreatureCircle* child) {
                 weight_thresh,
                 weight_full,
                 weight_factor,
-                game.get_add_connection_thresh(),
+                division.add_connection_thresh,
                 add_conn_iters,
                 reactivate,
-                game.get_add_node_thresh(),
+                division.add_node_thresh,
                 add_node_iters);
         }
     }

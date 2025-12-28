@@ -78,6 +78,27 @@ public:
         bool space_key_down = false;
     };
     void set_behavior_context(const BehaviorContext& ctx) { behavior = ctx; }
+    struct DivisionContext {
+        float circle_density = 0.0f;
+        int init_mutation_rounds = 0;
+        float init_add_node_thresh = 0.0f;
+        float init_add_connection_thresh = 0.0f;
+        float linear_impulse_magnitude = 0.0f;
+        float angular_impulse_magnitude = 0.0f;
+        float linear_damping = 0.0f;
+        float angular_damping = 0.0f;
+        int mutation_rounds = 0;
+        float mutate_weight_thresh = 0.0f;
+        float mutate_weight_full_change_thresh = 0.0f;
+        float mutate_weight_factor = 0.0f;
+        float add_connection_thresh = 0.0f;
+        int max_iterations_find_connection = 0;
+        float reactivate_connection_thresh = 0.0f;
+        float add_node_thresh = 0.0f;
+        int max_iterations_find_node = 0;
+        float sim_time = 0.0f;
+    };
+    void set_division_context(const DivisionContext& ctx) { division = ctx; }
 
 protected:
     bool should_draw_direction_indicator() const override { return true; }
@@ -134,4 +155,5 @@ private:
     Game* owner_game = nullptr;
     ContactContext contacts;
     BehaviorContext behavior;
+    DivisionContext division;
 };

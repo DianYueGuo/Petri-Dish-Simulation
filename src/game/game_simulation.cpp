@@ -134,6 +134,26 @@ void GameSimulationController::update_creatures(const b2WorldId& worldId, float 
             behavior_ctx.right_key_down = game.get_right_key_down();
             behavior_ctx.space_key_down = game.get_space_key_down();
             creature_circle->set_behavior_context(behavior_ctx);
+            CreatureCircle::DivisionContext division_ctx{};
+            division_ctx.circle_density = game.get_circle_density();
+            division_ctx.init_mutation_rounds = game.get_init_mutation_rounds();
+            division_ctx.init_add_node_thresh = game.get_init_add_node_thresh();
+            division_ctx.init_add_connection_thresh = game.get_init_add_connection_thresh();
+            division_ctx.linear_impulse_magnitude = game.get_linear_impulse_magnitude();
+            division_ctx.angular_impulse_magnitude = game.get_angular_impulse_magnitude();
+            division_ctx.linear_damping = game.get_linear_damping();
+            division_ctx.angular_damping = game.get_angular_damping();
+            division_ctx.mutation_rounds = game.get_mutation_rounds();
+            division_ctx.mutate_weight_thresh = game.get_mutate_weight_thresh();
+            division_ctx.mutate_weight_full_change_thresh = game.get_mutate_weight_full_change_thresh();
+            division_ctx.mutate_weight_factor = game.get_mutate_weight_factor();
+            division_ctx.add_connection_thresh = game.get_add_connection_thresh();
+            division_ctx.max_iterations_find_connection = game.get_max_iterations_find_connection_thresh();
+            division_ctx.reactivate_connection_thresh = game.get_reactivate_connection_thresh();
+            division_ctx.add_node_thresh = game.get_add_node_thresh();
+            division_ctx.max_iterations_find_node = game.get_max_iterations_find_node_thresh();
+            division_ctx.sim_time = game.get_sim_time();
+            creature_circle->set_division_context(division_ctx);
             creature_circle->process_eating(worldId, game, game.death.poison_death_probability, game.death.poison_death_probability_normal);
             creature_circle->update_inactivity(dt, game.death.inactivity_timeout);
         }
@@ -173,6 +193,26 @@ void GameSimulationController::run_brain_updates(const b2WorldId& worldId, float
                 behavior_ctx.right_key_down = game.get_right_key_down();
                 behavior_ctx.space_key_down = game.get_space_key_down();
                 creature_circle->set_behavior_context(behavior_ctx);
+                CreatureCircle::DivisionContext division_ctx{};
+                division_ctx.circle_density = game.get_circle_density();
+                division_ctx.init_mutation_rounds = game.get_init_mutation_rounds();
+                division_ctx.init_add_node_thresh = game.get_init_add_node_thresh();
+                division_ctx.init_add_connection_thresh = game.get_init_add_connection_thresh();
+                division_ctx.linear_impulse_magnitude = game.get_linear_impulse_magnitude();
+                division_ctx.angular_impulse_magnitude = game.get_angular_impulse_magnitude();
+                division_ctx.linear_damping = game.get_linear_damping();
+                division_ctx.angular_damping = game.get_angular_damping();
+                division_ctx.mutation_rounds = game.get_mutation_rounds();
+                division_ctx.mutate_weight_thresh = game.get_mutate_weight_thresh();
+                division_ctx.mutate_weight_full_change_thresh = game.get_mutate_weight_full_change_thresh();
+                division_ctx.mutate_weight_factor = game.get_mutate_weight_factor();
+                division_ctx.add_connection_thresh = game.get_add_connection_thresh();
+                division_ctx.max_iterations_find_connection = game.get_max_iterations_find_connection_thresh();
+                division_ctx.reactivate_connection_thresh = game.get_reactivate_connection_thresh();
+                division_ctx.add_node_thresh = game.get_add_node_thresh();
+                division_ctx.max_iterations_find_node = game.get_max_iterations_find_node_thresh();
+                division_ctx.sim_time = game.get_sim_time();
+                creature_circle->set_division_context(division_ctx);
                 creature_circle->move_intelligently(worldId, game, brain_period);
             }
         }
