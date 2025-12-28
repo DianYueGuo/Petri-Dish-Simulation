@@ -69,6 +69,27 @@ void Game::population_spawn_cloud(const CreatureCircle& creature, std::vector<st
     spawner.spawn_eatable_cloud(creature, out);
 }
 
+void Game::sim_cleanup_population(float timeStep) {
+    if (population) {
+        population->cleanup_pellets_by_rate(timeStep);
+        population->cull_consumed();
+        population->remove_stopped_boost_particles();
+    }
+}
+
+void Game::sim_remove_outside_if_enabled() {
+    if (dish.auto_remove_outside && population) {
+        population->remove_outside_petri();
+    }
+}
+
+void Game::sim_update_selection_after_step() {
+    if (selection_controller) {
+        selection_controller->update_max_ages();
+        selection_controller->apply_selection_mode();
+    }
+}
+
 void Game::process_game_logic_with_speed() {
     simulation->process_game_logic_with_speed();
 }

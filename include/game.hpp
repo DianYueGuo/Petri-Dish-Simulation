@@ -14,6 +14,7 @@
 #include "game/population_context.hpp"
 #include "game/selection_manager.hpp"
 #include "game/spawn_context.hpp"
+#include "game/simulation_context.hpp"
 #include "game/spawner.hpp"
 #include "creature_circle.hpp"
 
@@ -23,7 +24,7 @@ class GameSelectionController;
 class GamePopulationManager;
 class GameSimulationController;
 
-class Game : public SpawnContext, public PopulationContext {
+class Game : public SpawnContext, public PopulationContext, public SimulationContext {
     friend class Spawner;
     friend class CreatureCircle;
     friend class GameInputHandler;
@@ -305,6 +306,78 @@ public:
     void population_adjust_pellet_count(const EatableCircle* circle, int delta) override;
     void population_on_creature_added(const CreatureCircle& creature_circle) override;
     void population_spawn_cloud(const CreatureCircle& creature, std::vector<std::unique_ptr<EatableCircle>>& out) override;
+
+    // SimulationContext implementation
+    b2WorldId sim_world_id() const override { return worldId; }
+    float sim_time_scale() const override { return timing.time_scale; }
+    void sim_accumulate_desired_time(float dt_scaled) override { timing.desired_sim_time_accum += dt_scaled; }
+    float sim_desired_time() const override { return timing.desired_sim_time_accum; }
+    void sim_set_desired_time(float t) override { timing.desired_sim_time_accum = t; }
+    float sim_time_accum() const override { return timing.sim_time_accum; }
+    void sim_add_time(float dt) override { timing.sim_time_accum += dt; brain.time_accumulator += dt; }
+    float sim_last_real_dt() const override { return timing.last_real_dt; }
+    void sim_set_last_real_dt(float dt) override {
+        timing.last_real_dt = dt;
+        timing.real_time_accum += dt;
+        fps.accum_time += dt;
+        ++fps.frames;
+        if (fps.accum_time >= 0.5f) {
+            fps.last = static_cast<float>(fps.frames) / fps.accum_time;
+            fps.accum_time = 0.0f;
+            fps.frames = 0;
+        }
+    }
+    float sim_last_sim_dt() const override { return timing.last_sim_dt; }
+    void sim_set_last_sim_dt(float dt) override { timing.last_sim_dt = dt; }
+    void sim_set_actual_speed(float v) override { timing.actual_sim_speed_inst = v; }
+    bool sim_is_paused() const override { return paused; }
+    ContactGraph& sim_contact_graph() override { return contact_graph; }
+    CircleRegistry& sim_circle_registry() override { return circle_registry; }
+    std::vector<std::unique_ptr<EatableCircle>>& sim_circles() override { return circles; }
+    float sim_brain_updates_per_second() const override { return brain.updates_per_second; }
+    float sim_brain_time_accum() const override { return brain.time_accumulator; }
+    void sim_set_brain_time_accum(float t) override { brain.time_accumulator = t; }
+    void sim_sprinkle_entities(float timeStep) override { spawner.sprinkle_entities(timeStep); }
+    float sim_boost_area() const override { return creature.boost_area; }
+    float sim_circle_density() const override { return movement.circle_density; }
+    float sim_boost_particle_impulse_fraction() const override { return movement.boost_particle_impulse_fraction; }
+    float sim_boost_particle_linear_damping() const override { return movement.boost_particle_linear_damping; }
+    float sim_linear_impulse_magnitude() const override { return movement.linear_impulse_magnitude; }
+    float sim_angular_impulse_magnitude() const override { return movement.angular_impulse_magnitude; }
+    float sim_linear_damping() const override { return movement.linear_damping; }
+    float sim_angular_damping() const override { return movement.angular_damping; }
+    bool sim_live_mutation_enabled() const override { return mutation.live_mutation_enabled; }
+    float sim_mutate_weight_thresh() const override { return mutation.mutate_weight_thresh; }
+    float sim_mutate_weight_full_change_thresh() const override { return mutation.mutate_weight_full_change_thresh; }
+    float sim_mutate_weight_factor() const override { return mutation.mutate_weight_factor; }
+    float sim_tick_add_connection_thresh() const override { return mutation.tick_add_connection_thresh; }
+    float sim_tick_add_node_thresh() const override { return mutation.tick_add_node_thresh; }
+    int sim_max_iterations_find_connection_thresh() const override { return mutation.max_iterations_find_connection_thresh; }
+    int sim_max_iterations_find_node_thresh() const override { return mutation.max_iterations_find_node_thresh; }
+    float sim_reactivate_connection_thresh() const override { return mutation.reactivate_connection_thresh; }
+    float sim_minimum_area() const override { return creature.minimum_area; }
+    bool sim_show_true_color() const override { return show_true_color; }
+    float sim_petri_radius() const override { return dish.radius; }
+    float sim_poison_death_probability() const override { return death.poison_death_probability; }
+    float sim_poison_death_probability_normal() const override { return death.poison_death_probability_normal; }
+    float sim_inactivity_timeout() const override { return death.inactivity_timeout; }
+    int sim_init_mutation_rounds() const override { return mutation.init_mutation_rounds; }
+    float sim_init_add_node_thresh() const override { return mutation.init_add_node_thresh; }
+    float sim_init_add_connection_thresh() const override { return mutation.init_add_connection_thresh; }
+    int sim_mutation_rounds() const override { return mutation.mutation_rounds; }
+    float sim_add_connection_thresh() const override { return mutation.add_connection_thresh; }
+    float sim_add_node_thresh() const override { return mutation.add_node_thresh; }
+    const CreatureCircle* sim_selected_creature() const override { return get_selected_creature(); }
+    bool sim_is_selected_possessed() const override { return possesing.possess_selected_creature; }
+    bool sim_left_key_down() const override { return possesing.left_key_down; }
+    bool sim_right_key_down() const override { return possesing.right_key_down; }
+    bool sim_up_key_down() const override { return possesing.up_key_down; }
+    bool sim_space_key_down() const override { return possesing.space_key_down; }
+    void sim_frame_rendered() override { frame_rendered(); }
+    void sim_cleanup_population(float timeStep) override;
+    void sim_remove_outside_if_enabled() override;
+    void sim_update_selection_after_step() override;
+    Game& sim_owner_game() override { return *this; }
 
 private:
     struct SimulationTiming {
