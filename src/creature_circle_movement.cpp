@@ -13,13 +13,14 @@ void spawn_boost_particle(const b2WorldId& worldId,
                           const CreatureCircle& parent,
                           float boost_radius,
                           float angle,
-                          const b2Vec2& back_position) {
+                          const b2Vec2& back_position,
+                          const CreatureCircle::BehaviorContext& behavior) {
     auto boost_circle = std::make_unique<EatableCircle>(
         worldId,
         back_position.x,
         back_position.y,
         boost_radius,
-        game.get_circle_density(),
+        behavior.circle_density,
         /*toxic=*/false,
         /*division_pellet=*/false,
         /*angle=*/0.0f,
@@ -28,10 +29,10 @@ void spawn_boost_particle(const b2WorldId& worldId,
     const auto creature_signal_color = parent.get_color_rgb(); // use true signal, not smoothed display
     boost_circle_ptr->set_color_rgb(creature_signal_color[0], creature_signal_color[1], creature_signal_color[2]);
     boost_circle_ptr->smooth_display_color(1.0f);
-    float frac = game.get_boost_particle_impulse_fraction();
-    boost_circle_ptr->set_impulse_magnitudes(game.get_linear_impulse_magnitude() * frac, game.get_angular_impulse_magnitude() * frac);
-    boost_circle_ptr->set_linear_damping(game.get_boost_particle_linear_damping(), worldId);
-    boost_circle_ptr->set_angular_damping(game.get_angular_damping(), worldId);
+    float frac = behavior.boost_particle_impulse_fraction;
+    boost_circle_ptr->set_impulse_magnitudes(behavior.linear_impulse_magnitude * frac, behavior.angular_impulse_magnitude * frac);
+    boost_circle_ptr->set_linear_damping(behavior.boost_particle_linear_damping, worldId);
+    boost_circle_ptr->set_angular_damping(behavior.angular_damping, worldId);
     game.add_circle(std::move(boost_circle));
     boost_circle_ptr->setAngle(angle + PI, worldId);
     boost_circle_ptr->apply_forward_impulse();
@@ -73,16 +74,14 @@ void CreatureCircle::move_intelligently(const b2WorldId &worldId, Game &game, fl
     (void)dt;
     run_brain_cycle_from_touching();
 
-    if (game.get_selected_creature() == this &&
-        owner_game && owner_game->is_selected_creature_possessed()
-    ) {
-        if (owner_game->get_left_key_down()) {
+    if (behavior.selected_and_possessed) {
+        if (behavior.left_key_down) {
             this->boost_eccentric_forward_left(worldId, game);
         }
-        if (owner_game->get_right_key_down()) {
+        if (behavior.right_key_down) {
             this->boost_eccentric_forward_right(worldId, game);
         }
-        if (owner_game->get_space_key_down()) {
+        if (behavior.space_key_down) {
             this->divide(worldId, game);
         }
     } else {
@@ -100,18 +99,18 @@ void CreatureCircle::move_intelligently(const b2WorldId &worldId, Game &game, fl
         }
     }
 
-    if (game.get_live_mutation_enabled() && neat_innovations && neat_last_innov_id) {
+    if (behavior.live_mutation_enabled && neat_innovations && neat_last_innov_id) {
         brain.mutate(
             neat_innovations,
             neat_last_innov_id,
-            game.get_mutate_weight_thresh(),
-            game.get_mutate_weight_full_change_thresh(),
-            game.get_mutate_weight_factor(),
-            game.get_tick_add_connection_thresh(),
-            game.get_max_iterations_find_connection_thresh(),
-            game.get_reactivate_connection_thresh(),
-            game.get_tick_add_node_thresh(),
-            game.get_max_iterations_find_node_thresh());
+            behavior.mutate_weight_thresh,
+            behavior.mutate_weight_full_change_thresh,
+            behavior.mutate_weight_factor,
+            behavior.tick_add_connection_thresh,
+            behavior.max_iterations_find_connection,
+            behavior.reactivate_connection_thresh,
+            behavior.tick_add_node_thresh,
+            behavior.max_iterations_find_node);
     }
 
     // Update memory from dedicated memory outputs (clamped).
@@ -146,7 +145,7 @@ void CreatureCircle::update_inactivity(float dt, float timeout) {
 
 void CreatureCircle::boost_forward(const b2WorldId &worldId, Game& game) {
     float current_area = this->getArea();
-    float boost_cost = std::max(game.get_boost_area(), 0.0f);
+    float boost_cost = std::max(behavior.boost_area, 0.0f);
     float new_area = current_area - boost_cost;
 
     if (boost_cost <= 0.0f) {
@@ -169,13 +168,13 @@ void CreatureCircle::boost_forward(const b2WorldId &worldId, Game& game) {
             pos.y - direction.y * (this->getRadius() + boost_radius)
         };
 
-        spawn_boost_particle(worldId, game, *this, boost_radius, angle, back_position);
+        spawn_boost_particle(worldId, game, *this, boost_radius, angle, back_position, behavior);
     }
 }
 
 void CreatureCircle::boost_eccentric_forward_right(const b2WorldId &worldId, Game& game) {
     float current_area = this->getArea();
-    float boost_cost = std::max(game.get_boost_area(), 0.0f);
+    float boost_cost = std::max(behavior.boost_area, 0.0f);
     float new_area = current_area - boost_cost;
 
     float boost_radius = (boost_cost > 0.0f) ? sqrt(boost_cost / PI) : 0.0f;
@@ -192,13 +191,13 @@ void CreatureCircle::boost_eccentric_forward_right(const b2WorldId &worldId, Gam
         b2Vec2 boost_position = compute_lateral_boost_position(*this, /*to_right=*/true);
         this->apply_forward_impulse_at_point(boost_position);
 
-        spawn_boost_particle(worldId, game, *this, boost_radius, angle, boost_position);
+        spawn_boost_particle(worldId, game, *this, boost_radius, angle, boost_position, behavior);
     }
 }
 
 void CreatureCircle::boost_eccentric_forward_left(const b2WorldId &worldId, Game& game) {
     float current_area = this->getArea();
-    float boost_cost = std::max(game.get_boost_area(), 0.0f);
+    float boost_cost = std::max(behavior.boost_area, 0.0f);
     float new_area = current_area - boost_cost;
 
     float boost_radius = (boost_cost > 0.0f) ? sqrt(boost_cost / PI) : 0.0f;
@@ -215,6 +214,6 @@ void CreatureCircle::boost_eccentric_forward_left(const b2WorldId &worldId, Game
         b2Vec2 boost_position = compute_lateral_boost_position(*this, /*to_right=*/false);
         this->apply_forward_impulse_at_point(boost_position);
 
-        spawn_boost_particle(worldId, game, *this, boost_radius, angle, boost_position);
+        spawn_boost_particle(worldId, game, *this, boost_radius, angle, boost_position, behavior);
     }
 }

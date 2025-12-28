@@ -55,6 +55,29 @@ public:
     void set_last_division_time(float t) { last_division_time = t; }
     float get_last_division_time() const { return last_division_time; }
     void set_contact_context(ContactGraph& graph, CircleRegistry& registry, float petri_radius);
+    struct BehaviorContext {
+        float boost_area = 0.0f;
+        float circle_density = 0.0f;
+        float boost_particle_impulse_fraction = 0.0f;
+        float boost_particle_linear_damping = 0.0f;
+        float linear_impulse_magnitude = 0.0f;
+        float angular_impulse_magnitude = 0.0f;
+        float angular_damping = 0.0f;
+        float mutate_weight_thresh = 0.0f;
+        float mutate_weight_full_change_thresh = 0.0f;
+        float mutate_weight_factor = 0.0f;
+        float tick_add_connection_thresh = 0.0f;
+        float tick_add_node_thresh = 0.0f;
+        int max_iterations_find_connection = 0;
+        int max_iterations_find_node = 0;
+        float reactivate_connection_thresh = 0.0f;
+        bool live_mutation_enabled = false;
+        bool selected_and_possessed = false;
+        bool left_key_down = false;
+        bool right_key_down = false;
+        bool space_key_down = false;
+    };
+    void set_behavior_context(const BehaviorContext& ctx) { behavior = ctx; }
 
 protected:
     bool should_draw_direction_indicator() const override { return true; }
@@ -110,4 +133,5 @@ private:
     float last_division_time = 0.0f;
     Game* owner_game = nullptr;
     ContactContext contacts;
+    BehaviorContext behavior;
 };

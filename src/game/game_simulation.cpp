@@ -111,6 +111,29 @@ void GameSimulationController::update_creatures(const b2WorldId& worldId, float 
         if (game.circles[i] && game.circles[i]->get_kind() == CircleKind::Creature) {
             auto* creature_circle = static_cast<CreatureCircle*>(game.circles[i].get());
             creature_circle->set_contact_context(game.get_contact_graph(), game.get_circle_registry(), game.get_petri_radius());
+            CreatureCircle::BehaviorContext behavior_ctx{};
+            behavior_ctx.boost_area = game.get_boost_area();
+            behavior_ctx.circle_density = game.get_circle_density();
+            behavior_ctx.boost_particle_impulse_fraction = game.get_boost_particle_impulse_fraction();
+            behavior_ctx.boost_particle_linear_damping = game.get_boost_particle_linear_damping();
+            behavior_ctx.linear_impulse_magnitude = game.get_linear_impulse_magnitude();
+            behavior_ctx.angular_impulse_magnitude = game.get_angular_impulse_magnitude();
+            behavior_ctx.angular_damping = game.get_angular_damping();
+            behavior_ctx.live_mutation_enabled = game.get_live_mutation_enabled();
+            behavior_ctx.mutate_weight_thresh = game.get_mutate_weight_thresh();
+            behavior_ctx.mutate_weight_full_change_thresh = game.get_mutate_weight_full_change_thresh();
+            behavior_ctx.mutate_weight_factor = game.get_mutate_weight_factor();
+            behavior_ctx.tick_add_connection_thresh = game.get_tick_add_connection_thresh();
+            behavior_ctx.tick_add_node_thresh = game.get_tick_add_node_thresh();
+            behavior_ctx.max_iterations_find_connection = game.get_max_iterations_find_connection_thresh();
+            behavior_ctx.max_iterations_find_node = game.get_max_iterations_find_node_thresh();
+            behavior_ctx.reactivate_connection_thresh = game.get_reactivate_connection_thresh();
+            const bool is_selected = (game.get_selected_creature() == creature_circle);
+            behavior_ctx.selected_and_possessed = is_selected && game.is_selected_creature_possessed();
+            behavior_ctx.left_key_down = game.get_left_key_down();
+            behavior_ctx.right_key_down = game.get_right_key_down();
+            behavior_ctx.space_key_down = game.get_space_key_down();
+            creature_circle->set_behavior_context(behavior_ctx);
             creature_circle->process_eating(worldId, game, game.death.poison_death_probability, game.death.poison_death_probability_normal);
             creature_circle->update_inactivity(dt, game.death.inactivity_timeout);
         }
@@ -127,6 +150,29 @@ void GameSimulationController::run_brain_updates(const b2WorldId& worldId, float
                 creature_circle->set_minimum_area(game.creature.minimum_area);
                 creature_circle->set_display_mode(!game.show_true_color);
                 creature_circle->set_contact_context(game.get_contact_graph(), game.get_circle_registry(), game.get_petri_radius());
+                CreatureCircle::BehaviorContext behavior_ctx{};
+                behavior_ctx.boost_area = game.get_boost_area();
+                behavior_ctx.circle_density = game.get_circle_density();
+                behavior_ctx.boost_particle_impulse_fraction = game.get_boost_particle_impulse_fraction();
+                behavior_ctx.boost_particle_linear_damping = game.get_boost_particle_linear_damping();
+                behavior_ctx.linear_impulse_magnitude = game.get_linear_impulse_magnitude();
+                behavior_ctx.angular_impulse_magnitude = game.get_angular_impulse_magnitude();
+                behavior_ctx.angular_damping = game.get_angular_damping();
+                behavior_ctx.live_mutation_enabled = game.get_live_mutation_enabled();
+                behavior_ctx.mutate_weight_thresh = game.get_mutate_weight_thresh();
+                behavior_ctx.mutate_weight_full_change_thresh = game.get_mutate_weight_full_change_thresh();
+                behavior_ctx.mutate_weight_factor = game.get_mutate_weight_factor();
+                behavior_ctx.tick_add_connection_thresh = game.get_tick_add_connection_thresh();
+                behavior_ctx.tick_add_node_thresh = game.get_tick_add_node_thresh();
+                behavior_ctx.max_iterations_find_connection = game.get_max_iterations_find_connection_thresh();
+                behavior_ctx.max_iterations_find_node = game.get_max_iterations_find_node_thresh();
+                behavior_ctx.reactivate_connection_thresh = game.get_reactivate_connection_thresh();
+                const bool is_selected = (game.get_selected_creature() == creature_circle);
+                behavior_ctx.selected_and_possessed = is_selected && game.is_selected_creature_possessed();
+                behavior_ctx.left_key_down = game.get_left_key_down();
+                behavior_ctx.right_key_down = game.get_right_key_down();
+                behavior_ctx.space_key_down = game.get_space_key_down();
+                creature_circle->set_behavior_context(behavior_ctx);
                 creature_circle->move_intelligently(worldId, game, brain_period);
             }
         }
