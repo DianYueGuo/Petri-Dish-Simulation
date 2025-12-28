@@ -1,6 +1,7 @@
 #pragma once
 
 #include "eatable_circle.hpp"
+#include <functional>
 #include "contact_graph.hpp"
 #include "circle_registry.hpp"
 #include "simulation_config.hpp"
@@ -76,6 +77,7 @@ public:
         bool left_key_down = false;
         bool right_key_down = false;
         bool space_key_down = false;
+        std::function<void(std::unique_ptr<EatableCircle>)> spawn_circle;
     };
     void set_behavior_context(const BehaviorContext& ctx) { behavior = ctx; }
     struct DivisionContext {

@@ -33,7 +33,11 @@ void spawn_boost_particle(const b2WorldId& worldId,
     boost_circle_ptr->set_impulse_magnitudes(behavior.linear_impulse_magnitude * frac, behavior.angular_impulse_magnitude * frac);
     boost_circle_ptr->set_linear_damping(behavior.boost_particle_linear_damping, worldId);
     boost_circle_ptr->set_angular_damping(behavior.angular_damping, worldId);
-    game.add_circle(std::move(boost_circle));
+    if (behavior.spawn_circle) {
+        behavior.spawn_circle(std::move(boost_circle));
+    } else {
+        game.add_circle(std::move(boost_circle));
+    }
     boost_circle_ptr->setAngle(angle + PI, worldId);
     boost_circle_ptr->apply_forward_impulse();
 }
