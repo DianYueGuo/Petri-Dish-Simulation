@@ -114,6 +114,9 @@ add_executable(
     src/drawable_circle.cpp
     src/eatable_circle.cpp
     src/creature_circle.cpp
+    src/creature_circle_brain.cpp
+    src/creature_circle_movement.cpp
+    src/creature_circle_lifecycle.cpp
     src/ui.cpp
     src/game/spawner.cpp
     src/game/selection_manager.cpp
