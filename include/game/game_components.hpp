@@ -122,7 +122,7 @@ private:
 
 class GameSimulationController {
 public:
-    explicit GameSimulationController(SimulationContext& context);
+    explicit GameSimulationController(Game& game);
 
     void process_game_logic_with_speed();
     void process_game_logic();
@@ -142,5 +142,5 @@ private:
     void run_brain_updates(const b2WorldId& worldId, float timeStep);
     void finalize_world_state();
 
-    SimulationContext& ctx;
+    Game& game;
 };

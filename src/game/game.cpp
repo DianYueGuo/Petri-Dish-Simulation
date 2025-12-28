@@ -153,14 +153,6 @@ void Game::mark_selection_dirty() {
     selection_ctrl().mark_selection_dirty();
 }
 
-const CreatureCircle* Game::sim_selected_creature() const {
-    return selection_ctrl().get_selected_creature();
-}
-
-void Game::sim_frame_rendered() {
-    sim().frame_rendered();
-}
-
 bool Game::cc_selected_and_possessed(const void* creature_ptr) const {
     return possesing.possess_selected_creature && (selection_ctrl().get_selected_creature() == creature_ptr);
 }
