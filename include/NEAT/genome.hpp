@@ -18,6 +18,7 @@ private:
     void mutateWeights(float mutateWeightFullChangeThresh, float mutateWeightFactor, float mutateWeightThresh);
     bool addConnection(std::vector<std::vector<int>>* innovIds, int* lastInnovId, int maxIterationsFindConnectionThresh, float reactivateConnectionThresh);
     bool disableConnection();
+    void disableOrphanHiddenNodes();
     int isValidNewConnection(int inNodeId, int outNodeId);
     bool addNode(std::vector<std::vector<int>>* innovIds, int* lastInnovId, int maxIterationsFindNodeThresh);
     void updateLayersRec(int nodeId);

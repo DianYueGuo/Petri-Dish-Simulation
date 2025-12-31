@@ -119,6 +119,8 @@ void Genome::mutate(std::vector<std::vector<int>>* innovIds, int* lastInnovId, f
     if (randomNb < addNodeThresh) {
         addNode(innovIds, lastInnovId, maxIterationsFindNodeThresh);
     }
+
+    disableOrphanHiddenNodes();
 }
 
 void Genome::mutateWeights(float mutateWeightFullChangeThresh, float mutateWeightFactor, float mutateWeightThresh) {
@@ -164,6 +166,8 @@ bool Genome::addConnection(std::vector<std::vector<int>>* innovIds, int* lastInn
                 if (conn.inNodeId == inNodeId && conn.outNodeId == outNodeId) {
                     if (!conn.enabled) {
                         conn.enabled = true;
+                        nodes[inNodeId].enabled = true;
+                        nodes[outNodeId].enabled = true;
                         topoDirty = true;
                     }
                     return true;
@@ -177,6 +181,8 @@ bool Genome::addConnection(std::vector<std::vector<int>>* innovIds, int* lastInn
     int innovId = getInnovId(innovIds, lastInnovId, inNodeId, outNodeId);
     float weight = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f * weightExtremumInit - weightExtremumInit;
     connections.push_back(Connection(innovId, inNodeId, outNodeId, weight, true));
+    nodes[inNodeId].enabled = true;
+    nodes[outNodeId].enabled = true;
     topoDirty = true;
     return true;
 }
@@ -196,7 +202,37 @@ bool Genome::disableConnection() {
     int connIdx = enabledConnections[choice];
     connections[connIdx].enabled = false;
     topoDirty = true;
+    disableOrphanHiddenNodes();
     return true;
+}
+
+void Genome::disableOrphanHiddenNodes() {
+    bool changed = false;
+    int hiddenStartId = nbInput + nbOutput + 1;
+    for (auto& node : nodes) {
+        if (node.id < hiddenStartId) continue;
+
+        bool hasEnabledEdge = false;
+        for (const auto& conn : connections) {
+            if (!conn.enabled) continue;
+            if (conn.inNodeId == node.id || conn.outNodeId == node.id) {
+                hasEnabledEdge = true;
+                break;
+            }
+        }
+
+        if (!hasEnabledEdge && node.enabled) {
+            node.enabled = false;
+            changed = true;
+        } else if (hasEnabledEdge && !node.enabled) {
+            node.enabled = true;
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        topoDirty = true;
+    }
 }
 
 int Genome::isValidNewConnection(int inNodeId, int outNodeId) {
@@ -246,6 +282,7 @@ bool Genome::addNode(std::vector<std::vector<int>>* innovIds, int* lastInnovId, 
 
 void Genome::updateLayersRec(int nodeId) {
     for (auto& connection : connections) {
+        if (!connection.enabled) continue;
         if (connection.inNodeId == nodeId) {
             if (nodes[connection.outNodeId].layer <= nodes[nodeId].layer) {
                 nodes[connection.outNodeId].layer = nodes[nodeId].layer + 1;
@@ -257,6 +294,7 @@ void Genome::updateLayersRec(int nodeId) {
 
 void Genome::ensureForwardLayers() {
     for (auto& connection : connections) {
+        if (!connection.enabled) continue;
         int inLayer = nodes[connection.inNodeId].layer;
         int outLayer = nodes[connection.outNodeId].layer;
         if (inLayer >= outLayer) {
@@ -271,11 +309,13 @@ void Genome::rebuildTopology() {
 
     int maxLayer = 0;
     for (const auto& node : nodes) {
+        if (!node.enabled) continue;
         maxLayer = std::max(maxLayer, node.layer);
     }
 
     std::vector<std::vector<int>> nodesPerLayer(maxLayer + 1);
     for (const auto& node : nodes) {
+        if (!node.enabled) continue;
         nodesPerLayer[node.layer].push_back(node.id);
     }
 
