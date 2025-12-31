@@ -129,6 +129,7 @@ void GameSimulationController::update_creatures(const b2WorldId&, float dt) {
             behavior_ctx.max_iterations_find_connection = game.mutation.max_iterations_find_connection_thresh;
             behavior_ctx.max_iterations_find_node = game.mutation.max_iterations_find_node_thresh;
             behavior_ctx.reactivate_connection_thresh = game.mutation.reactivate_connection_thresh;
+            behavior_ctx.disable_connection_thresh = game.mutation.disable_connection_thresh;
             behavior_ctx.selected_and_possessed = game.possesing.possess_selected_creature && (game.selection_controller->get_selected_creature() == creature_circle);
             behavior_ctx.left_key_down = game.possesing.left_key_down;
             behavior_ctx.right_key_down = game.possesing.right_key_down;
@@ -151,6 +152,7 @@ void GameSimulationController::update_creatures(const b2WorldId&, float dt) {
             division_ctx.add_connection_thresh = game.mutation.add_connection_thresh;
             division_ctx.max_iterations_find_connection = game.mutation.max_iterations_find_connection_thresh;
             division_ctx.reactivate_connection_thresh = game.mutation.reactivate_connection_thresh;
+            division_ctx.disable_connection_thresh = game.mutation.disable_connection_thresh;
             division_ctx.add_node_thresh = game.mutation.add_node_thresh;
             division_ctx.max_iterations_find_node = game.mutation.max_iterations_find_node_thresh;
             division_ctx.sim_time = game.timing.sim_time_accum;
@@ -184,15 +186,16 @@ void GameSimulationController::run_brain_updates(const b2WorldId& worldId, float
                 behavior_ctx.mutate_weight_full_change_thresh = game.mutation.mutate_weight_full_change_thresh;
                 behavior_ctx.mutate_weight_factor = game.mutation.mutate_weight_factor;
                 behavior_ctx.tick_add_connection_thresh = game.mutation.tick_add_connection_thresh;
-                behavior_ctx.tick_add_node_thresh = game.mutation.tick_add_node_thresh;
-                behavior_ctx.max_iterations_find_connection = game.mutation.max_iterations_find_connection_thresh;
-                behavior_ctx.max_iterations_find_node = game.mutation.max_iterations_find_node_thresh;
-                behavior_ctx.reactivate_connection_thresh = game.mutation.reactivate_connection_thresh;
-                behavior_ctx.selected_and_possessed = game.possesing.possess_selected_creature && (game.selection_controller->get_selected_creature() == creature_circle);
-                behavior_ctx.left_key_down = game.possesing.left_key_down;
-                behavior_ctx.right_key_down = game.possesing.right_key_down;
-                behavior_ctx.space_key_down = game.possesing.space_key_down;
-                behavior_ctx.spawn_circle = [&](std::unique_ptr<EatableCircle> c) { game.population_mgr().add_circle(std::move(c)); };
+            behavior_ctx.tick_add_node_thresh = game.mutation.tick_add_node_thresh;
+            behavior_ctx.max_iterations_find_connection = game.mutation.max_iterations_find_connection_thresh;
+            behavior_ctx.max_iterations_find_node = game.mutation.max_iterations_find_node_thresh;
+            behavior_ctx.reactivate_connection_thresh = game.mutation.reactivate_connection_thresh;
+            behavior_ctx.disable_connection_thresh = game.mutation.disable_connection_thresh;
+            behavior_ctx.selected_and_possessed = game.possesing.possess_selected_creature && (game.selection_controller->get_selected_creature() == creature_circle);
+            behavior_ctx.left_key_down = game.possesing.left_key_down;
+            behavior_ctx.right_key_down = game.possesing.right_key_down;
+            behavior_ctx.space_key_down = game.possesing.space_key_down;
+            behavior_ctx.spawn_circle = [&](std::unique_ptr<EatableCircle> c) { game.population_mgr().add_circle(std::move(c)); };
                 creature_circle->set_behavior_context(behavior_ctx);
                 CreatureCircle::DivisionContext division_ctx{};
                 division_ctx.circle_density = game.movement.circle_density;
@@ -207,14 +210,15 @@ void GameSimulationController::run_brain_updates(const b2WorldId& worldId, float
                 division_ctx.mutate_weight_thresh = game.mutation.mutate_weight_thresh;
                 division_ctx.mutate_weight_full_change_thresh = game.mutation.mutate_weight_full_change_thresh;
                 division_ctx.mutate_weight_factor = game.mutation.mutate_weight_factor;
-                division_ctx.add_connection_thresh = game.mutation.add_connection_thresh;
-                division_ctx.max_iterations_find_connection = game.mutation.max_iterations_find_connection_thresh;
-                division_ctx.reactivate_connection_thresh = game.mutation.reactivate_connection_thresh;
-                division_ctx.add_node_thresh = game.mutation.add_node_thresh;
-                division_ctx.max_iterations_find_node = game.mutation.max_iterations_find_node_thresh;
-                division_ctx.sim_time = game.timing.sim_time_accum;
-                creature_circle->set_division_context(division_ctx);
-                creature_circle->move_intelligently(worldId, game, brain_period);
+            division_ctx.add_connection_thresh = game.mutation.add_connection_thresh;
+            division_ctx.max_iterations_find_connection = game.mutation.max_iterations_find_connection_thresh;
+            division_ctx.reactivate_connection_thresh = game.mutation.reactivate_connection_thresh;
+            division_ctx.disable_connection_thresh = game.mutation.disable_connection_thresh;
+            division_ctx.add_node_thresh = game.mutation.add_node_thresh;
+            division_ctx.max_iterations_find_node = game.mutation.max_iterations_find_node_thresh;
+            division_ctx.sim_time = game.timing.sim_time_accum;
+            creature_circle->set_division_context(division_ctx);
+            creature_circle->move_intelligently(worldId, game, brain_period);
             }
         }
         game.brain.time_accumulator -= brain_period;

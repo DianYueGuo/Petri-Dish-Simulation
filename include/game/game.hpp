@@ -117,6 +117,8 @@ public:
     int get_max_iterations_find_connection_thresh() const { return mutation.max_iterations_find_connection_thresh; }
     void set_reactivate_connection_thresh(float v) { mutation.reactivate_connection_thresh = std::clamp(v, 0.0f, 1.0f); }
     float get_reactivate_connection_thresh() const { return mutation.reactivate_connection_thresh; }
+    void set_disable_connection_thresh(float v) { mutation.disable_connection_thresh = std::clamp(v, 0.0f, 1.0f); }
+    float get_disable_connection_thresh() const { return mutation.disable_connection_thresh; }
     void set_max_iterations_find_node_thresh(int v) { mutation.max_iterations_find_node_thresh = std::max(1, v); }
     int get_max_iterations_find_node_thresh() const { return mutation.max_iterations_find_node_thresh; }
     void set_mutate_allow_recurrent(bool v) { mutation.mutate_allow_recurrent = v; }
@@ -271,6 +273,7 @@ private:
         float mutate_weight_factor = 0.2f;
         int max_iterations_find_connection_thresh = 20;
         float reactivate_connection_thresh = 0.25f;
+        float disable_connection_thresh = 0.1f;
         int max_iterations_find_node_thresh = 20;
         bool mutate_allow_recurrent = false;
         float init_add_node_thresh = 0.0f;

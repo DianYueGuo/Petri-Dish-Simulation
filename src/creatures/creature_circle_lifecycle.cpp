@@ -250,6 +250,7 @@ void CreatureCircle::mutate_lineage(CreatureCircle* child) {
                 division.add_connection_thresh,
                 add_conn_iters,
                 reactivate,
+                division.disable_connection_thresh,
                 division.add_node_thresh,
                 add_node_iters);
         }
@@ -263,6 +264,7 @@ void CreatureCircle::mutate_lineage(CreatureCircle* child) {
                 division.add_connection_thresh,
                 add_conn_iters,
                 reactivate,
+                division.disable_connection_thresh,
                 division.add_node_thresh,
                 add_node_iters);
         }

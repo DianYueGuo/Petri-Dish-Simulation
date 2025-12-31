@@ -17,6 +17,7 @@ private:
     int getInnovId(std::vector<std::vector<int>>* innovIds, int* lastInnovId, int inNodeId, int outNodeId);
     void mutateWeights(float mutateWeightFullChangeThresh, float mutateWeightFactor, float mutateWeightThresh);
     bool addConnection(std::vector<std::vector<int>>* innovIds, int* lastInnovId, int maxIterationsFindConnectionThresh, float reactivateConnectionThresh);
+    bool disableConnection();
     int isValidNewConnection(int inNodeId, int outNodeId);
     bool addNode(std::vector<std::vector<int>>* innovIds, int* lastInnovId, int maxIterationsFindNodeThresh);
     void updateLayersRec(int nodeId);
@@ -37,7 +38,7 @@ public:
     void loadInputs(float inputs[]);
     void runNetwork(float activationFn(float input));
     void getOutputs(float outputs[]);
-    void mutate(std::vector<std::vector<int>>* innovIds, int* lastInnovId, float mutateWeightThresh = 0.8f, float mutateWeightFullChangeThresh = 0.1f, float mutateWeightFactor = 0.1f, float addConnectionThresh = 0.05f, int maxIterationsFindConnectionThresh = 20, float reactivateConnectionThresh = 0.25f, float addNodeThresh = 0.03f, int maxIterationsFindNodeThresh = 20);
+    void mutate(std::vector<std::vector<int>>* innovIds, int* lastInnovId, float mutateWeightThresh = 0.8f, float mutateWeightFullChangeThresh = 0.1f, float mutateWeightFactor = 0.1f, float addConnectionThresh = 0.05f, int maxIterationsFindConnectionThresh = 20, float reactivateConnectionThresh = 0.25f, float disableConnectionThresh = 0.0f, float addNodeThresh = 0.03f, int maxIterationsFindNodeThresh = 20);
     void drawNetwork();
 };
 

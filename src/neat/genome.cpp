@@ -100,7 +100,7 @@ void Genome::getOutputs(float outputs[]) {
     }
 }
 
-void Genome::mutate(std::vector<std::vector<int>>* innovIds, int* lastInnovId, float mutateWeightThresh, float mutateWeightFullChangeThresh, float mutateWeightFactor, float addConnectionThresh, int maxIterationsFindConnectionThresh, float reactivateConnectionThresh, float addNodeThresh, int maxIterationsFindNodeThresh) {
+void Genome::mutate(std::vector<std::vector<int>>* innovIds, int* lastInnovId, float mutateWeightThresh, float mutateWeightFullChangeThresh, float mutateWeightFactor, float addConnectionThresh, int maxIterationsFindConnectionThresh, float reactivateConnectionThresh, float disableConnectionThresh, float addNodeThresh, int maxIterationsFindNodeThresh) {
     float randomNb = randomUnitExclusive();
 
     mutateWeights(mutateWeightFullChangeThresh, mutateWeightFactor, mutateWeightThresh);
@@ -108,6 +108,11 @@ void Genome::mutate(std::vector<std::vector<int>>* innovIds, int* lastInnovId, f
     randomNb = randomUnitExclusive();
     if (randomNb < addConnectionThresh) {
         addConnection(innovIds, lastInnovId, maxIterationsFindConnectionThresh, reactivateConnectionThresh);
+    }
+
+    randomNb = randomUnitExclusive();
+    if (randomNb < disableConnectionThresh) {
+        disableConnection();
     }
 
     randomNb = randomUnitExclusive();
@@ -172,6 +177,24 @@ bool Genome::addConnection(std::vector<std::vector<int>>* innovIds, int* lastInn
     int innovId = getInnovId(innovIds, lastInnovId, inNodeId, outNodeId);
     float weight = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f * weightExtremumInit - weightExtremumInit;
     connections.push_back(Connection(innovId, inNodeId, outNodeId, weight, true));
+    topoDirty = true;
+    return true;
+}
+
+bool Genome::disableConnection() {
+    std::vector<int> enabledConnections;
+    enabledConnections.reserve(connections.size());
+    for (int idx = 0; idx < static_cast<int>(connections.size()); ++idx) {
+        if (connections[idx].enabled) {
+            enabledConnections.push_back(idx);
+        }
+    }
+    if (enabledConnections.empty()) {
+        return false;
+    }
+    int choice = rand() % static_cast<int>(enabledConnections.size());
+    int connIdx = enabledConnections[choice];
+    connections[connIdx].enabled = false;
     topoDirty = true;
     return true;
 }

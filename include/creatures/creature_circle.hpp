@@ -71,6 +71,7 @@ public:
         int max_iterations_find_connection = 0;
         int max_iterations_find_node = 0;
         float reactivate_connection_thresh = 0.0f;
+        float disable_connection_thresh = 0.0f;
         bool live_mutation_enabled = false;
         bool selected_and_possessed = false;
         bool left_key_down = false;
@@ -95,6 +96,7 @@ public:
         float add_connection_thresh = 0.0f;
         int max_iterations_find_connection = 0;
         float reactivate_connection_thresh = 0.0f;
+        float disable_connection_thresh = 0.0f;
         float add_node_thresh = 0.0f;
         int max_iterations_find_node = 0;
         float sim_time = 0.0f;

@@ -63,6 +63,7 @@ struct MutationSettings {
     float weight_factor = 0.0f;
     int max_iterations_find_connection_thresh = 0;
     float reactivate_connection_thresh = 0.0f;
+    float disable_connection_thresh = 0.0f;
     int max_iterations_find_node_thresh = 0;
     int mutation_rounds = 0;
     float init_add_node_thresh = 0.0f;
@@ -369,6 +370,7 @@ void initialize_state(UiState& state, UiFacade& game) {
     state.mutation.weight_factor = g.get_mutate_weight_factor();
     state.mutation.max_iterations_find_connection_thresh = g.get_max_iterations_find_connection_thresh();
     state.mutation.reactivate_connection_thresh = g.get_reactivate_connection_thresh();
+    state.mutation.disable_connection_thresh = g.get_disable_connection_thresh();
     state.mutation.max_iterations_find_node_thresh = g.get_max_iterations_find_node_thresh();
     state.mutation.allow_recurrent = g.get_mutate_allow_recurrent();
     state.show_true_color = g.get_show_true_color();
@@ -680,6 +682,8 @@ void render_mutation_tab(UiFacade& game, UiState& state) {
         show_hover_text("maxIterationsFindConnectionThresh passed to mutate.");
         mutate_changed |= ImGui::SliderFloat("Reactivate connection prob", &state.mutation.reactivate_connection_thresh, 0.0f, 1.0f, "%.2f");
         show_hover_text("reactivateConnectionThresh: chance to re-enable a disabled connection.");
+        mutate_changed |= ImGui::SliderFloat("Disable connection prob", &state.mutation.disable_connection_thresh, 0.0f, 1.0f, "%.2f");
+        show_hover_text("Probability to disable an existing enabled connection during mutate().");
         mutate_changed |= ImGui::SliderInt("Max iter find node", &state.mutation.max_iterations_find_node_thresh, 1, 100);
         show_hover_text("maxIterationsFindNodeThresh passed to mutate.");
         if (mutate_changed) {
@@ -690,6 +694,7 @@ void render_mutation_tab(UiFacade& game, UiState& state) {
             g.set_mutate_weight_factor(state.mutation.weight_factor);
             g.set_max_iterations_find_connection_thresh(state.mutation.max_iterations_find_connection_thresh);
             g.set_reactivate_connection_thresh(state.mutation.reactivate_connection_thresh);
+            g.set_disable_connection_thresh(state.mutation.disable_connection_thresh);
             g.set_max_iterations_find_node_thresh(state.mutation.max_iterations_find_node_thresh);
         }
 

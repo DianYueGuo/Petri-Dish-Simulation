@@ -56,6 +56,7 @@ void CreatureCircle::initialize_brain(int mutation_rounds, float add_node_thresh
                 add_connection_thresh,
                 add_conn_iters,
                 reactivate,
+                0.0f,
                 add_node_thresh,
                 add_node_iters);
         }

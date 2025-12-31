@@ -113,6 +113,7 @@ void CreatureCircle::move_intelligently(const b2WorldId &worldId, Game &game, fl
             behavior.tick_add_connection_thresh,
             behavior.max_iterations_find_connection,
             behavior.reactivate_connection_thresh,
+            behavior.disable_connection_thresh,
             behavior.tick_add_node_thresh,
             behavior.max_iterations_find_node);
     }
