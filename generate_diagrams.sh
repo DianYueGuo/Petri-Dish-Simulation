@@ -3,6 +3,7 @@ set -euo pipefail
 
 CONFIG="clang-uml.yml"
 OUT_DIR="uml"
+CLANG_UML_OPTS=${CLANG_UML_OPTS:--q}
 
 # Relationship-only overview (class names only, no members)
 RELATIONSHIP_DIAGRAMS=(
@@ -49,7 +50,7 @@ run_diagrams() {
   local diagrams=("$@")
   for d in "${diagrams[@]}"; do
     echo "Generating ${label}: ${d}"
-    clang-uml -c "${CONFIG}" -n "${d}" -q
+    clang-uml ${CLANG_UML_OPTS} -c "${CONFIG}" -n "${d}"
   done
 }
 
