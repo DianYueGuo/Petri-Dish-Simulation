@@ -4,26 +4,44 @@ set -euo pipefail
 CONFIG="clang-uml.yml"
 OUT_DIR="uml"
 
-# Relationship-only overview (names/edges)
-OVERVIEW_DIAGRAMS=(
+# Relationship-only overview (class names only, no members)
+RELATIONSHIP_DIAGRAMS=(
   petri_component_overview
 )
 
-# Simplified flow (sequence) diagrams
+# High-level simplified flow diagrams
 FLOW_DIAGRAMS=(
   petri_flow_simple
 )
 
-# Detailed class diagrams
-DETAIL_DIAGRAMS=(
+# System-level detailed class views
+SYSTEM_DETAIL_DIAGRAMS=(
   petri_class_diagram
   petri_game_details
   petri_circles_details
+)
+
+# Detailed diagrams for each individual class (members + functions)
+INDIVIDUAL_CLASS_DIAGRAMS=(
   class_CirclePhysics
   class_DrawableCircle
   class_EatableCircle
   class_CircleRegistry
   class_CreatureCircle
+  class_ContactGraph
+  class_SelectionManager
+  class_Spawner
+  class_Game
+  class_GameInputHandler
+  class_GameSelectionController
+  class_GamePopulationManager
+  class_GameSimulationController
+  class_UiFacade
+  class_ISenseable
+  class_IEdible
+  class_neat_Genome
+  class_neat_Node
+  class_neat_Connection
 )
 
 run_diagrams() {
@@ -46,8 +64,9 @@ render_plantuml() {
 
 mkdir -p "${OUT_DIR}"
 
-run_diagrams "overview" "${OVERVIEW_DIAGRAMS[@]}"
+run_diagrams "relationship" "${RELATIONSHIP_DIAGRAMS[@]}"
 run_diagrams "flow" "${FLOW_DIAGRAMS[@]}"
-run_diagrams "details" "${DETAIL_DIAGRAMS[@]}"
+run_diagrams "system detail" "${SYSTEM_DETAIL_DIAGRAMS[@]}"
+run_diagrams "individual class detail" "${INDIVIDUAL_CLASS_DIAGRAMS[@]}"
 
 render_plantuml

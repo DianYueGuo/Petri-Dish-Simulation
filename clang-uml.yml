@@ -114,6 +114,160 @@ diagrams:
         - CreatureCircle
       namespaces:
         - ""
+  class_ContactGraph:
+    # Detailed context diagram for ContactGraph
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - ContactGraph
+      namespaces:
+        - ""
+  class_SelectionManager:
+    # Detailed context diagram for SelectionManager
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - SelectionManager
+      namespaces:
+        - ""
+  class_Spawner:
+    # Detailed context diagram for Spawner
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - Spawner
+      namespaces:
+        - ""
+  class_Game:
+    # Detailed context diagram for Game
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - Game
+      namespaces:
+        - ""
+  class_GameInputHandler:
+    # Detailed context diagram for GameInputHandler
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - GameInputHandler
+      namespaces:
+        - ""
+  class_GameSelectionController:
+    # Detailed context diagram for GameSelectionController
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - GameSelectionController
+      namespaces:
+        - ""
+  class_GamePopulationManager:
+    # Detailed context diagram for GamePopulationManager
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - GamePopulationManager
+      namespaces:
+        - ""
+  class_GameSimulationController:
+    # Detailed context diagram for GameSimulationController
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - GameSimulationController
+      namespaces:
+        - ""
+  class_UiFacade:
+    # Detailed context diagram for UiFacade
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - UiFacade
+      namespaces:
+        - ""
+  class_ISenseable:
+    # Detailed context diagram for ISenseable capability interface
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - ISenseable
+      namespaces:
+        - ""
+  class_IEdible:
+    # Detailed context diagram for IEdible capability interface
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - IEdible
+      namespaces:
+        - ""
+  class_neat_Genome:
+    # Detailed context diagram for neat::Genome
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - Genome
+      namespaces:
+        - neat
+  class_neat_Node:
+    # Detailed context diagram for neat::Node
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - Node
+      namespaces:
+        - neat
+  class_neat_Connection:
+    # Detailed context diagram for neat::Connection
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - Connection
+      namespaces:
+        - neat
   petri_flow_simple:
     # Simplified flow chart starting at main()
     type: sequence
