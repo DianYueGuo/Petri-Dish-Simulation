@@ -13,6 +13,9 @@ RELATIONSHIP_DIAGRAMS=(
 # High-level simplified flow diagrams
 FLOW_DIAGRAMS=(
   petri_flow_simple
+  petri_main_loop_highlevel
+  petri_main_loop_midlevel
+  petri_main_to_logic
 )
 
 # System-level detailed class views

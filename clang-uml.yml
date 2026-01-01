@@ -297,6 +297,9 @@ diagrams:
       - src/**/*.cpp
     include:
       paths: [include, src]
+    exclude:
+      namespaces: [std, sf, ImGui, ImGui::SFML, box2d]
+      access: [private, protected]
     start_from:
       - function: main()
     generate_condition_statements: true
@@ -312,8 +315,80 @@ diagrams:
       - src/**/*.cpp
     include:
       paths: [include, src]
+    exclude:
+      namespaces: [std, sf, ImGui, ImGui::SFML, box2d]
+      access: [private, protected]
     start_from:
       - function: main()
     generate_condition_statements: true
     generate_message_comments: true
     message_comment_width: 72
+  petri_main_loop_highlevel:
+    # High-level main loop interactions (Game & UI), hiding low-level libs/details
+    type: sequence
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      paths:
+        - src/game
+        - src/ui
+        - src/main.cpp
+    exclude:
+      namespaces: [std, sf, ImGui, ImGui::SFML, box2d]
+      access: [private, protected]
+    start_from:
+      - function: main()
+    generate_condition_statements: true
+    generate_message_comments: true
+    message_comment_width: 72
+    plantuml:
+      before:
+        - hide footbox
+  petri_main_loop_midlevel:
+    # One level deeper: include core game/circle subsystems but still hide engine/lib noise
+    type: sequence
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      paths:
+        - src/main.cpp
+        - src/game
+        - src/circles
+        - include/game
+        - include/circles
+    exclude:
+      namespaces: [std, sf, ImGui, ImGui::SFML, box2d]
+      access: [private]
+    start_from:
+      - function: main()
+    generate_condition_statements: true
+    generate_message_comments: true
+    message_comment_width: 72
+    plantuml:
+      before:
+        - hide footbox
+  petri_main_to_logic:
+    # Higher-level: only trace main() down to process_game_logic() as the leaf
+    type: sequence
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      paths:
+        - src/main.cpp
+        - src/game
+        - include/game
+    exclude:
+      namespaces: [std, sf, ImGui, ImGui::SFML, box2d]
+      access: [private]
+    from_to:
+      - - function: main()
+        - function: GameSimulationController::process_game_logic()
+    generate_condition_statements: true
+    generate_message_comments: true
+    message_comment_width: 72
+    plantuml:
+      before:
+        - hide footbox
