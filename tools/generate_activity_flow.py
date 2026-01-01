@@ -43,7 +43,7 @@ def sequence_to_activity(lines: list[str]) -> list[str]:
     stack: list[str] = []
 
     out.append("@startuml")
-    out.append("title Petri Dish Simulation - Auto Activity (from petri_flow_simple)")
+    out.append("title Petri Dish Simulation")
     out.append("start")
 
     for raw in lines:
