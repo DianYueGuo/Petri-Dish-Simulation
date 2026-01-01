@@ -59,8 +59,9 @@ run_diagrams() {
 
 render_plantuml() {
   if command -v plantuml >/dev/null 2>&1; then
-    echo "Rendering PlantUML diagrams to SVG..."
+    echo "Rendering PlantUML diagrams to SVG and PNG..."
     plantuml -tsvg "${OUT_DIR}"/*.puml
+    plantuml -tpng "${OUT_DIR}"/*.puml
   else
     echo "PlantUML not found on PATH; skipping SVG rendering."
   fi
