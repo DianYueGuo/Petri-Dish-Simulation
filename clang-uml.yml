@@ -13,6 +13,122 @@ diagrams:
       paths:
         - include
         - src
+  petri_component_overview:
+    # High-level class diagram hiding internals; focuses on relationships
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      paths:
+        - include
+        - src
+    plantuml:
+      before:
+        - hide fields
+        - hide methods
+        - hide stereotypes
+        - skinparam classAttributeIconSize 0
+  petri_package_overview:
+    # Folder/namespace level dependencies
+    type: package
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      paths:
+        - include
+        - src
+  petri_game_details:
+    # Detailed view limited to game module
+    type: class
+    glob:
+      - include/game/**/*.hpp
+      - src/game/**/*.cpp
+    include:
+      paths:
+        - include/game
+        - src/game
+  petri_circles_details:
+    # Detailed view limited to circle entities
+    type: class
+    glob:
+      - include/circles/**/*.hpp
+      - src/circles/**/*.cpp
+    include:
+      paths:
+        - include/circles
+        - src/circles
+  class_CirclePhysics:
+    # Detailed context diagram for CirclePhysics (top-level namespace)
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - CirclePhysics
+      namespaces:
+        - ""
+  class_DrawableCircle:
+    # Detailed context diagram for DrawableCircle
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - DrawableCircle
+      namespaces:
+        - ""
+  class_EatableCircle:
+    # Detailed context diagram for EatableCircle
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - EatableCircle
+      namespaces:
+        - ""
+  class_CircleRegistry:
+    # Detailed context diagram for CircleRegistry
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - CircleRegistry
+      namespaces:
+        - ""
+  class_CreatureCircle:
+    # Detailed context diagram for CreatureCircle
+    type: class
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      context:
+        - CreatureCircle
+      namespaces:
+        - ""
+  petri_flow_simple:
+    # Simplified flow chart starting at main()
+    type: sequence
+    glob:
+      - include/**/*.hpp
+      - src/**/*.cpp
+    include:
+      paths:
+        - include
+        - src
+    start_from:
+      - function: main()
+    plantuml:
+      before:
+        - hide footbox
   petri_sequence_diagram:
     type: sequence
     glob:

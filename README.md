@@ -47,10 +47,21 @@ This emits `PetriDishSimulation-<version>.dmg`.
 ```bash
 clang-uml --config clang-uml.yml
 ```
-To render images automatically (requires `plantuml` on PATH), run:
+Common diagrams in the config:
+- `petri_component_overview`: high-level class relationships (fields/methods hidden).
+- `petri_package_overview`: package/folder dependency view.
+- `petri_game_details`: detailed classes scoped to `include/game` + `src/game`.
+- `petri_circles_details`: detailed classes scoped to `include/circles` + `src/circles`.
+- `petri_flow_simple`: simplified flow chart (sequence) starting from `main()`.
+- `class_CirclePhysics`: per-class context diagram for the top-level `CirclePhysics`.
+- `class_DrawableCircle`: per-class context diagram for `DrawableCircle`.
+- `class_EatableCircle`: per-class context diagram for `EatableCircle`.
+- `class_CircleRegistry`: per-class context diagram for `CircleRegistry`.
+- `class_CreatureCircle`: per-class context diagram for `CreatureCircle`.
+- `petri_class_diagram`: full class diagram for the whole project.
+- `petri_sequence_diagram`: sequence starting from `main()`.
+
+Generate all common diagrams at once (overview, flow, detailed) and render SVGs if `plantuml` is available:
 ```bash
-plantuml -tsvg uml/petri_class_diagram.puml
-```
-```bash
-plantuml -tsvg uml/petri_sequence_diagram.puml
+./generate_diagrams.sh
 ```
